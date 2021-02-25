@@ -1,0 +1,62 @@
+{
+  "name": "zapplawyer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "debug:dev": "export DEBUG=* && npm run start:dev",
+    "start:dev": "nodemon ./bin/www",
+    "db:migrate": "./node_modules/.bin/sequelize db:migrate",
+    "db:migrate:undo": "./node_modules/.bin/sequelize db:migrate:undo",
+    "db:migrate:undo:all": "./node_modules/.bin/sequelize db:migrate:undo:all"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Deveote/Zapplawyer-BE.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Deveote/Zapplawyer-BE/issues"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*.js": [
+      "eslint --fix",
+      "git add"
+    ]
+  },
+  "homepage": "https://github.com/Deveote/Zapplawyer-BE#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "debug": "^4.3.1",
+    "esm": "^3.2.25",
+    "express": "^4.17.1",
+    "express-winston": "^4.1.0",
+    "helmet": "^4.4.1",
+    "http-errors": "^1.7.2",
+    "joi": "^17.4.0",
+    "pg": "^8.5.1",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^6.5.0",
+    "sequelize-cli": "^6.2.0",
+    "uuidv4": "^6.2.6",
+    "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.20.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "husky": "^5.1.1",
+    "lint-staged": "^10.5.4",
+    "nodemon": "^2.0.7",
+    "prettier": "^2.2.1"
+  }
+}
