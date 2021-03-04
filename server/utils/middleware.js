@@ -1,13 +1,16 @@
-import Joi from "joi";
+import createError from "http-errors";
+import debug from "debug";
+
+const log = debug("app:modules:utils:middleware");
 
 export const middleware = ({ schema, property }) => {
   return (req, res, next) => {
-    // const { error } = Joi.validate(req[property], schema);
+    log(`performing a validation on ${req[property]} with ${schema}`);
     const { error } = schema.validate(req[property]);
     const valid = error == null;
     if (!valid) {
       const { details } = error;
-      return res.status(422).send({ err: details });
+      return next(createError(403, { err: details }));
     }
     next();
   };

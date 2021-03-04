@@ -1,7 +1,12 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import UsersController from "./controllers/users.controller";
-import { schema } from "./schema/users.schema";
-import { middleware } from "../utils/middleware";
+import {
+  createUserSchema,
+  updateUserSchema,
+  validateUUID,
+  loginUserSchema,
+} from "./schema/users.schema";
+import { middleware, wrapCatch, Authenticate, AccessControl } from "../../utils";
 
 export class UserRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {
@@ -10,23 +15,30 @@ export class UserRoutes extends CommonRoutesConfig {
 
   configureRoutes() {
     this.app
-      .route(`${this.path}/users`)
-      .get((req, res) => {
-        res.status(200).send(`List of users`);
-      })
+      .route(`${this.path}/users/login`)
       .post([
-        middleware({ schema, property: "body" }),
-        UsersController.createUser,
+        middleware({ schema: loginUserSchema, property: "body" }),
+        wrapCatch(UsersController.login),
+      ]);
+    this.app
+      .route(`${this.path}/users/signup`)
+      .post([
+        middleware({ schema: createUserSchema, property: "body" }),
+        wrapCatch(UsersController.signUp),
       ]);
 
     this.app
-      .route(`/users/:userId`)
-      .all((req, res, next) => {
-        next();
-      })
-      .get((req, res) => {
-        res.status(200).send(`GET requested for id ${req.params.userId}`);
-      });
+      .route(`${this.path}/users/:id`)
+      .all([
+        Authenticate.verifyToken,
+        middleware({ schema: validateUUID, property: "params" }),
+        UsersController.userExistMiddleware,
+      ])
+      .patch([
+        middleware({ schema: updateUserSchema, property: "body" }),
+        AccessControl.checkPermissionMiddleware(),
+        UsersController.updateUser,
+      ]);
     return this.app;
   }
 }

@@ -10,20 +10,83 @@ module.exports = {
       },
       firstName: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       lastName: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       email: {
         type: Sequelize.STRING,
         unique: true,
+        allowNull: false,
+      },
+      notification: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true,
+        allowNull: false,
+      },
+      isAccountSuspended: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
       },
+      notification: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      isSubscribed: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      isVerified: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      guarantors: {
+        type: Sequelize.JSONB,
+      },
+      lawyerDocuments: {
+        type: Sequelize.JSONB,
+      },
+      address: {
+        type: Sequelize.JSONB,
+      },
+      phone: {
+        type: Sequelize.STRING,
+      },
+      dob: {
+        type: Sequelize.STRING,
+      },
+      hasAgreedToTerms: {
+        type: Sequelize.BOOLEAN,
+      },
+      role: {
+        type: Sequelize.ENUM,
+        values: ["user", "lawyer", "admin", "super-admin"],
+      },
+      profilePic: {
+        type: Sequelize.STRING,
+      },
+      creditCard: {
+        type: Sequelize.STRING,
+      },
       updatedAt: {
         allowNull: false,
+        type: Sequelize.DATE,
+      },
+      deletedAt: {
         type: Sequelize.DATE,
       },
     });

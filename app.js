@@ -1,37 +1,29 @@
-import express from "express";
-import winston from "winston";
-import expressWinston from "express-winston";
-import cors from "cors";
-import helmet from "helmet";
 import debug from "debug";
+import express from "express";
+import Loaders from "./server/loaders";
 
-import { initializeRoutes } from "./server/modules";
-
-const app = express();
 const debugLog = debug("app");
-const path = "/api/v1";
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cors());
-app.use(helmet());
+export const startServer = async () => {
+  const expressApp = express();
 
-const routes = initializeRoutes({ app, path });
+  const { app, routes } = await Loaders.init({ app: expressApp });
+  const port = parseInt(process.env.PORT, 10) || 8000;
 
-app.use(
-  expressWinston.errorLogger({
-    transports: [new winston.transports.Console()],
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.json()
-    ),
-  })
-);
+  app.listen(port, () => {
+    debugLog(`Zapp Lawyer Backend app  listening at http://localhost:${port}`);
+    routes.forEach((route) => {
+      debugLog(`Routes configured for ${route.getName()}`);
+    });
+  });
 
-app.get("*", (req, res) =>
-  res.status(200).send({
-    message: "Welcome to the beginning of nothingness.",
-  })
-);
+  process.on("uncaughtException", (error) => {
+    debugLog("Oh my god, something terrible happened: ", error);
+    process.exit(1); // exit application
+  });
 
-module.exports = { app, routes, debugLog };
+  process.on("unhandledRejection", (error, promise) => {
+    debugLog(" Oh Lord! We forgot to handle a promise rejection here: ", promise);
+    debugLog(" The error was: ", error);
+  });
+};
