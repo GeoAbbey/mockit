@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "debug:dev": "export DEBUG=* &&  nodemon ./bin/www",
-    "start": "pm2 start ./bin/www.js",
+    "start": "export NODE_ENV=production && pm2 start ./bin/www.js",
     "stop": "pm2 stop 'all'",
     "start:dev": "export DEBUG=app && nodemon ./bin/www",
     "db:migrate": "./node_modules/.bin/sequelize db:migrate",

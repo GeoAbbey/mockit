@@ -58,23 +58,24 @@ class UsersController {
 
   async updateUser(req, res) {
     const {
-      params: { id },
+      params: { id = req.decodedToken.id },
       user,
       body,
     } = req;
     log(`updating the details of user with id ${id}`);
+    id ? id : req.user.id;
     const [, [User]] = await UsersService.update(id, body, user);
     const token = await Authenticate.signToken(User.dataValues);
     return res.status(200).send({
       success: true,
       message: "user successfully updated",
-      user: User,
       token,
     });
   }
 
   async userExistMiddleware(req, res, next) {
-    const { id } = req.params;
+    const { id = req.decodedToken.id } = req.params;
+
     log(`validating that user with id ${id} exists`);
     const user = await UsersService.findByPk(id);
     if (!user) {

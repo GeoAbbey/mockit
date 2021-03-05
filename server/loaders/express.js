@@ -30,8 +30,8 @@ export default async ({ app }) => {
   );
 
   app.use((err, req, res, next) => {
-    console.error(err.stack);
-    return res.status(500).send({ message: "Something broke!", err });
+    const { stack, status = 500, message } = err;
+    return res.status(status).send({ message, stack });
   });
 
   return { app, routes };

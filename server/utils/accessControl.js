@@ -25,55 +25,55 @@ class Permissions {
     return grants;
   }
 
-  checkPermissionMiddleware() {
+  checkPermissionAdminAccess() {
     return async (req, res, next) => {
       const { role } = req.decodedToken;
+      if (role !== "super-admin" && role !== "admin")
+        return next(createError(403, "you do not have access to perform this operation"));
       if (role === "super-admin") next();
 
-      if (role === "admin") {
-        if (req.body.role === "admin")
-          return next(
-            createError(
-              403,
-              "you do not have access to perform this operation, as an admin make an admin"
-            )
-          );
-        next();
-      }
+      if (role === "admin" && req.body.role === "admin") {
+        console.log("I am here boo");
+        return next(
+          createError(
+            403,
+            "you do not have access to perform this operation, as an admin make an admin"
+          )
+        );
+      } else next();
+    };
+  }
 
-      if (role === "lawyer" || role === "user") {
-        if (req.decodedToken.id !== req.user.id)
-          return next(
-            createError(403, "you do not have access to perform this operation, not own object")
-          );
-        if (req.body.isAccountSuspended === true || req.body.isAccountSuspended === false)
+  checkPermissionUserOrLawyerAccess() {
+    return (req, res, next) => {
+      const { role } = req.decodedToken;
+      console.log({ role });
+      if (role !== "lawyer" && role !== "user")
+        return next(createError(403, "to perform this operation make use of the admin route"));
+
+      if (req.body.isAccountSuspended === true || req.body.isAccountSuspended === false)
+        return next(
+          createError(403, "you do not have access to perform this operation, is Account Suspended")
+        );
+      if (req.body.lawyerDocuments) {
+        if (
+          req.body.lawyerDocuments.isLawyerVerified === true ||
+          req.body.lawyerDocuments.isLawyerVerified === false
+        ) {
           return next(
             createError(
               403,
-              "you do not have access to perform this operation, is Account Suspended"
+              "you do not have access to perform this operation, is lawyer Documents"
             )
           );
-        if (req.body.lawyerDocuments) {
-          if (
-            req.body.lawyerDocuments.isLawyerVerified === true ||
-            req.body.lawyerDocuments.isLawyerVerified === false
-          ) {
-            return next(
-              createError(
-                403,
-                "you do not have access to perform this operation, is lawyer Documents"
-              )
-            );
-          }
         }
-
-        if (req.body.role)
-          return next(
-            createError(403, "you do not have access to perform this operation, is bad role")
-          );
-
-        next();
       }
+
+      if (req.body.role)
+        return next(
+          createError(403, "you do not have access to perform this operation, is bad role")
+        );
+      next();
     };
   }
 }
