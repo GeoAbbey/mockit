@@ -28,6 +28,15 @@ export class UserRoutes extends CommonRoutesConfig {
       ]);
 
     this.app
+      .route(`${this.path}/users/profile`)
+      .all([Authenticate.verifyToken, UsersController.userExistMiddleware])
+      .patch([
+        middleware({ schema: updateUserSchema, property: "body" }),
+        AccessControl.checkPermissionUserOrLawyerAccess(),
+        UsersController.updateUser,
+      ]);
+
+    this.app
       .route(`${this.path}/users/:id`)
       .all([
         Authenticate.verifyToken,
@@ -36,9 +45,10 @@ export class UserRoutes extends CommonRoutesConfig {
       ])
       .patch([
         middleware({ schema: updateUserSchema, property: "body" }),
-        AccessControl.checkPermissionMiddleware(),
+        AccessControl.checkPermissionAdminAccess(),
         UsersController.updateUser,
       ]);
+
     return this.app;
   }
 }
