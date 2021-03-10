@@ -1,5 +1,6 @@
-import models from "../../../models";
 import debug from "debug";
+
+import models from "../../../models";
 
 const debugLog = debug("app:users-service");
 
@@ -18,7 +19,7 @@ class UsersService {
   }
 
   async findByPk(id) {
-    debugLog(`retrieving a user with email ${id}`);
+    debugLog(`retrieving a user with id ${id}`);
     return models.User.findByPk(id);
   }
 
@@ -29,11 +30,16 @@ class UsersService {
 
   async update(id, UserDTO, oldDetails) {
     debugLog(`updating a user with id ${id}`);
-    const { address, guarantors, lawyerDocuments } = oldDetails;
+    const { address, guarantors, lawyer } = oldDetails;
+    const handleDocuments = () => {
+      if (UserDTO.lawyer && UserDTO.lawyer.documents) {
+        return { ...lawyer.documents, ...UserDTO.lawyer.documents };
+      } else lawyer.documents;
+    };
     return models.User.update(
       {
         notification: UserDTO.notification || oldDetails.notification,
-        isEmailVerified: UserDTO.notification || oldDetails.isVerified,
+        isVerified: UserDTO.isVerified || oldDetails.isVerified,
         isAccountSuspended: UserDTO.isAccountSuspended || oldDetails.isAccountSuspended,
         firstName: UserDTO.firstName || oldDetails.firstName,
         lastName: UserDTO.lastName || oldDetails.lastName,
@@ -41,6 +47,10 @@ class UsersService {
         password: UserDTO.password || oldDetails.password,
         role: UserDTO.role || oldDetails.role,
         isSubscribed: UserDTO.isSubscribed || oldDetails.isSubscribed,
+        otp: {
+          value: (UserDTO.otp && UserDTO.otp.value) || oldDetails.otp.value,
+          expiresIn: (UserDTO.otp && UserDTO.otp.expiresIn) || oldDetails.otp.expiresIn,
+        },
         address: {
           residential:
             (UserDTO.address && UserDTO.address.residential) ||
@@ -110,11 +120,9 @@ class UsersService {
         },
         profilePic: UserDTO.profilePic || oldDetails.profilePic,
         creditCard: UserDTO.creditCard || oldDetails.creditCard,
-        lawyerDocuments: {
-          isLawyerVerified:
-            (UserDTO.lawyerDocuments && UserDTO.lawyerDocuments.isLawyerVerified) ||
-            (lawyerDocuments && lawyerDocuments.isLawyerVerified) ||
-            null,
+        lawyer: {
+          isVerified: (UserDTO.lawyer && UserDTO.lawyer.isVerified) || lawyer.isVerified,
+          documents: handleDocuments(),
         },
         hasAgreedToTerms: UserDTO.hasAgreedToTerms || oldDetails.hasAgreedToTerms,
       },

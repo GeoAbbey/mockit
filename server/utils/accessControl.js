@@ -1,7 +1,9 @@
 import { AccessControl } from "accesscontrol";
 import { grantsObject } from "./grantsObject";
 import createError from "http-errors";
-import models from "../models";
+import debug from "debug";
+
+const log = debug("app:accessControl");
 
 class Permissions {
   static instance;
@@ -27,27 +29,28 @@ class Permissions {
 
   checkPermissionAdminAccess() {
     return async (req, res, next) => {
+      log("checking admin access to perform a certain operation");
       const { role } = req.decodedToken;
       if (role !== "super-admin" && role !== "admin")
         return next(createError(403, "you do not have access to perform this operation"));
-      if (role === "super-admin") next();
 
       if (role === "admin" && req.body.role === "admin") {
-        console.log("I am here boo");
         return next(
           createError(
             403,
             "you do not have access to perform this operation, as an admin make an admin"
           )
         );
-      } else next();
+      }
+
+      next();
     };
   }
 
   checkPermissionUserOrLawyerAccess() {
     return (req, res, next) => {
+      log("checking user or lawyer access to perform a certain operation");
       const { role } = req.decodedToken;
-      console.log({ role });
       if (role !== "lawyer" && role !== "user")
         return next(createError(403, "to perform this operation make use of the admin route"));
 
@@ -55,11 +58,8 @@ class Permissions {
         return next(
           createError(403, "you do not have access to perform this operation, is Account Suspended")
         );
-      if (req.body.lawyerDocuments) {
-        if (
-          req.body.lawyerDocuments.isLawyerVerified === true ||
-          req.body.lawyerDocuments.isLawyerVerified === false
-        ) {
+      if (req.body.lawyer) {
+        if (req.body.lawyer.isVerified === true || req.body.lawyer.isVerified === false) {
           return next(
             createError(
               403,
@@ -69,9 +69,13 @@ class Permissions {
         }
       }
 
-      if (req.body.role)
+      const roleOrEmailOrVerified = req.body.role || req.body.email;
+      if (roleOrEmailOrVerified)
         return next(
-          createError(403, "you do not have access to perform this operation, is bad role")
+          createError(
+            403,
+            `you do not have access to perform this operation, you can't modify to a  ${roleOrEmailOrVerified}`
+          )
         );
       next();
     };

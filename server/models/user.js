@@ -1,5 +1,6 @@
 "use strict";
 import { v4 } from "uuid";
+import { otp } from "../utils";
 
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
@@ -21,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       isAccountSuspended: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
       lastName: { type: DataTypes.STRING, allowNull: false },
       email: { type: DataTypes.STRING, allowNull: false, unique: true, isEmail: true },
-      password: { type: DataTypes.STRING, allowNull: false, min: 8, isAlphanumeric: true },
+      password: { type: DataTypes.STRING, allowNull: false, min: 8 },
       isSubscribed: { type: DataTypes.BOOLEAN },
       isVerified: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
       address: { type: DataTypes.JSONB },
@@ -30,13 +31,26 @@ module.exports = (sequelize, DataTypes) => {
       guarantors: { type: DataTypes.JSONB },
       profilePic: { type: DataTypes.STRING },
       creditCard: { type: DataTypes.STRING, isCreditCard: true },
-      lawyerDocuments: { type: DataTypes.JSONB },
+      lawyer: {
+        type: DataTypes.JSONB,
+        allowNull: false,
+        defaultValue: {
+          isVerified: false,
+          documents: {},
+        },
+      },
       hasAgreedToTerms: { type: DataTypes.BOOLEAN },
       role: {
         type: DataTypes.ENUM,
         values: ["user", "lawyer", "admin", "super-admin"],
         defaultValue: "user",
       },
+      otp: {
+        type: DataTypes.JSONB,
+        allowNull: false,
+        defaultValue: () => otp(),
+      },
+
       id: {
         type: DataTypes.UUID,
         primaryKey: true,

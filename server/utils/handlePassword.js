@@ -18,7 +18,6 @@ class HandlePassword {
 
   async getHash(plainTextPassword) {
     debugLog(`Generating hash`);
-    console.log({ plainTextPassword }, "🍅", this.saltRounds);
     const hash = await bcrypt.hash(plainTextPassword, this.saltRounds);
     return hash;
   }

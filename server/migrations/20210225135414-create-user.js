@@ -57,10 +57,13 @@ module.exports = {
       guarantors: {
         type: Sequelize.JSONB,
       },
-      lawyerDocuments: {
+      lawyer: {
         type: Sequelize.JSONB,
       },
       address: {
+        type: Sequelize.JSONB,
+      },
+      otp: {
         type: Sequelize.JSONB,
       },
       phone: {

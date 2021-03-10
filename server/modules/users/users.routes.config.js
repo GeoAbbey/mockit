@@ -5,6 +5,8 @@ import {
   updateUserSchema,
   validateUUID,
   loginUserSchema,
+  validOTP,
+  validOtpAndPassword,
 } from "./schema/users.schema";
 import { middleware, wrapCatch, Authenticate, AccessControl } from "../../utils";
 
@@ -34,6 +36,30 @@ export class UserRoutes extends CommonRoutesConfig {
         middleware({ schema: updateUserSchema, property: "body" }),
         AccessControl.checkPermissionUserOrLawyerAccess(),
         UsersController.updateUser,
+      ]);
+
+    this.app
+      .route(`${this.path}/users/new-otp`)
+      .all([UsersController.userExistMiddleware])
+      .post([UsersController.generateNewOtp]);
+
+    this.app
+      .route(`${this.path}/users/verify`)
+      .all([Authenticate.verifyToken, UsersController.userExistMiddleware])
+      .patch([
+        middleware({ schema: validOTP, property: "body" }),
+        AccessControl.checkPermissionUserOrLawyerAccess(),
+        UsersController.validateOTP,
+        UsersController.verifyEmail,
+      ]);
+
+    this.app
+      .route(`${this.path}/users/reset-password`)
+      .all([UsersController.userExistMiddleware])
+      .patch([
+        middleware({ schema: validOtpAndPassword, property: "body" }),
+        UsersController.validateOTP,
+        UsersController.resetPassword,
       ]);
 
     this.app
