@@ -1,8 +1,11 @@
 import debug from "debug";
+import createError from "http-errors";
+import { compareAsc } from "date-fns";
 
 import UsersService from "../service/user.service";
 import Authenticate from "../../../utils/handleJwt";
-import { HandlePassword } from "../../../utils";
+import { HandlePassword, otp } from "../../../utils";
+import { parseISO } from "date-fns/esm";
 
 const log = debug("app:users-controller");
 
@@ -20,6 +23,7 @@ class UsersController {
     const hash = await HandlePassword.getHash(req.body.password);
     req.body.password = hash;
     const user = await UsersService.create(req.body);
+    delete user.dataValues.password;
     const token = await Authenticate.signToken(user.dataValues);
     return res.status(201).send({
       success: true,
@@ -28,31 +32,22 @@ class UsersController {
     });
   }
 
-  async login(req, res) {
+  async login(req, res, next) {
     const { email, password } = req.body;
     log(`login in an existing user with id ${email}`);
     const user = await UsersService.findOne(email);
 
-    if (!user) {
-      return res.status(404).send({
-        success: false,
-        message: "user not found",
-      });
-    }
-    const match = await HandlePassword.compareHash(password, user.password);
-    if (!match) {
-      return res.status(400).send({
-        success: false,
-        message: "Invalid email or password",
-      });
-    }
+    if (!user) return next(createError(404, "User not found"));
 
+    const match = await HandlePassword.compareHash(password, user.password);
+    if (!match) return next(createError(400, "Invalid email or password"));
+
+    delete user.dataValues.password;
     const token = await Authenticate.signToken(user.dataValues);
     return res.status(200).send({
       success: true,
       message: "user successfully retrieved",
       token,
-      user,
     });
   }
 
@@ -63,7 +58,6 @@ class UsersController {
       body,
     } = req;
     log(`updating the details of user with id ${id}`);
-    id ? id : req.user.id;
     const [, [User]] = await UsersService.update(id, body, user);
     const token = await Authenticate.signToken(User.dataValues);
     return res.status(200).send({
@@ -73,17 +67,75 @@ class UsersController {
     });
   }
 
-  async userExistMiddleware(req, res, next) {
-    const { id = req.decodedToken.id } = req.params;
+  async verifyEmail(req, res, next) {
+    const {
+      params: { id = req.decodedToken.id },
+      user,
+      body,
+    } = req;
+    log(`verifying otp details of user with id ${id}`);
 
-    log(`validating that user with id ${id} exists`);
-    const user = await UsersService.findByPk(id);
-    if (!user) {
-      res.status(404).send({
-        success: false,
-        message: "user not found",
-      });
+    body.isVerified = true;
+    const [, [User]] = await UsersService.update(id, body, user);
+    delete user.dataValues.password;
+    const token = await Authenticate.signToken(User.dataValues);
+    return res.status(200).send({
+      success: true,
+      message: "email successfully verified",
+      token,
+    });
+  }
+
+  async generateNewOtp(req, res, next) {
+    const { user, body } = req;
+    log(`Generating new otp for user with email ${body.email}`);
+    body.otp = otp();
+    const [, [User]] = await UsersService.update(user.id, body, user);
+    res.status(200).send({
+      message: "new OTP successfully generated",
+      success: true,
+    });
+  }
+
+  async resetPassword(req, res, next) {
+    const { user, body } = req;
+    log(`changing password for user with email ${body.email}`);
+
+    body.password = await HandlePassword.getHash(body.newPassword);
+    const [, [User]] = await UsersService.update(user.id, body, user);
+    delete user.dataValues.password;
+    const token = await Authenticate.signToken(User.dataValues);
+    return res.status(200).send({
+      success: true,
+      message: "password successfully updated",
+      token,
+    });
+  }
+
+  async validateOTP(req, res, next) {
+    log("validating OTP supplied");
+    const { body } = req;
+    if (body.otp !== req.user.otp.value) {
+      return next(createError(403, "Invalid OTP supplied"));
     }
+    if (compareAsc(new Date(), parseISO(req.user.otp.expiresIn)) !== -1) {
+      return next(createError(403, "supplied OTP has expired"));
+    }
+    next();
+  }
+  async userExistMiddleware(req, res, next) {
+    log("Checking that the user actually exits");
+    const identifier =
+      (req.params && req.params.id) ||
+      (req.decodedToken && req.decodedToken.id) ||
+      (req.body && req.body.email);
+
+    if (!identifier) return next(createError(403, "means of identification must be supplied"));
+    log(`validating that user with identifier ${identifier} exists`);
+    const user = req.body.email
+      ? await UsersService.findOne(identifier)
+      : await UsersService.findByPk(identifier);
+    if (!user) return next(createError(404, "user not found"));
     req.user = user;
     next();
   }
