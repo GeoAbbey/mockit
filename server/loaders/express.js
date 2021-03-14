@@ -30,7 +30,7 @@ export default async ({ app }) => {
   );
 
   app.use((err, req, res, next) => {
-    const { stack, status = 500, message } = err;
+    const { stack, status = 500 } = err;
     console.error(stack);
     return res.status(status).send({ err });
   });
