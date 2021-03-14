@@ -20,6 +20,8 @@ class UsersController {
 
   async signUp(req, res) {
     log("creating a user");
+
+    console.log(process.NODE_ENV);
     const hash = await HandlePassword.getHash(req.body.password);
     req.body.password = hash;
     const user = await UsersService.create(req.body);
