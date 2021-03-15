@@ -13,7 +13,7 @@
     "db:migrate:undo": "./node_modules/.bin/sequelize db:migrate:undo",
     "db:migrate:undo:all": "./node_modules/.bin/sequelize db:migrate:undo:all",
     "down:up:prod": "export NODE_ENV=production && npm run db:migrate:undo:all && npm run db:migrate",
-    "down:up:": "npm run db:migrate:undo:all && npm run db:migrate"
+    "down:up": "npm run db:migrate:undo:all && npm run db:migrate"
   },
   "repository": {
     "type": "git",

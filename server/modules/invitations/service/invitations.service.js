@@ -15,7 +15,6 @@ class InvitationsService {
 
   async create(invitationDTO) {
     debugLog("creating an invitation");
-    console.log({ invitationDTO }, "😆");
     return models.Invitation.create(invitationDTO);
   }
 }
