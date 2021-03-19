@@ -20,8 +20,6 @@ class UsersController {
 
   async signUp(req, res) {
     log("creating a user");
-
-    console.log(process.NODE_ENV);
     const hash = await HandlePassword.getHash(req.body.password);
     req.body.password = hash;
     const user = await UsersService.create(req.body);
@@ -61,6 +59,7 @@ class UsersController {
     } = req;
     log(`updating the details of user with id ${id}`);
     const [, [User]] = await UsersService.update(id, body, user);
+    delete User.dataValues.password;
     const token = await Authenticate.signToken(User.dataValues);
     return res.status(200).send({
       success: true,
@@ -79,7 +78,7 @@ class UsersController {
 
     body.isVerified = true;
     const [, [User]] = await UsersService.update(id, body, user);
-    delete user.dataValues.password;
+    delete User.dataValues.password;
     const token = await Authenticate.signToken(User.dataValues);
     return res.status(200).send({
       success: true,
@@ -105,7 +104,7 @@ class UsersController {
 
     body.password = await HandlePassword.getHash(body.newPassword);
     const [, [User]] = await UsersService.update(user.id, body, user);
-    delete user.dataValues.password;
+    delete User.dataValues.password;
     const token = await Authenticate.signToken(User.dataValues);
     return res.status(200).send({
       success: true,
@@ -125,21 +124,49 @@ class UsersController {
     }
     next();
   }
-  async userExistMiddleware(req, res, next) {
-    log("Checking that the user actually exits");
-    const identifier =
-      (req.params && req.params.id) ||
-      (req.decodedToken && req.decodedToken.id) ||
-      (req.body && req.body.email);
 
-    if (!identifier) return next(createError(403, "means of identification must be supplied"));
-    log(`validating that user with identifier ${identifier} exists`);
-    const user = req.body.email
-      ? await UsersService.findOne(identifier)
-      : await UsersService.findByPk(identifier);
-    if (!user) return next(createError(404, "user not found"));
-    req.user = user;
-    next();
+  userExistMiddleware(context) {
+    return async (req, res, next) => {
+      log("Checking that the user actually exits");
+      const identifier =
+        (req.params && req.params.id) ||
+        (req.decodedToken && req.decodedToken.id) ||
+        (req.body && req.body.email);
+
+      if (!identifier) return next(createError(403, "means of identification must be supplied"));
+      log(`validating that user with identifier ${identifier} exists`);
+      const user = req.body.email
+        ? await UsersService.findOne(identifier)
+        : await UsersService.findByPk(identifier);
+
+      if (user && context === "signup")
+        return next(createError(409, "user with the given email already exits"));
+
+      if (user && context === "getProfile") {
+        delete user.dataValues.password;
+        const token = await Authenticate.signToken(user.dataValues);
+        return res.status(200).send({
+          success: true,
+          message: "password successfully updated",
+          token,
+        });
+      }
+
+      if (!context && !user) return next(createError(404, "user not found"));
+      req.user = user;
+      next();
+    };
+  }
+
+  async getAllUsers(req, res, next) {
+    log("retrieving all the users on the platform");
+
+    const users = await UsersService.retrieveAll(req.body);
+    return res.status(200).send({
+      success: true,
+      message: "user successfully retrieved",
+      users,
+    });
   }
 }
 

@@ -17,6 +17,47 @@ class InvitationsService {
     debugLog("creating an invitation");
     return models.Invitation.create(invitationDTO);
   }
+
+  async find(id) {
+    debugLog(`looking for an invitation with id ${id}`);
+    return models.Invitation.findByPk(id);
+  }
+
+  async findMany(data) {
+    debugLog(`retrieving invitations with the following filter ${JSON.stringify(data)}`);
+    return models.Invitation.findAll(data);
+  }
+
+  async update(id, invitationDTO, oldInvitation) {
+    const { status, reason, venue, attachments, assignedLawyerId } = oldInvitation;
+    const handleAttachments = () => {
+      if (typeof invitationDTO.attachments === "number") {
+        attachments.splice(invitationDTO.attachments, 1);
+        return attachments;
+      }
+      if (invitationDTO.attachments) {
+        return [...new Set([...attachments, ...invitationDTO.attachments])];
+      }
+      return attachments;
+    };
+    return models.Invitation.update(
+      {
+        status: invitationDTO.status || status,
+        reason: invitationDTO.reason || reason,
+        venue: invitationDTO.venue || venue,
+        attachments: handleAttachments(),
+        assignedLawyerId: invitationDTO.assignedLawyerId || assignedLawyerId,
+      },
+      { where: { id }, returning: true }
+    );
+  }
+
+  async remove(id) {
+    debugLog(`deleting the invitation with id ${id}`);
+    return models.Invitation.destroy({
+      where: { id, assignedLawyerId: null },
+    });
+  }
 }
 
 export default InvitationsService.getInstance();
