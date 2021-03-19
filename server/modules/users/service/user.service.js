@@ -28,6 +28,11 @@ class UsersService {
     return models.User.findOne({ where: { email } });
   }
 
+  async retrieveAll() {
+    debugLog(`retrieving all user on the platform`);
+    return models.User.findAll();
+  }
+
   async update(id, UserDTO, oldDetails) {
     debugLog(`updating a user with id ${id}`);
     const { address, guarantors, lawyer } = oldDetails;

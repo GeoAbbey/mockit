@@ -45,10 +45,6 @@ export const updateUserSchema = Joi.object().keys({
   role: Joi.string().valid("user", "lawyer", "admin"),
 });
 
-export const validateUUID = Joi.object().keys({
-  id: Joi.string().guid({ version: "uuidv4" }).required(),
-});
-
 export const validOTP = Joi.object().keys({
   otp: Joi.number().required(),
 });
@@ -62,4 +58,8 @@ export const validOtpAndPassword = Joi.object().keys({
 export const loginUserSchema = Joi.object().keys({
   email: Joi.string().email({ minDomainSegments: 2 }).required(),
   password: Joi.string().required(),
+});
+
+export const newOTP = Joi.object().keys({
+  for: Joi.string().valid("reset-password", "verify-email"),
 });

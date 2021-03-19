@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       reason: { type: DataTypes.STRING, allowNull: false },
       ownerId: { type: DataTypes.UUID, allowNull: false },
-      assignedLawyerId: { type: DataTypes.UUID },
+      assignedLawyerId: { type: DataTypes.UUID, allowNull: true },
       status: {
         type: DataTypes.ENUM,
         values: ["initiated", "in-progress", "completed"],

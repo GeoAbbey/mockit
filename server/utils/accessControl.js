@@ -69,12 +69,12 @@ class Permissions {
         }
       }
 
-      const roleOrEmailOrVerified = req.body.role || req.body.email;
-      if (roleOrEmailOrVerified)
+      const theRole = req.body.role;
+      if (theRole)
         return next(
           createError(
             403,
-            `you do not have access to perform this operation, you can't modify to a  ${roleOrEmailOrVerified}`
+            `you do not have access to perform this operation, you can't modify to a ${theRole}`
           )
         );
       next();
