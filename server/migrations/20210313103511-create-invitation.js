@@ -28,7 +28,7 @@ module.exports = {
         references: {
           model: "Users",
           key: "id",
-          as: "owner",
+          as: "ownerId",
         },
       },
       assignedLawyerId: {
@@ -38,7 +38,7 @@ module.exports = {
         references: {
           model: "Users",
           key: "id",
-          as: " assignedLawyer",
+          as: " assignedLawyerId",
         },
       },
       createdAt: {
