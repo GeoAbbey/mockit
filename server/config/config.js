@@ -8,6 +8,7 @@ module.exports = {
     database: process.env.LOCAL_DATABASE,
     host: process.env.HOST,
     dialect: process.env.DIALECT,
+    mongoConnect: process.env.MONGO_DB_CONNECTION_LOCAL,
   },
 
   production: {
@@ -15,6 +16,7 @@ module.exports = {
     password: process.env.PROD_DB_PASSWORD,
     database: process.env.PROD_DB_NAME,
     host: process.env.PROD_DB_HOSTNAME,
+    mongoConnect: process.env.MONGO_DB_CONNECTION_PROD,
     dialect: "postgres",
     dialectOptions: {
       ssl: {

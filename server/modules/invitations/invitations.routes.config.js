@@ -5,7 +5,7 @@ import {
   updatedInvitationSchema,
   markAsCompletedSchema,
 } from "./schema/invitation.schema";
-import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
+import { wrapCatch, middleware, Authenticate, validateUUID, uploadMiddleware } from "../../utils";
 
 export class InvitationRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {
@@ -18,7 +18,7 @@ export class InvitationRoutes extends CommonRoutesConfig {
       .all([Authenticate.verifyToken])
       .post([
         middleware({ schema: createInvitationSchema, property: "body" }),
-        wrapCatch(InvitationsController.makeInvite),
+        [uploadMiddleware, wrapCatch(InvitationsController.makeInvite)],
       ])
       .get([
         InvitationsController.queryContext,

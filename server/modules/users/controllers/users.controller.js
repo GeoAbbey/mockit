@@ -6,6 +6,7 @@ import UsersService from "../service/user.service";
 import Authenticate from "../../../utils/handleJwt";
 import { HandlePassword, otp } from "../../../utils";
 import { parseISO } from "date-fns/esm";
+import { schedule } from "../../../jobs/scheduler";
 
 const log = debug("app:users-controller");
 
@@ -20,11 +21,16 @@ class UsersController {
 
   async signUp(req, res) {
     log("creating a user");
+
     const hash = await HandlePassword.getHash(req.body.password);
     req.body.password = hash;
     const user = await UsersService.create(req.body);
     delete user.dataValues.password;
     const token = await Authenticate.signToken(user.dataValues);
+
+    const { email, otp } = user.dataValues;
+    await schedule.sendWelcomeEmail({ email, otp });
+
     return res.status(201).send({
       success: true,
       message: "user successfully created",
@@ -36,7 +42,6 @@ class UsersController {
     const { email, password } = req.body;
     log(`login in an existing user with id ${email}`);
     const user = await UsersService.findOne(email);
-
     if (!user) return next(createError(404, "User not found"));
 
     const match = await HandlePassword.compareHash(password, user.password);
@@ -44,6 +49,7 @@ class UsersController {
 
     delete user.dataValues.password;
     const token = await Authenticate.signToken(user.dataValues);
+
     return res.status(200).send({
       success: true,
       message: "user successfully retrieved",
