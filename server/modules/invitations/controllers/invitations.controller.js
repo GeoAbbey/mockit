@@ -14,10 +14,10 @@ class InvitationsController {
   }
 
   async makeInvite(req, res) {
-    const { body } = req;
+    const { body, attachments = [] } = req;
     const ownerId = req.decodedToken.id;
     log(`creating a new invitation for user with id ${ownerId}`);
-    const invitation = await InvitationsService.create({ ...body, ownerId });
+    const invitation = await InvitationsService.create({ ...body, attachments, ownerId });
 
     return res.status(201).send({
       success: true,
@@ -67,9 +67,10 @@ class InvitationsController {
 
   getAnInvite(req, res, next) {
     const { oldInvitation } = req;
+    console.log({ oldInvitation });
     return res.status(200).send({
       success: true,
-      message: "Invitation succesfully retrieved",
+      message: "Invitation successfully retrieved",
       invitation: oldInvitation,
     });
   }
@@ -87,12 +88,15 @@ class InvitationsController {
 
   async marKAsCompleted(req, res, next) {
     const {
-      body,
       params: { id },
       oldInvitation,
     } = req;
 
-    const [, [updatedInvitation]] = await InvitationsService.update(id, body, oldInvitation);
+    const [, [updatedInvitation]] = await InvitationsService.update(
+      id,
+      { status: "completed" },
+      oldInvitation
+    );
     return res.status(200).send({
       success: true,
       message: "You have successfully completed this invitation",
@@ -108,8 +112,9 @@ class InvitationsController {
         oldInvitation: { ownerId, status },
       } = req;
       if (role === "admin" || role === "super-admin") next();
+      console.log(req.decodedToken.id, "🔥", req.oldInvitation);
       if (role === "user" && id !== ownerId) {
-        return next(createError(401, `You do not have access to  ${context} this invitation`));
+        return next(createError(401, `You do not have access to ${context} this invitation`));
       }
       if (role === "user" && id === ownerId && body.assignedLawyerId)
         return next(createError(403, "you can't assign a lawyer to yourself"));
@@ -128,11 +133,8 @@ class InvitationsController {
       const {
         decodedToken: { role, id },
         oldInvitation,
-        body,
       } = req;
       if (role !== "lawyer")
-        return next(createError(401, "You do not have access to perform this operation"));
-      if (body.reason || body.venue || body.attachments)
         return next(createError(401, "You do not have access to perform this operation"));
       if (context === "markAsComplete") {
         if (id !== oldInvitation.assignedLawyerId)

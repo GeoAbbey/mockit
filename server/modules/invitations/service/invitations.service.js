@@ -1,5 +1,5 @@
 import debug from "debug";
-
+import { QueryTypes } from "sequelize";
 import models from "../../../models";
 
 const debugLog = debug("app:invitations-service");
@@ -20,7 +20,17 @@ class InvitationsService {
 
   async find(id) {
     debugLog(`looking for an invitation with id ${id}`);
-    return models.Invitation.findByPk(id);
+    const invitation = await models.Invitation.findByPk(id, {
+      include: [
+        {
+          model: models.Review,
+          as: "reviews",
+          where: { modelName: "Invitation", modelId: id },
+        },
+      ],
+    });
+
+    return invitation;
   }
 
   async findMany(data) {

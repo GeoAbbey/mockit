@@ -1,10 +1,9 @@
 "use strict";
-
 import { v4 } from "uuid";
 
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Invitation extends Model {
+  class SmallClaim extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -17,12 +16,14 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "assignedLawyerId",
         onDelete: "CASCADE",
       });
-      this.hasMany(models.Review, { as: "reviews", foreignKey: "modelId" });
     }
   }
-  Invitation.init(
+  SmallClaim.init(
     {
-      reason: { type: DataTypes.STRING, allowNull: false },
+      claim: { type: DataTypes.STRING, allowNull: false },
+      amount: { type: DataTypes.INTEGER, allowNull: false },
+      attachments: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
+      venue: { type: DataTypes.STRING, allowNull: false },
       ownerId: { type: DataTypes.UUID, allowNull: false },
       assignedLawyerId: { type: DataTypes.UUID, allowNull: true },
       status: {
@@ -30,8 +31,6 @@ module.exports = (sequelize, DataTypes) => {
         values: ["initiated", "in-progress", "completed"],
         defaultValue: "initiated",
       },
-      attachments: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
-      venue: { type: DataTypes.STRING, allowNull: false },
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
@@ -41,8 +40,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Invitation",
+      modelName: "SmallClaim",
     }
   );
-  return Invitation;
+  return SmallClaim;
 };

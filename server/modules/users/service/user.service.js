@@ -25,7 +25,9 @@ class UsersService {
 
   async findOne(email) {
     debugLog(`retrieving a user with email ${email}`);
-    return models.User.findOne({ where: { email } });
+    return models.User.findOne({
+      where: { email },
+    });
   }
 
   async retrieveAll() {
