@@ -10,7 +10,6 @@ export const updatedInvitationSchema = Joi.object().keys({
   reason: Joi.string(),
   venue: Joi.string(),
   attachments: [Joi.array().items(Joi.string()), Joi.number()],
-  status: Joi.string(),
   assignedLawyerId: Joi.string(),
   status: Joi.string().valid("in-progress", "completed"),
 });

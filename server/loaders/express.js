@@ -9,13 +9,12 @@ import { initializeRoutes } from "../modules/";
 import { manageAllEvents } from "../handlers/listeners";
 import { agendaUI } from "./agendaUI";
 import { agendaInstance } from "../jobs";
-// import { upload } from "../utils/UploadService";
 
 export default async ({ app }) => {
   const path = "/api/v1";
 
   app.use(express.json());
-  app.use(express.urlencoded({ extended: false }));
+  app.use(express.urlencoded({ extended: true }));
   app.use(cors());
   app.use(helmet());
 

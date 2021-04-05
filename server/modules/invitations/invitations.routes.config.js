@@ -42,7 +42,6 @@ export class InvitationRoutes extends CommonRoutesConfig {
         wrapCatch(InvitationsController.modifyInvite),
       ])
       .post([
-        middleware({ schema: markAsCompletedSchema, property: "body" }),
         InvitationsController.checkAccessLawyer("markAsComplete"),
         wrapCatch(InvitationsController.marKAsCompleted),
       ])

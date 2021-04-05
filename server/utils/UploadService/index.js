@@ -16,7 +16,7 @@ const uploadS3 = multer({
     acl: "public-read",
     s3: AWS_S3,
     key: (req, file, callBack) => {
-      var fullPath = "files/" + file.originalname; //If you want to save into a folder concat de name of the folder to the path
+      var fullPath = "attachments/" + file.originalname; //If you want to save into a folder concat de name of the folder to the path
       callBack(null, fullPath);
     },
     limits: { fileSize: 2000000 },
@@ -24,31 +24,28 @@ const uploadS3 = multer({
       callBack(null, { fieldName: file.fieldname });
     },
   }),
-}).array("files", 10);
+}).array("attachments", 10);
 
 export const uploadMiddleware = async (req, res, next) => {
-  uploadS3(req, res, next, (error, data) => {
+  uploadS3(req, res, (error) => {
     logger("the upload middleware has been initialized");
-    if (!req.attachments.length) {
+    console.log(req.files, "🧣");
+    if (req.files == undefined) {
       logger("no files to upload");
-      next();
+      return next();
     }
 
     if (error) return next(createError(500, "There was a problem with S3 upload servers"));
 
-    let fileArray = req.attachments;
-    let fileLocation;
-
-    console.log({ data }, "🐳");
+    let fileArray = req.files;
+    let fileLocation = [];
 
     const images = [];
     for (let i = 0; i < fileArray.length; i++) {
-      fileLocation = fileArray[1].location;
-      console.log("filename", fileLocation);
+      fileLocation = fileArray[i].location;
       images.push(fileLocation);
     }
-    req.attachmentsArray = fileArray;
-    locationArray = images;
+    req.attachments = images;
     next();
   });
 };
