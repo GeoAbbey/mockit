@@ -26,13 +26,15 @@ class InvitationsController {
     });
   }
 
-  async invitationExits(req, res, next) {
-    const { id } = req.params;
-    log(`verifying that an invitation with id ${id} exits`);
-    const invitation = await InvitationsService.find(id);
-    if (!invitation) return next(createError(404, "The invitation can not be found"));
-    req.oldInvitation = invitation;
-    next();
+  invitationExits(context) {
+    return async (req, res, next) => {
+      const { id } = req.params;
+      log(`verifying that an invitation with id ${id} exits`);
+      const invitation = await InvitationsService.find(id, context);
+      if (!invitation) return next(createError(404, "The invitation can not be found"));
+      req.oldInvitation = invitation;
+      next();
+    };
   }
 
   async modifyInvite(req, res, next) {
@@ -67,7 +69,6 @@ class InvitationsController {
 
   getAnInvite(req, res, next) {
     const { oldInvitation } = req;
-    console.log({ oldInvitation });
     return res.status(200).send({
       success: true,
       message: "Invitation successfully retrieved",
@@ -112,7 +113,6 @@ class InvitationsController {
         oldInvitation: { ownerId, status },
       } = req;
       if (role === "admin" || role === "super-admin") next();
-      console.log(req.decodedToken.id, "🔥", req.oldInvitation);
       if (role === "user" && id !== ownerId) {
         return next(createError(401, `You do not have access to ${context} this invitation`));
       }

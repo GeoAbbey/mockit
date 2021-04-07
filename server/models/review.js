@@ -12,14 +12,15 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.belongsTo(models.User, { as: "Reviews", foreignKey: "reviewerId" });
-      this.belongsTo(models.Invitation, { as: "reviews", foreignKey: "modelId" });
+      this.belongsTo(models.Invitation, { as: "invitation-reviews", foreignKey: "modelId" });
+      this.belongsTo(models.SmallClaim, { as: "small-claims-reviews", foreignKey: "modelId" });
     }
   }
   Review.init(
     {
-      modelName: {
+      modelType: {
         type: DataTypes.ENUM,
-        values: ["Invitation", "SmallClaim"],
+        values: ["SmallClaim", "Invitation"],
         allowNull: false,
       },
       modelId: { type: DataTypes.UUID, allowNull: false },

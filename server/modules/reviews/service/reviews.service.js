@@ -15,8 +15,8 @@ class ReviewsService {
 
   async create(ReviewDTO) {
     debugLog("creating a review");
-    const { modelName, reviewerId, modelId } = ReviewDTO;
-    const validModelIdWithOwnerOrLawyer = await models[modelName].findOne({
+    const { modelType, reviewerId, modelId } = ReviewDTO;
+    const validModelIdWithOwnerOrLawyer = await models[modelType].findOne({
       where: {
         id: modelId,
         [Op.or]: [
@@ -44,14 +44,15 @@ class ReviewsService {
 
   async findOne(searchContext) {
     debugLog(`finding a review with ${searchContext}`);
+    console.log({ searchContext });
     return models.Review.findOne({ where: searchContext });
   }
 
   async findAssociated(context) {
     debugLog(`getting a reviews with the following filters ${JSON.stringify(context)}`);
-    const { modelId, modelName } = context;
+    const { modelId, modelType } = context;
 
-    return models.Review.findAll({ where: { modelId, modelName } });
+    return models.Review.findAll({ where: { modelId, modelType } });
   }
 
   async findMany(context) {

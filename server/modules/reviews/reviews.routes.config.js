@@ -16,7 +16,7 @@ export class ReviewsRoutes extends CommonRoutesConfig {
 
   configureRoutes() {
     this.app
-      .route(`${this.path}/review/:modelName/:id`)
+      .route(`${this.path}/review/:modelType/:id`)
       .all([
         Authenticate.verifyToken,
         middleware({ schema: allowedModelSchema, property: "params" }),
@@ -24,7 +24,7 @@ export class ReviewsRoutes extends CommonRoutesConfig {
       .post([
         middleware({ schema: createReviewSchema, property: "body" }),
         ReviewsController.reviewExits("create"),
-        [wrapCatch(ReviewsController.makeReview)],
+        wrapCatch(ReviewsController.makeReview),
       ])
       .get([wrapCatch(ReviewsController.getAssociatedReviews)]);
 

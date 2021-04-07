@@ -18,19 +18,24 @@ class InvitationsService {
     return models.Invitation.create(invitationDTO);
   }
 
-  async find(id) {
+  async find(id, context) {
     debugLog(`looking for an invitation with id ${id}`);
-    const invitation = await models.Invitation.findByPk(id, {
-      include: [
-        {
-          model: models.Review,
-          as: "reviews",
-          where: { modelName: "Invitation", modelId: id },
-        },
-      ],
-    });
+    if (context) {
+      const invitation = await models.Invitation.findByPk(id, {
+        include: [
+          {
+            model: models.Review,
+            as: "invitation-reviews",
+            where: { modelType: "Invitation", modelId: id },
+            required: false,
+          },
+        ],
+      });
 
-    return invitation;
+      return invitation;
+    }
+
+    return models.Invitation.findByPk(id);
   }
 
   async findMany(data) {

@@ -20,6 +20,9 @@ module.exports = {
       attachments: {
         type: Sequelize.ARRAY(Sequelize.STRING),
       },
+      interestedLawyers: {
+        type: Sequelize.JSONB,
+      },
       status: {
         type: Sequelize.ENUM,
         values: ["initiated", "in-progress", "completed"],
@@ -36,12 +39,11 @@ module.exports = {
       },
       assignedLawyerId: {
         type: Sequelize.UUID,
-        allowNull: true,
         onDelete: "CASCADE",
         references: {
           model: "Users",
           key: "id",
-          as: " assignedLawyerId",
+          as: "assignedLawyerId",
         },
       },
       createdAt: {

@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "assignedLawyerId",
         onDelete: "CASCADE",
       });
-      this.hasMany(models.Review, { as: "reviews", foreignKey: "modelId" });
+      this.hasMany(models.Review, { as: "invitation-reviews", foreignKey: "modelId" });
     }
   }
   Invitation.init(
