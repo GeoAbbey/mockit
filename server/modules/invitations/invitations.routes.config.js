@@ -26,11 +26,11 @@ export class InvitationRoutes extends CommonRoutesConfig {
       ]);
 
     this.app
-      .route(`${this.path}/invitations/:id`)
+      .route(`${this.path}/Invitation/:id`)
       .all([
         Authenticate.verifyToken,
         middleware({ schema: validateUUID, property: "params" }),
-        InvitationsController.invitationExits,
+        InvitationsController.invitationExits(),
       ])
       .patch([
         middleware({ schema: updatedInvitationSchema, property: "body" }),
@@ -48,9 +48,14 @@ export class InvitationRoutes extends CommonRoutesConfig {
       .delete([
         InvitationsController.checkAccessUser("delete"),
         wrapCatch(InvitationsController.deleteInvite),
-      ])
+      ]);
+
+    this.app
+      .route(`${this.path}/Invitation/:id`)
       .get([
-        InvitationsController.invitationExits,
+        Authenticate.verifyToken,
+        middleware({ schema: validateUUID, property: "params" }),
+        InvitationsController.invitationExits("retrieve"),
         InvitationsController.checkAccessUser("retrieve"),
         wrapCatch(InvitationsController.getAnInvite),
       ]);

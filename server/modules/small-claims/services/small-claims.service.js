@@ -18,8 +18,20 @@ class SmallClaimsService {
     return models.SmallClaim.create(SmallClaimDTO);
   }
 
-  async find(id) {
+  async find(id, context) {
     debugLog(`looking for an SmallClaim with id ${id}`);
+    if (context) {
+      return models.SmallClaim.findByPk(id, {
+        include: [
+          {
+            model: models.Review,
+            as: "small-claims-reviews",
+            where: { modelType: "SmallClaim", modelId: id },
+            required: false,
+          },
+        ],
+      });
+    }
     return models.SmallClaim.findByPk(id);
   }
 
@@ -40,23 +52,36 @@ class SmallClaimsService {
       }
       return attachments;
     };
+
+    const handleInterestedLawyers = () => {
+      console.log({ smallClaimDTO });
+      if (smallClaimDTO.lawyerId) {
+        const { baseCharge, serviceCharge, lawyerId } = smallClaimDTO;
+        oldSmallClaim.interestedLawyers[lawyerId] = {
+          baseCharge,
+          serviceCharge,
+        };
+        return oldSmallClaim.interestedLawyers;
+      } else return oldSmallClaim.interestedLawyers;
+    };
     return models.SmallClaim.update(
       {
         status: smallClaimDTO.status || status,
         claim: smallClaimDTO.claim || claim,
         venue: smallClaimDTO.venue || venue,
         amount: smallClaimDTO.amount || amount,
-        attachments: handleAttachments(),
         assignedLawyerId: smallClaimDTO.assignedLawyerId || assignedLawyerId,
+        attachments: handleAttachments(),
+        interestedLawyers: handleInterestedLawyers(),
       },
-      filter ? filter : { where: { id, assignedLawyerId: null }, returning: true }
+      { where: { id }, returning: true }
     );
   }
 
   async remove(id) {
     debugLog(`deleting the SmallClaim with id ${id}`);
     return models.SmallClaim.destroy({
-      where: { id, assignedLawyerId: null },
+      where: { id, status: "initiated" },
     });
   }
 }

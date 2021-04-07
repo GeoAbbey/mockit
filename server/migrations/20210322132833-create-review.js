@@ -15,9 +15,9 @@ module.exports = {
       feedback: {
         type: Sequelize.STRING,
       },
-      modelName: {
+      modelType: {
         type: Sequelize.ENUM,
-        values: ["Invitation", "SmallClaim"],
+        values: ["SmallClaim", "Invitation"],
       },
       modelId: {
         type: Sequelize.UUID,

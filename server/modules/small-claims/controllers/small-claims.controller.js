@@ -1,3 +1,4 @@
+import { de } from "date-fns/locale";
 import debug from "debug";
 import createError from "http-errors";
 
@@ -26,13 +27,15 @@ class SmallClaimsController {
     });
   }
 
-  async smallClaimExits(req, res, next) {
-    const { id } = req.params;
-    log(`verifying that the small claim with id ${id} exits`);
-    const smallClaim = await SmallClaimsService.find(id);
-    if (!smallClaim) return next(createError(404, "The small claim can not be found"));
-    req.oldSmallClaim = smallClaim;
-    next();
+  smallClaimExits(context) {
+    return async (req, res, next) => {
+      const { id } = req.params;
+      log(`verifying that the small claim with id ${id} exits`);
+      const smallClaim = await SmallClaimsService.find(id, context);
+      if (!smallClaim) return next(createError(404, "The small claim can not be found"));
+      req.oldSmallClaim = smallClaim;
+      next();
+    };
   }
 
   async modifyClaim(req, res, next) {
@@ -56,6 +59,7 @@ class SmallClaimsController {
     const { id } = req.params;
     log(`deleting an small claim with id ${id}`);
     const deletedSmallClaim = await SmallClaimsService.remove(id);
+
     return res.status(200).send({
       success: true,
       message: "small claim successfully deleted",
@@ -97,10 +101,48 @@ class SmallClaimsController {
       filter
     );
 
-    console.log({ updatedSmallClaim });
     return res.status(200).send({
       success: true,
       message: "You have successfully completed this small claim",
+      smallClaim: updatedSmallClaim,
+    });
+  }
+
+  async marKInterest(req, res, next) {
+    const {
+      params: { id },
+      body: { baseCharge, serviceCharge },
+      oldSmallClaim,
+      decodedToken: { id: lawyerId },
+    } = req;
+
+    const [, [updatedSmallClaim]] = await SmallClaimsService.update(
+      id,
+      { baseCharge, serviceCharge, lawyerId },
+      oldSmallClaim
+    );
+
+    return res.status(200).send({
+      success: true,
+      message: "You have successfully completed this small claim",
+      smallClaim: updatedSmallClaim,
+    });
+  }
+  async assignALawyer(req, res, next) {
+    const {
+      params: { id },
+      body: { assignedLawyerId },
+      oldSmallClaim,
+    } = req;
+
+    const [, [updatedSmallClaim]] = await SmallClaimsService.update(
+      id,
+      { status: "in-progress", assignedLawyerId },
+      oldSmallClaim
+    );
+    return res.status(200).send({
+      success: true,
+      message: "You have successfully assigned a lawyer to this small claim",
       smallClaim: updatedSmallClaim,
     });
   }
@@ -109,21 +151,30 @@ class SmallClaimsController {
     return async (req, res, next) => {
       const {
         decodedToken: { role, id },
-        body,
-        oldSmallClaim: { ownerId, status },
+        body: { assignedLawyerId },
+        oldSmallClaim: { ownerId, status, interestedLawyers },
       } = req;
+      if (role === "lawyer")
+        return next(createError(401, `You do not have access to ${context} this small claim`));
       if (role === "admin" || role === "super-admin") next();
       if (role === "user" && id !== ownerId) {
         return next(createError(401, `You do not have access to ${context} this small claim`));
       }
-      // if (role === "user" && id === ownerId && body.assignedLawyerId)
-      //   return next(createError(403, "you can't assign a lawyer to yourself"));
-      if (context !== "retrieve") {
-        if (role === "user" && status !== "initiated")
-          return next(
-            createError(401, `You can't ${context} an small claim once it has been assigned`)
-          );
+
+      if ((context === "delete" || context === "modify") && status !== "initiated") {
+        return next(
+          createError(401, `You can not ${context} a small claim once it has been assigned`)
+        );
       }
+
+      if (context === "assignLawyer") {
+        if (status === "in-progress")
+          next(createError(403, `A lawyer has already been assigned to this small claim`));
+        const lawyerMarkedInterest = interestedLawyers[assignedLawyerId];
+        if (!lawyerMarkedInterest)
+          return next(createError(400, "You can't assign a lawyer that didn't marked interest"));
+      }
+
       next();
     };
   }
@@ -133,7 +184,6 @@ class SmallClaimsController {
       const {
         decodedToken: { role, id },
         oldSmallClaim,
-        body,
       } = req;
       if (role !== "lawyer")
         return next(createError(401, "You do not have access to perform this operation"));
@@ -151,7 +201,7 @@ class SmallClaimsController {
       req.data = {};
     }
     if (role === "lawyer") {
-      req.data = { where: { assignedLawyerId: id } };
+      req.data = { where: { status: "initiated" } };
     }
     if (role === "user") {
       req.data = { where: { ownerId: id } };

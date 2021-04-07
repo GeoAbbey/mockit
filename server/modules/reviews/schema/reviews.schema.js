@@ -11,10 +11,10 @@ export const updateReviewSchema = Joi.object().keys({
 });
 
 export const allowedModelSchema = Joi.object().keys({
-  modelName: Joi.string().valid("Invitation").required(),
+  modelType: Joi.string().valid("Invitation", "SmallClaim").required(),
   id: Joi.string().guid({ version: "uuidv4" }).required(),
 });
 
 export const queryReviewSchema = Joi.object().keys({
-  modelName: Joi.string().valid("Invitation"),
+  modelType: Joi.string().valid("Invitation"),
 });

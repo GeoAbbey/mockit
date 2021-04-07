@@ -17,11 +17,11 @@ class ReviewsController {
   async makeReview(req, res, next) {
     const {
       body,
-      params: { id, modelName },
+      params: { id, modelType },
       decodedToken: { id: reviewerId },
     } = req;
     log(`creating a new invitation for user with id ${reviewerId}`);
-    const review = await ReviewsService.create({ ...body, reviewerId, modelId: id, modelName });
+    const review = await ReviewsService.create({ ...body, reviewerId, modelId: id, modelType });
     if (!review) return next(createError(403, "You are not authorized to perform this operation"));
 
     return res.status(201).send({
@@ -62,8 +62,9 @@ class ReviewsController {
 
   reviewExits(context) {
     return async (req, res, next) => {
+      console.log("I got here now 🇬🇳");
       const {
-        params: { id: modelId, modelName },
+        params: { id: modelId, modelType },
         decodedToken: { id: reviewerId },
       } = req;
       if (context !== "create") {
@@ -72,10 +73,10 @@ class ReviewsController {
         req.oldReview = review;
         next();
       } else {
-        const review = await ReviewsService.findOne({ modelId, modelName, reviewerId });
+        const review = await ReviewsService.findOne({ modelId, modelType, reviewerId });
         if (review)
           return next(
-            createError(403, `You can only have one review per ${modelName} with ${modelId}`)
+            createError(403, `You can only have one review per ${modelType} with ${modelId}`)
           );
         next();
       }
@@ -93,9 +94,9 @@ class ReviewsController {
 
   async getAssociatedReviews(req, res, next) {
     const {
-      params: { modelName, id: modelId },
+      params: { modelType, id: modelId },
     } = req;
-    const reviews = await ReviewsService.findAssociated({ modelName, modelId });
+    const reviews = await ReviewsService.findAssociated({ modelType, modelId });
     return res.status(200).send({
       success: true,
       message: "review successfully retrieved",
@@ -105,9 +106,9 @@ class ReviewsController {
 
   async getAllReviews(req, res, next) {
     let context = {};
-    if (req.query.modelName) {
-      const { modelName } = req.query;
-      context = { where: { modelName } };
+    if (req.query.modelType) {
+      const { modelType } = req.query;
+      context = { where: { modelType } };
     }
     const reviews = await ReviewsService.findMany(context);
     return res.status(200).send({

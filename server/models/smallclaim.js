@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "assignedLawyerId",
         onDelete: "CASCADE",
       });
+      this.hasMany(models.Review, { as: "small-claims-reviews", foreignKey: "modelId" });
     }
   }
   SmallClaim.init(
@@ -25,7 +26,8 @@ module.exports = (sequelize, DataTypes) => {
       attachments: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
       venue: { type: DataTypes.STRING, allowNull: false },
       ownerId: { type: DataTypes.UUID, allowNull: false },
-      assignedLawyerId: { type: DataTypes.UUID, allowNull: true },
+      assignedLawyerId: { type: DataTypes.UUID },
+      interestedLawyers: { type: DataTypes.JSONB, defaultValue: {} },
       status: {
         type: DataTypes.ENUM,
         values: ["initiated", "in-progress", "completed"],
