@@ -13,7 +13,3 @@ export const updatedInvitationSchema = Joi.object().keys({
   assignedLawyerId: Joi.string(),
   status: Joi.string().valid("in-progress", "completed"),
 });
-
-export const markAsCompletedSchema = Joi.object().keys({
-  status: Joi.string().valid("completed").required(),
-});
