@@ -16,8 +16,7 @@ module.exports = {
         type: Sequelize.STRING,
       },
       modelType: {
-        type: Sequelize.ENUM,
-        values: ["SmallClaim", "Invitation"],
+        type: Sequelize.STRING,
       },
       modelId: {
         type: Sequelize.UUID,

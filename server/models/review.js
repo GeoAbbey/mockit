@@ -19,8 +19,10 @@ module.exports = (sequelize, DataTypes) => {
   Review.init(
     {
       modelType: {
-        type: DataTypes.ENUM,
-        values: ["SmallClaim", "Invitation"],
+        type: DataTypes.STRING,
+        validate: {
+          isIn: [["SmallClaim", "Invitation"]],
+        },
         allowNull: false,
       },
       modelId: { type: DataTypes.UUID, allowNull: false },
