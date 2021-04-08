@@ -46,8 +46,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       hasAgreedToTerms: { type: DataTypes.BOOLEAN },
       role: {
-        type: DataTypes.ENUM,
-        values: ["user", "lawyer", "admin", "super-admin"],
+        type: DataTypes.STRING,
+        validate: {
+          isIn: [["user", "lawyer", "admin", "super-admin"]],
+        },
         defaultValue: "user",
       },
       otp: {

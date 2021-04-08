@@ -76,8 +76,7 @@ module.exports = {
         type: Sequelize.BOOLEAN,
       },
       role: {
-        type: Sequelize.ENUM,
-        values: ["user", "lawyer", "admin", "super-admin"],
+        type: Sequelize.STRING,
       },
       profilePic: {
         type: Sequelize.STRING,
