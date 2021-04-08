@@ -17,7 +17,7 @@ class InvitationsController {
     const { body, attachments = [] } = req;
     const ownerId = req.decodedToken.id;
     log(`creating a new invitation for user with id ${ownerId}`);
-    const invitation = await InvitationsService.create({ ...body, attachments, ownerId });
+    const invitation = await InvitationsService.create({ attachments, ...body, ownerId });
 
     return res.status(201).send({
       success: true,

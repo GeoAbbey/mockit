@@ -1,10 +1,6 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import InvitationsController from "./controllers/invitations.controller";
-import {
-  createInvitationSchema,
-  updatedInvitationSchema,
-  markAsCompletedSchema,
-} from "./schema/invitation.schema";
+import { createInvitationSchema, updatedInvitationSchema } from "./schema/invitation.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID, uploadMiddleware } from "../../utils";
 
 export class InvitationRoutes extends CommonRoutesConfig {
