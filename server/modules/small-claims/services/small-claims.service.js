@@ -25,9 +25,23 @@ class SmallClaimsService {
         include: [
           {
             model: models.Review,
-            as: "small-claims-reviews",
+            as: "reviews",
             where: { modelType: "SmallClaim", modelId: id },
             required: false,
+          },
+          {
+            model: models.InterestedLawyer,
+            as: "interestedLawyers",
+            where: { modelType: "SmallClaim", modelId: id },
+            attributes: ["baseCharge", "serviceCharge"],
+            required: false,
+            include: [
+              {
+                model: models.User,
+                as: "profile",
+                attributes: ["firstName", "lastName", "email", "profilePic"],
+              },
+            ],
           },
         ],
       });
@@ -53,17 +67,6 @@ class SmallClaimsService {
       return attachments;
     };
 
-    const handleInterestedLawyers = () => {
-      console.log({ smallClaimDTO });
-      if (smallClaimDTO.lawyerId) {
-        const { baseCharge, serviceCharge, lawyerId } = smallClaimDTO;
-        oldSmallClaim.interestedLawyers[lawyerId] = {
-          baseCharge,
-          serviceCharge,
-        };
-        return oldSmallClaim.interestedLawyers;
-      } else return oldSmallClaim.interestedLawyers;
-    };
     return models.SmallClaim.update(
       {
         status: smallClaimDTO.status || status,
@@ -72,7 +75,6 @@ class SmallClaimsService {
         amount: smallClaimDTO.amount || amount,
         assignedLawyerId: smallClaimDTO.assignedLawyerId || assignedLawyerId,
         attachments: handleAttachments(),
-        interestedLawyers: handleInterestedLawyers(),
       },
       { where: { id }, returning: true }
     );

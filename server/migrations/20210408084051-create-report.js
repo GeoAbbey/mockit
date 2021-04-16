@@ -17,6 +17,9 @@ module.exports = {
       likedBy: {
         type: Sequelize.JSONB,
       },
+      amplifiedBy: {
+        type: Sequelize.JSONB,
+      },
       reporterId: {
         type: Sequelize.UUID,
         onDelete: "CASCADE",

@@ -31,6 +31,7 @@ export class CommentRoutes extends CommonRoutesConfig {
         wrapCatch(CommentsController.modifyComment),
       ])
       .put([wrapCatch(CommentsController.reactToComment)])
+      .post([wrapCatch(CommentsController.amplifyAComment)])
       .delete([
         CommentsController.checkAccessUser("delete"),
         wrapCatch(CommentsController.deleteComment),

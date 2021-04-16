@@ -1,7 +1,5 @@
 import debug from "debug";
 
-import { sendMail } from "../../utils";
-
 const logger = debug("app:handlers:listeners:user-events");
 
 export const userEvents = (eventEmitter) => {

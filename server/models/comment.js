@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       commenterId: { type: DataTypes.UUID, allowNull: false },
       reportId: { type: DataTypes.UUID, allowNull: false },
       likedBy: { type: DataTypes.JSONB, defaultValue: {} },
+      amplifiedBy: { type: DataTypes.JSONB, defaultValue: {} },
       id: {
         type: DataTypes.UUID,
         primaryKey: true,

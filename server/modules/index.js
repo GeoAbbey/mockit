@@ -4,6 +4,8 @@ import { ReviewsRoutes } from "./reviews/reviews.routes.config";
 import { SmallClaimRoutes } from "./small-claims/small-claims.routes.config";
 import { ReportRoutes } from "./reports/reports.routes.config";
 import { CommentRoutes } from "./comments/comments.routes.config";
+import { NotificationRoutes } from "./notifications/notifications.routes.config";
+import { InterestedLawyersRoutes } from "./interestedLawyers/interested-lawyers.routes.config";
 
 const routes = [
   UserRoutes,
@@ -12,6 +14,8 @@ const routes = [
   SmallClaimRoutes,
   ReportRoutes,
   CommentRoutes,
+  NotificationRoutes,
+  InterestedLawyersRoutes,
 ];
 
 export const initializeRoutes = ({ app, path }) => {

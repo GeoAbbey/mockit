@@ -54,6 +54,7 @@ class UsersService {
         password: UserDTO.password || oldDetails.password,
         role: UserDTO.role || oldDetails.role,
         isSubscribed: UserDTO.isSubscribed || oldDetails.isSubscribed,
+        firebaseToken: UserDTO.firebaseToken || oldDetails.firebaseToken,
         otp: {
           value: (UserDTO.otp && UserDTO.otp.value) || oldDetails.otp.value,
           expiresIn: (UserDTO.otp && UserDTO.otp.expiresIn) || oldDetails.otp.expiresIn,

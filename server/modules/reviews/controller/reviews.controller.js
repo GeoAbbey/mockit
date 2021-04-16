@@ -1,5 +1,6 @@
 import debug from "debug";
 import createError from "http-errors";
+import { EVENT_IDENTIFIERS } from "../../../constants";
 
 import ReviewsService from "../service/reviews.service";
 const log = debug("app:reviews-controller");
@@ -15,6 +16,8 @@ class ReviewsController {
   }
 
   async makeReview(req, res, next) {
+    const eventEmitter = req.app.get("eventEmitter");
+
     const {
       body,
       params: { id, modelType },
@@ -24,6 +27,7 @@ class ReviewsController {
     const review = await ReviewsService.create({ ...body, reviewerId, modelId: id, modelType });
     if (!review) return next(createError(403, "You are not authorized to perform this operation"));
 
+    eventEmitter.emit(EVENT_IDENTIFIERS.REVIEW.CREATED, review);
     return res.status(201).send({
       success: true,
       message: "review successfully created",
@@ -46,6 +50,8 @@ class ReviewsController {
   }
 
   async editReview(req, res) {
+    const eventEmitter = req.app.get("eventEmitter");
+
     const {
       body,
       params: { id },
@@ -53,6 +59,9 @@ class ReviewsController {
     } = req;
 
     const [, [updatedReview]] = await ReviewsService.update(id, body, oldReview);
+
+    eventEmitter.emit(EVENT_IDENTIFIERS.REVIEW.EDITED, updatedReview);
+
     return res.status(200).send({
       success: true,
       message: "review successfully updated",
@@ -62,7 +71,6 @@ class ReviewsController {
 
   reviewExits(context) {
     return async (req, res, next) => {
-      console.log("I got here now 🇬🇳");
       const {
         params: { id: modelId, modelType },
         decodedToken: { id: reviewerId },

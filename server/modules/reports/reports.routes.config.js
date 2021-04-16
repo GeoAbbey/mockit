@@ -17,7 +17,7 @@ export class ReportRoutes extends CommonRoutesConfig {
         uploadMiddleware,
         wrapCatch(ReportsController.makeReport),
       ])
-      .get([ReportsController.queryContext, wrapCatch(ReportsController.getAllReports)]);
+      .get([wrapCatch(ReportsController.getAllReports)]);
 
     this.app
       .route(`${this.path}/report/:id`)
@@ -33,6 +33,7 @@ export class ReportRoutes extends CommonRoutesConfig {
         wrapCatch(ReportsController.modifyReport),
       ])
       .put([wrapCatch(ReportsController.reactToReport)])
+      .post([wrapCatch(ReportsController.amplifyAReport)])
       .delete([
         ReportsController.checkAccessUser("delete"),
         wrapCatch(ReportsController.deleteReport),

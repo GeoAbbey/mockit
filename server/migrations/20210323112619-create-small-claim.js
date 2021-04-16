@@ -20,9 +20,6 @@ module.exports = {
       attachments: {
         type: Sequelize.ARRAY(Sequelize.STRING),
       },
-      interestedLawyers: {
-        type: Sequelize.JSONB,
-      },
       status: {
         type: Sequelize.ENUM,
         values: ["initiated", "in-progress", "completed"],

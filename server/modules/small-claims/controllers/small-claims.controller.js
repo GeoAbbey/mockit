@@ -1,6 +1,6 @@
-import { de } from "date-fns/locale";
 import debug from "debug";
 import createError from "http-errors";
+import { EVENT_IDENTIFIERS } from "../../../constants";
 
 import SmallClaimsService from "../services/small-claims.service";
 const log = debug("app:small-claims-controller");
@@ -15,10 +15,14 @@ class SmallClaimsController {
   }
 
   async makeClaim(req, res) {
+    const eventEmitter = req.app.get("eventEmitter");
+
     const { body } = req;
     const ownerId = req.decodedToken.id;
     log(`creating a new SmallClaim for user with id ${ownerId}`);
     const smallClaim = await SmallClaimsService.create({ ...body, ownerId });
+
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, smallClaim, "SMALL_CLAIM");
 
     return res.status(201).send({
       success: true,
@@ -88,6 +92,8 @@ class SmallClaimsController {
   }
 
   async marKAsCompleted(req, res, next) {
+    const eventEmitter = req.app.get("eventEmitter");
+
     const {
       params: { id },
       oldSmallClaim,
@@ -100,6 +106,7 @@ class SmallClaimsController {
       oldSmallClaim,
       filter
     );
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED, updatedSmallClaim);
 
     return res.status(200).send({
       success: true,
@@ -109,6 +116,8 @@ class SmallClaimsController {
   }
 
   async marKInterest(req, res, next) {
+    const eventEmitter = req.app.get("eventEmitter");
+
     const {
       params: { id },
       body: { baseCharge, serviceCharge },
@@ -122,13 +131,17 @@ class SmallClaimsController {
       oldSmallClaim
     );
 
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, updatedSmallClaim);
+
     return res.status(200).send({
       success: true,
-      message: "You have successfully completed this small claim",
+      message: "You have successfully indicated interest in this small claim",
       smallClaim: updatedSmallClaim,
     });
   }
   async assignALawyer(req, res, next) {
+    const eventEmitter = req.app.get("eventEmitter");
+
     const {
       params: { id },
       body: { assignedLawyerId },
@@ -140,6 +153,9 @@ class SmallClaimsController {
       { status: "in-progress", assignedLawyerId },
       oldSmallClaim
     );
+
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.ASSIGNED, updatedSmallClaim);
+
     return res.status(200).send({
       success: true,
       message: "You have successfully assigned a lawyer to this small claim",

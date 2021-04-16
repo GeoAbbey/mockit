@@ -72,6 +72,22 @@ class ReportsController {
     });
   }
 
+  async amplifyAReport(req, res, next) {
+    log("re-posting a reports");
+    const {
+      decodedToken: { id: amplifierId },
+      params: { id },
+      oldReport,
+    } = req;
+
+    const [, [updatedReport]] = await ReportsService.update(id, { amplifierId }, oldReport);
+    return res.status(200).send({
+      success: true,
+      message: "report successfully updated",
+      report: updatedReport,
+    });
+  }
+
   async getAllReports(req, res, next) {
     log("getting all reports");
     const { data } = req;
@@ -90,7 +106,6 @@ class ReportsController {
       params: { id },
       oldReport,
     } = req;
-    console.log({ reactorId });
 
     const [, [updatedReport]] = await ReportsService.update(id, { reactorId }, oldReport);
     return res.status(200).send({
@@ -112,20 +127,6 @@ class ReportsController {
       }
       next();
     };
-  }
-
-  queryContext(req, res, next) {
-    const { role, id } = req.decodedToken;
-    if (role === "admin" || role === "super-admin") {
-      req.data = {};
-    }
-    if (role === "lawyer") {
-      req.data = { where: { assignedLawyerId: id } };
-    }
-    if (role === "user") {
-      req.data = { where: { ownerId: id } };
-    }
-    next();
   }
 }
 

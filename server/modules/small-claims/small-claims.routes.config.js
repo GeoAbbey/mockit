@@ -1,10 +1,6 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import SmallClaimsController from "./controllers/small-claims.controller";
-import {
-  createSmallClaimSchema,
-  updateSmallClaimSchema,
-  markInterestSchema,
-} from "./schema/small-claim.schema";
+import { createSmallClaimSchema, updateSmallClaimSchema } from "./schema/small-claim.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID, uploadMiddleware } from "../../utils";
 
 export class SmallClaimRoutes extends CommonRoutesConfig {
@@ -41,14 +37,9 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
         SmallClaimsController.checkAccessUser("modify"),
         wrapCatch(SmallClaimsController.modifyClaim),
       ])
-      .head([
+      .post([
         SmallClaimsController.checkAccessLawyer("markAsComplete"),
         wrapCatch(SmallClaimsController.marKAsCompleted),
-      ])
-      .post([
-        middleware({ schema: markInterestSchema, property: "body" }),
-        SmallClaimsController.checkAccessLawyer("markInterest"),
-        wrapCatch(SmallClaimsController.marKInterest),
       ])
       .put([
         SmallClaimsController.checkAccessUser("assignLawyer"),
