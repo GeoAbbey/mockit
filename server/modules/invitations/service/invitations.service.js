@@ -25,9 +25,14 @@ class InvitationsService {
         include: [
           {
             model: models.Review,
-            as: "invitation-reviews",
+            as: "reviews",
             where: { modelType: "Invitation", modelId: id },
             required: false,
+          },
+          {
+            model: models.User,
+            as: "lawyerProfile",
+            attributes: ["firstName", "lastName", "email", "profilePic"],
           },
         ],
       });
