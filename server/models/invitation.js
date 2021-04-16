@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
         as: "lawyerProfile",
         onDelete: "CASCADE",
       });
-      this.hasMany(models.Review, { as: "invitation-reviews", foreignKey: "modelId" });
+      this.hasMany(models.Review, { as: "reviews", foreignKey: "modelId" });
     }
   }
   Invitation.init(
