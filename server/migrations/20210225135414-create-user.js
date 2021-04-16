@@ -78,6 +78,9 @@ module.exports = {
       role: {
         type: Sequelize.STRING,
       },
+      firebaseToken: {
+        type: Sequelize.STRING,
+      },
       profilePic: {
         type: Sequelize.STRING,
       },

@@ -9,6 +9,7 @@ module.exports = {
     host: process.env.HOST,
     dialect: process.env.DIALECT,
     mongoConnect: process.env.MONGO_DB_CONNECTION_LOCAL,
+    googleApplicationCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS,
   },
 
   production: {
@@ -17,6 +18,7 @@ module.exports = {
     database: process.env.PROD_DB_NAME,
     host: process.env.PROD_DB_HOSTNAME,
     mongoConnect: process.env.MONGO_DB_CONNECTION_PROD,
+    googleApplicationCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS,
     dialect: "postgres",
     dialectOptions: {
       ssl: {

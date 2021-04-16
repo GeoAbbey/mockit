@@ -19,6 +19,8 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.SmallClaim, { as: "claimsLawyer", foreignKey: "assignedLawyerId" });
       this.hasMany(models.Report, { as: "reports", foreignKey: "reporterId" });
       this.hasMany(models.Comment, { as: "userComments", foreignKey: "commenterId" });
+      this.hasMany(models.Notification, { foreignKey: "ownerId" });
+      this.hasMany(models.InterestedLawyer, { foreignKey: "lawyerId" });
     }
   }
 
@@ -46,6 +48,7 @@ module.exports = (sequelize, DataTypes) => {
           documents: {},
         },
       },
+      firebaseToken: { type: DataTypes.STRING },
       hasAgreedToTerms: { type: DataTypes.BOOLEAN },
       role: {
         type: DataTypes.STRING,

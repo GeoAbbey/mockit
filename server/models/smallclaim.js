@@ -11,12 +11,18 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.User, { foreignKey: "ownerId", onDelete: "CASCADE" });
       this.belongsTo(models.User, {
-        foreignKey: "assignedLawyerId",
+        foreignKey: "ownerId",
+        as: "ownerProfile",
         onDelete: "CASCADE",
       });
-      this.hasMany(models.Review, { as: "small-claims-reviews", foreignKey: "modelId" });
+      this.belongsTo(models.User, {
+        foreignKey: "assignedLawyerId",
+        as: "lawyerProfile",
+        onDelete: "CASCADE",
+      });
+      this.hasMany(models.Review, { as: "reviews", foreignKey: "modelId" });
+      this.hasMany(models.InterestedLawyer, { as: "interestedLawyers", foreignKey: "modelId" });
     }
   }
   SmallClaim.init(
@@ -27,7 +33,6 @@ module.exports = (sequelize, DataTypes) => {
       venue: { type: DataTypes.STRING, allowNull: false },
       ownerId: { type: DataTypes.UUID, allowNull: false },
       assignedLawyerId: { type: DataTypes.UUID },
-      interestedLawyers: { type: DataTypes.JSONB, defaultValue: {} },
       status: {
         type: DataTypes.ENUM,
         values: ["initiated", "in-progress", "completed"],

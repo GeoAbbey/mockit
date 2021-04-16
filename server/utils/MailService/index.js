@@ -9,12 +9,9 @@ export const AWS_CONFIG = {
   region: process.env.REGION,
 };
 
-console.log(process.env.REGION, "🔥");
-
 const AWS_SES = new AWS.SES(AWS_CONFIG);
 
 const sendMail = ({ email, otp }) => {
-  console.log({ email, otp });
   let params = {
     Destination: {
       ToAddresses: [email],

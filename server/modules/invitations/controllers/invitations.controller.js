@@ -1,5 +1,6 @@
 import debug from "debug";
 import createError from "http-errors";
+import { EVENT_IDENTIFIERS } from "../../../constants";
 
 import InvitationsService from "../service/invitations.service";
 const log = debug("app:invitations-controller");
@@ -14,11 +15,14 @@ class InvitationsController {
   }
 
   async makeInvite(req, res) {
+    const eventEmitter = req.app.get("eventEmitter");
+
     const { body, attachments = [] } = req;
     const ownerId = req.decodedToken.id;
     log(`creating a new invitation for user with id ${ownerId}`);
     const invitation = await InvitationsService.create({ attachments, ...body, ownerId });
 
+    eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, invitation);
     return res.status(201).send({
       success: true,
       message: "invitation successfully created",
@@ -38,15 +42,24 @@ class InvitationsController {
   }
 
   async modifyInvite(req, res, next) {
+    const eventEmitter = req.app.get("eventEmitter");
+
     const {
       body,
       oldInvitation,
+      decodedToken,
       params: { id },
     } = req;
     if (oldInvitation.bid) {
       (body.assignedLawyerId = req.decodedToken.id), (body.status = "in-progress");
     }
     const [, [updatedInvitation]] = await InvitationsService.update(id, body, oldInvitation);
+
+    if (oldInvitation.bid)
+      eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.ASSIGNED, {
+        invitation: updatedInvitation,
+      });
+
     return res.status(200).send({
       success: true,
       message: !oldInvitation.bid
@@ -88,6 +101,8 @@ class InvitationsController {
   }
 
   async marKAsCompleted(req, res, next) {
+    const eventEmitter = req.app.get("eventEmitter");
+
     const {
       params: { id },
       oldInvitation,
@@ -98,6 +113,11 @@ class InvitationsController {
       { status: "completed" },
       oldInvitation
     );
+
+    eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.MARK_AS_COMPLETED, {
+      invitation: updatedInvitation,
+    });
+
     return res.status(200).send({
       success: true,
       message: "You have successfully completed this invitation",

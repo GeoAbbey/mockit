@@ -11,6 +11,9 @@ module.exports = {
       likedBy: {
         type: Sequelize.JSONB,
       },
+      amplifiedBy: {
+        type: Sequelize.JSONB,
+      },
       content: {
         type: Sequelize.STRING,
       },

@@ -1,5 +1,5 @@
 import debug from "debug";
-import { Op, QueryTypes } from "sequelize";
+import { Op } from "sequelize";
 import models from "../../../models";
 
 const debugLog = debug("app:reviews-service");
@@ -19,6 +19,7 @@ class ReviewsService {
     const validModelIdWithOwnerOrLawyer = await models[modelType].findOne({
       where: {
         id: modelId,
+        status: "completed",
         [Op.or]: [
           {
             ownerId: reviewerId,
@@ -44,7 +45,6 @@ class ReviewsService {
 
   async findOne(searchContext) {
     debugLog(`finding a review with ${searchContext}`);
-    console.log({ searchContext });
     return models.Review.findOne({ where: searchContext });
   }
 

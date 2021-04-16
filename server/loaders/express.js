@@ -4,11 +4,15 @@ import expressWinston from "express-winston";
 import cors from "cors";
 import helmet from "helmet";
 import { eventEmitter } from "./events";
+import debug from "debug";
 
 import { initializeRoutes } from "../modules/";
 import { manageAllEvents } from "../handlers/listeners";
 import { agendaUI } from "./agendaUI";
 import { agendaInstance } from "../jobs";
+import { messaging } from "./firebaseInit";
+
+const logger = debug("app:loaders:express");
 
 export default async ({ app }) => {
   const path = "/api/v1";
@@ -25,6 +29,7 @@ export default async ({ app }) => {
   manageAllEvents(eventEmitter);
 
   agendaUI(app, agendaInstance);
+  logger({ messaging });
 
   app.use(
     expressWinston.errorLogger({
@@ -41,7 +46,7 @@ export default async ({ app }) => {
 
   app.use((err, req, res, next) => {
     const { stack, status = 500 } = err;
-    console.error(stack);
+    logger(stack);
     return res.status(status).send({ err });
   });
 

@@ -1,5 +1,5 @@
 import debug from "debug";
-import { QueryTypes } from "sequelize";
+import sequelize from "sequelize";
 import models from "../../../models";
 
 const debugLog = debug("app:reports-service");
@@ -25,7 +25,7 @@ class ReportsService {
         include: [
           {
             model: models.Comment,
-            as: "reportComments",
+            as: "comments",
             where: { reportId: id },
             required: false,
           },
@@ -35,13 +35,19 @@ class ReportsService {
     return models.Report.findByPk(id);
   }
 
-  async findMany(data) {
-    debugLog(`retrieving reports with the following filter ${JSON.stringify(data)}`);
-    return models.Report.findAll(data);
+  async findMany() {
+    debugLog(`retrieving reports}`);
+    return models.Report.findAll({
+      attributes: {
+        include: [[sequelize.fn("COUNT", sequelize.col("comments.id")), "numOfComments"]],
+      },
+      include: [{ model: models.Comment, as: "comments", attributes: [] }],
+      group: ["Report.id"],
+    });
   }
 
   async update(id, ReportDTO, oldReport) {
-    const { content, attachments, likedBy } = oldReport;
+    const { content, attachments, likedBy, amplifiedBy } = oldReport;
     const handleAttachments = () => {
       if (typeof ReportDTO.attachments === "number") {
         attachments.splice(ReportDTO.attachments, 1);
@@ -60,11 +66,20 @@ class ReportsService {
         return likedBy;
       } else return likedBy;
     };
+
+    const handleAmplifiedBy = () => {
+      if (ReportDTO.amplifierId) {
+        const { amplifierId } = ReportDTO;
+        amplifiedBy[amplifierId] = amplifiedBy[amplifierId] ? !amplifiedBy[amplifierId] : true;
+        return amplifiedBy;
+      } else return amplifiedBy;
+    };
     return models.Report.update(
       {
         content: ReportDTO.content || content,
         attachments: handleAttachments(),
         likedBy: handleLikedBy(),
+        amplifiedBy: handleAmplifiedBy(),
       },
       { where: { id }, returning: true }
     );

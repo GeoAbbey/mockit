@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.belongsTo(models.User, { as: "reports", foreignKey: "reporterId" });
-      this.hasMany(models.Comment, { as: "reportComments", foreignKey: "reportId" });
+      this.hasMany(models.Comment, { as: "comments", foreignKey: "reportId" });
     }
   }
   Report.init(
@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       content: { type: DataTypes.STRING, allowNull: false },
       reporterId: { type: DataTypes.UUID, allowNull: false },
       likedBy: { type: DataTypes.JSONB, defaultValue: {} },
+      amplifiedBy: { type: DataTypes.JSONB, defaultValue: {} },
       attachments: {
         type: DataTypes.ARRAY(DataTypes.STRING),
         defaultValue: [],

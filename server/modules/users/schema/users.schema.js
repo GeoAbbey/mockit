@@ -14,6 +14,7 @@ export const updateUserSchema = Joi.object().keys({
   notification: Joi.boolean(),
   isAccountSuspended: Joi.boolean(),
   isSubscribed: Joi.boolean(),
+  firebaseToken: Joi.string(),
   address: {
     residential: Joi.string(),
     work: Joi.string(),

@@ -78,11 +78,27 @@ class CommentsController {
   async getAllComments(req, res, next) {
     log("getting all Comments");
     const { data } = req;
-    const Comments = await CommentsService.findMany(data);
+    const comments = await CommentsService.findMany(data);
     return res.status(200).send({
       success: true,
       message: "Comments successfully retrieved",
       comments,
+    });
+  }
+
+  async amplifyAComment(req, res, next) {
+    log("re-posting a comment");
+    const {
+      decodedToken: { id: amplifierId },
+      params: { id },
+      oldComment,
+    } = req;
+
+    const [, [updatedComment]] = await CommentsService.update(id, { amplifierId }, oldComment);
+    return res.status(200).send({
+      success: true,
+      message: "comment successfully re-posted",
+      comment: updatedComment,
     });
   }
 
@@ -93,7 +109,6 @@ class CommentsController {
       params: { id },
       oldComment,
     } = req;
-    console.log({ reactorId });
 
     const [, [updatedComment]] = await CommentsService.update(id, { reactorId }, oldComment);
     return res.status(200).send({

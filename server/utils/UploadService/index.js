@@ -29,7 +29,6 @@ const uploadS3 = multer({
 export const uploadMiddleware = async (req, res, next) => {
   uploadS3(req, res, (error) => {
     logger("the upload middleware has been initialized");
-    console.log(req.files, "🧣");
     if (req.files == undefined) {
       logger("no files to upload");
       return next();
