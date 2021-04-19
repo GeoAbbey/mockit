@@ -36,7 +36,7 @@ class InterestedLawyersController {
     return res.status(200).send({
       success: true,
       message: "You have successfully indicated interest in this small claim",
-      result,
+      interest,
     });
   }
 
