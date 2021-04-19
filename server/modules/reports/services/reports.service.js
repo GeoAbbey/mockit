@@ -47,7 +47,7 @@ class ReportsService {
   }
 
   async update(id, ReportDTO, oldReport) {
-    const { content, attachments, likedBy, amplifiedBy } = oldReport;
+    const { content, attachments, likedBy, amplifiedBy, location } = oldReport;
     const handleAttachments = () => {
       if (typeof ReportDTO.attachments === "number") {
         attachments.splice(ReportDTO.attachments, 1);
@@ -77,6 +77,7 @@ class ReportsService {
     return models.Report.update(
       {
         content: ReportDTO.content || content,
+        location: ReportDTO.location || location,
         attachments: handleAttachments(),
         likedBy: handleLikedBy(),
         amplifiedBy: handleAmplifiedBy(),
