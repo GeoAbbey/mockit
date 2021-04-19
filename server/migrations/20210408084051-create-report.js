@@ -20,6 +20,9 @@ module.exports = {
       amplifiedBy: {
         type: Sequelize.JSONB,
       },
+      location: {
+        type: Sequelize.STRING,
+      },
       reporterId: {
         type: Sequelize.UUID,
         onDelete: "CASCADE",

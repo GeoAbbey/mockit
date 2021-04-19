@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       reporterId: { type: DataTypes.UUID, allowNull: false },
       likedBy: { type: DataTypes.JSONB, defaultValue: {} },
       amplifiedBy: { type: DataTypes.JSONB, defaultValue: {} },
+      location: { type: DataTypes.STRING },
       attachments: {
         type: DataTypes.ARRAY(DataTypes.STRING),
         defaultValue: [],
