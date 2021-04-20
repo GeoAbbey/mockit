@@ -1,15 +1,19 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
+const common = {
+  googleApplicationCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  dialect: process.env.DIALECT,
+};
+
 module.exports = {
   development: {
     username: process.env.USERNAME,
     password: process.env.PASSWORD,
     database: process.env.LOCAL_DATABASE,
     host: process.env.HOST,
-    dialect: process.env.DIALECT,
     mongoConnect: process.env.MONGO_DB_CONNECTION_LOCAL,
-    googleApplicationCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    ...common,
   },
 
   production: {
@@ -18,8 +22,7 @@ module.exports = {
     database: process.env.PROD_DB_NAME,
     host: process.env.PROD_DB_HOSTNAME,
     mongoConnect: process.env.MONGO_DB_CONNECTION_PROD,
-    googleApplicationCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-    dialect: "postgres",
+    ...common,
     dialectOptions: {
       ssl: {
         require: true,
