@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 export const createReportSchema = Joi.object().keys({
-  content: Joi.string().required(),
+  content: Joi.string(),
   location: Joi.string(),
   attachments: Joi.array().items(Joi.any()),
 });
