@@ -21,6 +21,11 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Comment, { as: "userComments", foreignKey: "commenterId" });
       this.hasMany(models.Notification, { foreignKey: "ownerId" });
       this.hasMany(models.InterestedLawyer, { foreignKey: "lawyerId" });
+      this.hasMany(models.Response, { as: "myEmergencyResponse", foreignKey: "ownerId" });
+      this.hasMany(models.Response, {
+        as: "assignedEmergencyResponse",
+        foreignKey: "assignedLawyerId",
+      });
     }
   }
 

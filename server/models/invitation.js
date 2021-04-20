@@ -31,8 +31,10 @@ module.exports = (sequelize, DataTypes) => {
       ownerId: { type: DataTypes.UUID, allowNull: false },
       assignedLawyerId: { type: DataTypes.UUID, allowNull: true },
       status: {
-        type: DataTypes.ENUM,
-        values: ["initiated", "in-progress", "completed"],
+        type: DataTypes.STRING,
+        validate: {
+          isIn: [["initiated", "in-progress", "completed"]],
+        },
         defaultValue: "initiated",
       },
       attachments: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
