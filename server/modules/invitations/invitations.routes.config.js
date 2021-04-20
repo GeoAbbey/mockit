@@ -22,7 +22,7 @@ export class InvitationRoutes extends CommonRoutesConfig {
       ]);
 
     this.app
-      .route(`${this.path}/Invitation/:id`)
+      .route(`${this.path}/invitation/:id`)
       .all([
         Authenticate.verifyToken,
         middleware({ schema: validateUUID, property: "params" }),
@@ -47,7 +47,7 @@ export class InvitationRoutes extends CommonRoutesConfig {
       ]);
 
     this.app
-      .route(`${this.path}/Invitation/:id`)
+      .route(`${this.path}/invitation/:id`)
       .get([
         Authenticate.verifyToken,
         middleware({ schema: validateUUID, property: "params" }),

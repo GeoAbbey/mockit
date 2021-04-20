@@ -6,6 +6,7 @@ import { ReportRoutes } from "./reports/reports.routes.config";
 import { CommentRoutes } from "./comments/comments.routes.config";
 import { NotificationRoutes } from "./notifications/notifications.routes.config";
 import { InterestedLawyersRoutes } from "./interestedLawyers/interested-lawyers.routes.config";
+import { ResponseRoutes } from "./response/response.routes.config";
 
 const routes = [
   UserRoutes,
@@ -16,6 +17,7 @@ const routes = [
   CommentRoutes,
   NotificationRoutes,
   InterestedLawyersRoutes,
+  ResponseRoutes,
 ];
 
 export const initializeRoutes = ({ app, path }) => {
