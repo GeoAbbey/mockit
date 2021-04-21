@@ -51,7 +51,16 @@ class SmallClaimsService {
 
   async findMany(data) {
     debugLog(`retrieving SmallClaims with the following filter ${JSON.stringify(data)}`);
-    return models.SmallClaim.findAll(data);
+    return models.SmallClaim.findAll({
+      include: [
+        {
+          model: models.User,
+          as: "lawyerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic"],
+          data,
+        },
+      ],
+    });
   }
 
   async update(id, smallClaimDTO, oldSmallClaim, filter) {

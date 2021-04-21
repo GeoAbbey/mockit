@@ -8,7 +8,14 @@ import {
   validOtpAndPassword,
   newOTP,
 } from "./schema/users.schema";
-import { middleware, wrapCatch, Authenticate, AccessControl, validateUUID } from "../../utils";
+import {
+  middleware,
+  wrapCatch,
+  Authenticate,
+  AccessControl,
+  validateUUID,
+  uploadMiddleware,
+} from "../../utils";
 
 export class UserRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {
@@ -34,7 +41,8 @@ export class UserRoutes extends CommonRoutesConfig {
       .route(`${this.path}/users/profile`)
       .all([Authenticate.verifyToken])
       .patch([
-        middleware({ schema: updateUserSchema, property: "body" }),
+        uploadMiddleware("profilePic"),
+        // middleware({ schema: updateUserSchema, property: "body" }),
         UsersController.userExistMiddleware(),
         AccessControl.checkPermissionUserOrLawyerAccess(),
         UsersController.updateUser,

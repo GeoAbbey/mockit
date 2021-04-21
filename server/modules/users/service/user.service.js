@@ -37,7 +37,7 @@ class UsersService {
 
   async update(id, UserDTO, oldDetails) {
     debugLog(`updating a user with id ${id}`);
-    const { address, guarantors, lawyer } = oldDetails;
+    const { address, guarantors, lawyer, profilePic } = oldDetails;
     const handleDocuments = () => {
       if (UserDTO.lawyer && UserDTO.lawyer.documents) {
         return { ...lawyer.documents, ...UserDTO.lawyer.documents };
@@ -126,7 +126,7 @@ class UsersService {
               null,
           },
         },
-        profilePic: UserDTO.profilePic || oldDetails.profilePic,
+        profilePic: UserDTO.profilePic || profilePic,
         creditCard: UserDTO.creditCard || oldDetails.creditCard,
         lawyer: {
           isVerified: (UserDTO.lawyer && UserDTO.lawyer.isVerified) || lawyer.isVerified,

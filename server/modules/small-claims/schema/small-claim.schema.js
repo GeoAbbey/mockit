@@ -4,7 +4,7 @@ export const createSmallClaimSchema = Joi.object().keys({
   claim: Joi.string(),
   venue: Joi.string(),
   attachments: Joi.array().items(Joi.string()),
-  amount: Joi.number().integer().min(0).required(),
+  amount: Joi.number().integer().min(0),
 });
 
 export const updateSmallClaimSchema = Joi.object().keys({

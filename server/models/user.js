@@ -17,9 +17,9 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Review, { as: "reviews", foreignKey: "reviewerId" });
       this.hasMany(models.SmallClaim, { as: "myClaims", foreignKey: "ownerId" });
       this.hasMany(models.SmallClaim, { as: "claimsLawyer", foreignKey: "assignedLawyerId" });
-      this.hasMany(models.Report, { as: "reports", foreignKey: "reporterId" });
+      this.hasMany(models.Report, { as: "ownerProfile", foreignKey: "reporterId" });
       this.hasMany(models.Comment, { as: "userComments", foreignKey: "commenterId" });
-      this.hasMany(models.Notification, { foreignKey: "ownerId" });
+      this.hasMany(models.Notification, { as: "profile", foreignKey: "ownerId" });
       this.hasMany(models.InterestedLawyer, { foreignKey: "lawyerId" });
       this.hasMany(models.Response, { as: "myEmergencyResponse", foreignKey: "ownerId" });
       this.hasMany(models.Response, {

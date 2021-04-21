@@ -24,6 +24,11 @@ class ReportsService {
       return models.Report.findByPk(id, {
         include: [
           {
+            model: models.User,
+            as: "ownerProfile",
+            attributes: ["firstName", "lastName", "email", "profilePic"],
+          },
+          {
             model: models.Comment,
             as: "comments",
             where: { reportId: id },
@@ -41,8 +46,16 @@ class ReportsService {
       attributes: {
         include: [[sequelize.fn("COUNT", sequelize.col("comments.id")), "numOfComments"]],
       },
-      include: [{ model: models.Comment, as: "comments", attributes: [] }],
-      group: ["Report.id"],
+      include: [
+        { model: models.Comment, as: "comments", attributes: [] },
+        {
+          model: models.User,
+          as: "ownerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic"],
+        },
+      ],
+
+      group: ["Report.id", "ownerProfile.id"],
     });
   }
 

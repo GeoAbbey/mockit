@@ -1,5 +1,4 @@
 import debug from "debug";
-import { Op } from "sequelize";
 import models from "../../../models";
 
 const debugLog = debug("app:notifications-service");
@@ -20,7 +19,16 @@ class NotificationsService {
 
   async findMany(id) {
     debugLog(`retrieving notifications with the following filter id ${id}`);
-    return models.Notification.findAll({ where: { ownerId: id } });
+    return models.Notification.findAll({
+      include: [
+        {
+          model: models.User,
+          as: "profile",
+          attributes: ["firstName", "lastName", "email", "profilePic"],
+          where: { id },
+        },
+      ],
+    });
   }
 
   async update(ids) {
