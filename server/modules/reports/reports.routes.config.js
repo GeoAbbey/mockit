@@ -14,7 +14,7 @@ export class ReportRoutes extends CommonRoutesConfig {
       .all([Authenticate.verifyToken])
       .post([
         middleware({ schema: createReportSchema, property: "body" }),
-        uploadMiddleware,
+        uploadMiddleware(),
         wrapCatch(ReportsController.makeReport),
       ])
       .get([wrapCatch(ReportsController.getAllReports)]);
@@ -29,7 +29,7 @@ export class ReportRoutes extends CommonRoutesConfig {
       .patch([
         middleware({ schema: updateReportSchema, property: "body" }),
         ReportsController.checkAccessUser("modify"),
-        uploadMiddleware,
+        uploadMiddleware(),
         wrapCatch(ReportsController.modifyReport),
       ])
       .put([wrapCatch(ReportsController.reactToReport)])
