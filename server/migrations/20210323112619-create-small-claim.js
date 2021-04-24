@@ -21,9 +21,7 @@ module.exports = {
         type: Sequelize.ARRAY(Sequelize.STRING),
       },
       status: {
-        type: Sequelize.ENUM,
-        values: ["initiated", "in-progress", "completed"],
-        defaultValue: "initiated",
+        type: Sequelize.STRING,
       },
       ownerId: {
         type: Sequelize.UUID,

@@ -34,7 +34,7 @@ export class InvitationRoutes extends CommonRoutesConfig {
         wrapCatch(InvitationsController.modifyInvite),
       ])
       .put([
-        InvitationsController.checkAccessLawyer(),
+        InvitationsController.checkAccessLawyer("bid"),
         wrapCatch(InvitationsController.modifyInvite),
       ])
       .post([

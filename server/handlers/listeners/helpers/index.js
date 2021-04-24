@@ -2,6 +2,10 @@ import debug from "debug";
 import { sendNotificationToClient } from "../../../utils/sendNotificationToClient";
 import { EVENT_IDENTIFIERS, NOTIFICATION_DATA, ROLES } from "../../../constants";
 import models from "../../../models";
+const env = process.env.NODE_ENV || "development";
+const configOptions = require("../../../config/config");
+
+const config = configOptions[env];
 
 const logger = debug("app:handlers:listeners:helpers");
 
@@ -21,7 +25,8 @@ export const sendNotificationToLawyers = async (events, data, modelName, action)
   });
 
   logger("sending notification to qualified lawyers");
-  sendNotificationToClient({ tokens, data: NOTIFICATION_DATA[modelName][action] });
+  config.runNotificationService &&
+    sendNotificationToClient({ tokens, data: NOTIFICATION_DATA[modelName][action] });
 
   logger("saving notification for qualified lawyers on the database");
   await models.Notification.bulkCreate(allNotices, NOTIFICATION_DATA[modelName][action]);
@@ -43,7 +48,8 @@ export const sendNotificationToUserOrLawyer = async (events, data, modelName, ac
   ];
 
   logger("sending notification to the user");
-  sendNotificationToClient({ tokens, data: NOTIFICATION_DATA[modelName][action] });
+  config.runNotificationService &&
+    sendNotificationToClient({ tokens, data: NOTIFICATION_DATA[modelName][action] });
 
   logger("saving notification sent to the user in the database");
   await models.Notification.bulkCreate(notice, NOTIFICATION_DATA[modelName][action]);
@@ -74,10 +80,11 @@ export const layerMarkInterestForClaim = async (events, data) => {
   ];
 
   logger("sending notification to the user");
-  sendNotificationToClient({
-    tokens: [ownerProfile.firebaseToken],
-    data: NOTIFICATION_DATA.SMALL_CLAIM.MARK_INTEREST,
-  });
+  config.runNotificationService &&
+    sendNotificationToClient({
+      tokens: [ownerProfile.firebaseToken],
+      data: NOTIFICATION_DATA.SMALL_CLAIM.MARK_INTEREST,
+    });
 
   logger("saving notification sent to the user in the database");
   await models.Notification.bulkCreate(notice, NOTIFICATION_DATA.SMALL_CLAIM.MARK_INTEREST);
