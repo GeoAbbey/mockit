@@ -14,7 +14,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
       .all([Authenticate.verifyToken])
       .post([
         middleware({ schema: createSmallClaimSchema, property: "body" }),
-        [uploadMiddleware, wrapCatch(SmallClaimsController.makeClaim)],
+        [uploadMiddleware(), wrapCatch(SmallClaimsController.makeClaim)],
       ])
       .get([
         SmallClaimsController.queryContext,
