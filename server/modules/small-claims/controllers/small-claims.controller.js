@@ -17,10 +17,10 @@ class SmallClaimsController {
   async makeClaim(req, res) {
     const eventEmitter = req.app.get("eventEmitter");
 
-    const { body } = req;
+    const { body, attachments = [] } = req;
     const ownerId = req.decodedToken.id;
     log(`creating a new SmallClaim for user with id ${ownerId}`);
-    const smallClaim = await SmallClaimsService.create({ ...body, ownerId });
+    const smallClaim = await SmallClaimsService.create({ ...body, attachments, ownerId });
 
     eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, smallClaim, "SMALL_CLAIM");
 
