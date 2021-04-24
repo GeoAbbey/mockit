@@ -160,6 +160,13 @@ class InvitationsController {
         if (id !== oldInvitation.assignedLawyerId)
           return next(createError(401, "You do not have access to perform this operation"));
       }
+
+      if (context === "bid") {
+        if (oldInvitation.assignedLawyerId)
+          return next(
+            createError(401, "This invitation has already been assigned to another lawyer")
+          );
+      }
       req.oldInvitation.bid = true;
       next();
     };

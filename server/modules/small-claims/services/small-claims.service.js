@@ -21,6 +21,7 @@ class SmallClaimsService {
   async find(id, context) {
     debugLog(`looking for an SmallClaim with id ${id}`);
     if (context) {
+      console.log("I was called using context");
       return models.SmallClaim.findByPk(id, {
         include: [
           {
@@ -39,7 +40,7 @@ class SmallClaimsService {
               {
                 model: models.User,
                 as: "profile",
-                attributes: ["firstName", "lastName", "email", "profilePic"],
+                attributes: ["firstName", "lastName", "email", "profilePic", "id"],
               },
             ],
           },

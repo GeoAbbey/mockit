@@ -40,20 +40,20 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
       .post([
         SmallClaimsController.checkAccessLawyer("markAsComplete"),
         wrapCatch(SmallClaimsController.marKAsCompleted),
-      ])
-      .put([
-        SmallClaimsController.checkAccessUser("assignLawyer"),
-        wrapCatch(SmallClaimsController.assignALawyer),
       ]);
 
     this.app
       .route(`${this.path}/small-claims/:id`)
+      .all([Authenticate.verifyToken, middleware({ schema: validateUUID, property: "params" })])
       .get([
-        Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
         SmallClaimsController.smallClaimExits("retrieve"),
         SmallClaimsController.checkAccessUser("retrieve"),
         wrapCatch(SmallClaimsController.getASmallClaim),
+      ])
+      .put([
+        SmallClaimsController.smallClaimExits("retrieve"),
+        SmallClaimsController.checkAccessUser("assignLawyer"),
+        wrapCatch(SmallClaimsController.assignALawyer),
       ]);
   }
 }

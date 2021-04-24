@@ -24,6 +24,8 @@ class UsersController {
 
     const hash = await HandlePassword.getHash(req.body.password);
     req.body.password = hash;
+    req.body.profilePic = "https://zapplawyer.s3.us-west-2.amazonaws.com/attachments/user.png";
+
     const user = await UsersService.create(req.body);
     delete user.dataValues.password;
     const token = await Authenticate.signToken(user.dataValues);

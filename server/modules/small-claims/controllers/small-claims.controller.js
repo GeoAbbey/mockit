@@ -186,7 +186,9 @@ class SmallClaimsController {
       if (context === "assignLawyer") {
         if (status === "in-progress")
           next(createError(403, `A lawyer has already been assigned to this small claim`));
-        const lawyerMarkedInterest = interestedLawyers[assignedLawyerId];
+        const lawyerMarkedInterest = interestedLawyers.find(
+          (lawyer) => lawyer.profile.id == assignedLawyerId
+        );
         if (!lawyerMarkedInterest)
           return next(createError(400, "You can't assign a lawyer that didn't marked interest"));
       }
