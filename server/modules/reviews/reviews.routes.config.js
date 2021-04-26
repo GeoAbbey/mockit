@@ -1,13 +1,8 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import ReviewsController from "./controller/reviews.controller";
-import {
-  createReviewSchema,
-  updateReviewSchema,
-  allowedModelSchema,
-  queryReviewSchema,
-} from "./schema/reviews.schema";
+import { createReviewSchema, updateReviewSchema, queryReviewSchema } from "./schema/reviews.schema";
 
-import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
+import { wrapCatch, middleware, Authenticate, validateUUID, allowedModelSchema } from "../../utils";
 
 export class ReviewsRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {

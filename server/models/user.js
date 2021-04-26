@@ -21,6 +21,8 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Comment, { as: "userComments", foreignKey: "commenterId" });
       this.hasMany(models.Notification, { as: "profile", foreignKey: "ownerId" });
       this.hasMany(models.InterestedLawyer, { foreignKey: "lawyerId" });
+      this.hasMany(models.Reaction, { as: "myLikes", foreignKey: "ownerId" });
+      this.hasMany(models.Reaction, { as: "myRepost", foreignKey: "ownerId" });
       this.hasMany(models.Response, { as: "myEmergencyResponse", foreignKey: "ownerId" });
       this.hasMany(models.Response, {
         as: "assignedEmergencyResponse",
@@ -43,6 +45,7 @@ module.exports = (sequelize, DataTypes) => {
       phone: { type: DataTypes.STRING },
       dob: { type: DataTypes.STRING, isDate: true },
       guarantors: { type: DataTypes.JSONB },
+      meta: { type: DataTypes.JSONB, defaultValue: {} },
       profilePic: { type: DataTypes.STRING },
       creditCard: { type: DataTypes.STRING, isCreditCard: true },
       lawyer: {
@@ -61,6 +64,13 @@ module.exports = (sequelize, DataTypes) => {
           isIn: [["user", "lawyer", "admin", "super-admin"]],
         },
         defaultValue: "user",
+      },
+      gender: {
+        type: DataTypes.STRING,
+        validate: {
+          isIn: [["male", "female"]],
+        },
+        allowNull: false,
       },
       otp: {
         type: DataTypes.JSONB,

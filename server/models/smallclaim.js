@@ -1,5 +1,6 @@
 "use strict";
 import { v4 } from "uuid";
+import { nanoid } from "nanoid";
 
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
@@ -32,7 +33,13 @@ module.exports = (sequelize, DataTypes) => {
       attachments: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
       venue: { type: DataTypes.STRING, allowNull: false },
       ownerId: { type: DataTypes.UUID, allowNull: false },
+      meta: { type: DataTypes.JSONB, defaultValue: {} },
       assignedLawyerId: { type: DataTypes.UUID },
+      ticketId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: () => nanoid(10),
+      },
       status: {
         type: DataTypes.STRING,
         validate: {

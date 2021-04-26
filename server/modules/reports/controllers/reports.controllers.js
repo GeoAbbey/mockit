@@ -72,46 +72,17 @@ class ReportsController {
     });
   }
 
-  async amplifyAReport(req, res, next) {
-    log("re-posting a reports");
-    const {
-      decodedToken: { id: amplifierId },
-      params: { id },
-      oldReport,
-    } = req;
-
-    const [, [updatedReport]] = await ReportsService.update(id, { amplifierId }, oldReport);
-    return res.status(200).send({
-      success: true,
-      message: "report successfully updated",
-      report: updatedReport,
-    });
-  }
-
   async getAllReports(req, res, next) {
     log("getting all reports");
-    const { data } = req;
-    const reports = await ReportsService.findMany(data);
+    const {
+      decodedToken: { id: ownerId },
+    } = req;
+
+    const reports = await ReportsService.findMany(ownerId);
     return res.status(200).send({
       success: true,
       message: "reports successfully retrieved",
       reports,
-    });
-  }
-
-  async reactToReport(req, res, next) {
-    log("reacting to a reports");
-    const {
-      decodedToken: { id: reactorId },
-      params: { id },
-      oldReport,
-    } = req;
-
-    const [, [updatedReport]] = await ReportsService.update(id, { reactorId }, oldReport);
-    return res.status(200).send({
-      success: true,
-      message: "report successfully updated",
-      report: updatedReport,
     });
   }
 

@@ -126,7 +126,7 @@ class UsersController {
   async validateOTP(req, res, next) {
     log("validating OTP supplied");
     const { body } = req;
-    if (body.otp !== req.user.otp.value) {
+    if (body.otp != req.user.otp.value) {
       return next(createError(403, "Invalid OTP supplied"));
     }
     if (compareAsc(new Date(), parseISO(req.user.otp.expiresIn)) !== -1) {

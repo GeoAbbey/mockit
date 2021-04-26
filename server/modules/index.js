@@ -7,6 +7,7 @@ import { CommentRoutes } from "./comments/comments.routes.config";
 import { NotificationRoutes } from "./notifications/notifications.routes.config";
 import { InterestedLawyersRoutes } from "./interestedLawyers/interested-lawyers.routes.config";
 import { ResponseRoutes } from "./response/response.routes.config";
+import { ReactionRoutes } from "./reactions/reactions.routes.config";
 
 const routes = [
   UserRoutes,
@@ -18,6 +19,7 @@ const routes = [
   NotificationRoutes,
   InterestedLawyersRoutes,
   ResponseRoutes,
+  ReactionRoutes,
 ];
 
 export const initializeRoutes = ({ app, path }) => {

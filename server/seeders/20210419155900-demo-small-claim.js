@@ -1,4 +1,5 @@
 "use strict";
+const { nanoid } = require("nanoid");
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -17,6 +18,7 @@ module.exports = {
           claim: "We are many more",
           venue: "Effc office jankara",
           amount: 50005,
+          ticketId: nanoid(10),
           attachments: ["we are one for all", "in the  year King uzaahia died"],
           ownerId: "49ed9b33-ba84-4d3a-bb90-b5d4c67fb44f",
           createdAt: new Date(),
@@ -29,6 +31,7 @@ module.exports = {
           claim: "We are many more",
           venue: "Effc office jankara",
           amount: 50005,
+          ticketId: nanoid(10),
           attachments: ["we are one for all", "in the  year King uzaahia died"],
           ownerId: "49ed9b33-ba84-4d3a-bb90-b5d4c67fb44f",
           createdAt: new Date(),
@@ -41,6 +44,7 @@ module.exports = {
           claim: "We are many more",
           venue: "Effc office jankara",
           amount: 50005,
+          ticketId: nanoid(10),
           attachments: ["we are one for all", "in the  year King uzaahia died"],
           ownerId: "49ed9b33-ba84-4d3a-bb90-b5d4c67fb44f",
           createdAt: new Date(),

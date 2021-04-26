@@ -53,6 +53,7 @@ class UsersService {
         email: UserDTO.email || oldDetails.email,
         password: UserDTO.password || oldDetails.password,
         role: UserDTO.role || oldDetails.role,
+        gender: UserDTO.gender || oldDetails.gender,
         isSubscribed: UserDTO.isSubscribed || oldDetails.isSubscribed,
         firebaseToken: UserDTO.firebaseToken || oldDetails.firebaseToken,
         otp: {

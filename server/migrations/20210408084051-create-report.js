@@ -14,10 +14,7 @@ module.exports = {
       attachments: {
         type: Sequelize.ARRAY(Sequelize.STRING),
       },
-      likedBy: {
-        type: Sequelize.JSONB,
-      },
-      amplifiedBy: {
+      meta: {
         type: Sequelize.JSONB,
       },
       location: {

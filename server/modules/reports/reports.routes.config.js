@@ -32,8 +32,6 @@ export class ReportRoutes extends CommonRoutesConfig {
         uploadMiddleware(),
         wrapCatch(ReportsController.modifyReport),
       ])
-      .put([wrapCatch(ReportsController.reactToReport)])
-      .post([wrapCatch(ReportsController.amplifyAReport)])
       .delete([
         ReportsController.checkAccessUser("delete"),
         wrapCatch(ReportsController.deleteReport),

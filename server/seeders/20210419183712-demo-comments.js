@@ -11,8 +11,6 @@ module.exports = {
       "Comments",
       [
         {
-          likedBy: JSON.stringify({}),
-          amplifiedBy: JSON.stringify({}),
           id: "6b16285e-11b8-47f5-9577-56d9b5550a99",
           reportId: "6171a987-9d2e-4596-9d17-6e293eaba2b6",
           content: "I would like to say many other things",

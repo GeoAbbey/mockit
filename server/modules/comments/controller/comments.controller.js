@@ -86,38 +86,6 @@ class CommentsController {
     });
   }
 
-  async amplifyAComment(req, res, next) {
-    log("re-posting a comment");
-    const {
-      decodedToken: { id: amplifierId },
-      params: { id },
-      oldComment,
-    } = req;
-
-    const [, [updatedComment]] = await CommentsService.update(id, { amplifierId }, oldComment);
-    return res.status(200).send({
-      success: true,
-      message: "comment successfully re-posted",
-      comment: updatedComment,
-    });
-  }
-
-  async reactToComment(req, res, next) {
-    log("reacting to a comments");
-    const {
-      decodedToken: { id: reactorId },
-      params: { id },
-      oldComment,
-    } = req;
-
-    const [, [updatedComment]] = await CommentsService.update(id, { reactorId }, oldComment);
-    return res.status(200).send({
-      success: true,
-      message: "Comment successfully updated",
-      comment: updatedComment,
-    });
-  }
-
   checkAccessUser(context) {
     return async (req, res, next) => {
       const {

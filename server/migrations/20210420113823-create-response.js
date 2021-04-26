@@ -11,6 +11,10 @@ module.exports = {
       status: {
         type: Sequelize.STRING,
       },
+      ticketId: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       ownerId: {
         type: Sequelize.UUID,
         onDelete: "CASCADE",

@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       modelId: { type: DataTypes.UUID, allowNull: false },
+      meta: { type: DataTypes.JSONB, defaultValue: {} },
       reviewerId: { type: DataTypes.UUID, allowNull: false },
       rating: { type: DataTypes.INTEGER, allowNull: false, min: 1, max: 5 },
       feedback: DataTypes.STRING,
