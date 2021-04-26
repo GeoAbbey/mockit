@@ -60,6 +60,9 @@ module.exports = {
       lawyer: {
         type: Sequelize.JSONB,
       },
+      gender: {
+        type: Sequelize.STRING,
+      },
       address: {
         type: Sequelize.JSONB,
       },
@@ -93,6 +96,9 @@ module.exports = {
       },
       deletedAt: {
         type: Sequelize.DATE,
+      },
+      meta: {
+        type: Sequelize.JSONB,
       },
     });
   },

@@ -23,6 +23,13 @@ module.exports = {
       status: {
         type: Sequelize.STRING,
       },
+      ticketId: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      meta: {
+        type: Sequelize.JSONB,
+      },
       ownerId: {
         type: Sequelize.UUID,
         onDelete: "CASCADE",

@@ -8,10 +8,7 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
-      likedBy: {
-        type: Sequelize.JSONB,
-      },
-      amplifiedBy: {
+      meta: {
         type: Sequelize.JSONB,
       },
       content: {

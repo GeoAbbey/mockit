@@ -13,14 +13,15 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       this.belongsTo(models.User, { as: "ownerProfile", foreignKey: "reporterId" });
       this.hasMany(models.Comment, { as: "comments", foreignKey: "reportId" });
+      this.hasMany(models.Reaction, { as: "likes", foreignKey: "modelId" });
+      this.hasMany(models.Reaction, { as: "reposts", foreignKey: "modelId" });
     }
   }
   Report.init(
     {
       content: { type: DataTypes.STRING, allowNull: false },
       reporterId: { type: DataTypes.UUID, allowNull: false },
-      likedBy: { type: DataTypes.JSONB, defaultValue: {} },
-      amplifiedBy: { type: DataTypes.JSONB, defaultValue: {} },
+      meta: { type: DataTypes.JSONB, defaultValue: {} },
       location: { type: DataTypes.STRING },
       attachments: {
         type: DataTypes.ARRAY(DataTypes.STRING),

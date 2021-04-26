@@ -23,6 +23,9 @@ module.exports = {
       content: {
         type: Sequelize.STRING,
       },
+      meta: {
+        type: Sequelize.JSONB,
+      },
       seen: {
         type: Sequelize.BOOLEAN,
       },

@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       ownerId: { type: DataTypes.UUID, allowNull: false },
       content: { type: DataTypes.STRING, allowNull: false },
       seen: { type: DataTypes.BOOLEAN, defaultValue: false },
+      meta: { type: DataTypes.JSONB, defaultValue: {} },
     },
     {
       sequelize,

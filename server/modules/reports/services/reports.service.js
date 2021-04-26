@@ -1,5 +1,5 @@
 import debug from "debug";
-import sequelize from "sequelize";
+import { QueryTypes } from "sequelize";
 import models from "../../../models";
 
 const debugLog = debug("app:reports-service");
@@ -40,27 +40,19 @@ class ReportsService {
     return models.Report.findByPk(id);
   }
 
-  async findMany() {
+  async findMany(ownerId) {
     debugLog(`retrieving reports}`);
-    return models.Report.findAll({
-      attributes: {
-        include: [[sequelize.fn("COUNT", sequelize.col("comments.id")), "numOfComments"]],
-      },
-      include: [
-        { model: models.Comment, as: "comments", attributes: [] },
-        {
-          model: models.User,
-          as: "ownerProfile",
-          attributes: ["firstName", "lastName", "email", "profilePic"],
-        },
-      ],
-
-      group: ["Report.id", "ownerProfile.id"],
-    });
+    return models.sequelize.query(
+      `select *, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'repost') as reposts, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like') as likes, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like' and "ownerId" = '${ownerId}') as has_liked, (select count(id) from "Reactions" where "modelId" = "Reports".id and "reactionType" = 'repost' and "modelType" = 'Report' and "ownerId" = '${ownerId}') as has_reposted, (select count (id) from "Comments" where "reportId" = "Reports".id) as comments from "Reports"
+    `,
+      {
+        type: QueryTypes.SELECT,
+      }
+    );
   }
 
   async update(id, ReportDTO, oldReport) {
-    const { content, attachments, likedBy, amplifiedBy, location } = oldReport;
+    const { content, attachments, location } = oldReport;
     const handleAttachments = () => {
       if (typeof ReportDTO.attachments === "number") {
         attachments.splice(ReportDTO.attachments, 1);
@@ -72,28 +64,11 @@ class ReportsService {
       return attachments;
     };
 
-    const handleLikedBy = () => {
-      if (ReportDTO.reactorId) {
-        const { reactorId } = ReportDTO;
-        likedBy[reactorId] = likedBy[reactorId] ? !likedBy[reactorId] : true;
-        return likedBy;
-      } else return likedBy;
-    };
-
-    const handleAmplifiedBy = () => {
-      if (ReportDTO.amplifierId) {
-        const { amplifierId } = ReportDTO;
-        amplifiedBy[amplifierId] = amplifiedBy[amplifierId] ? !amplifiedBy[amplifierId] : true;
-        return amplifiedBy;
-      } else return amplifiedBy;
-    };
     return models.Report.update(
       {
         content: ReportDTO.content || content,
         location: ReportDTO.location || location,
         attachments: handleAttachments(),
-        likedBy: handleLikedBy(),
-        amplifiedBy: handleAmplifiedBy(),
       },
       { where: { id }, returning: true }
     );

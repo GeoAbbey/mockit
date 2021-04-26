@@ -1,28 +1,24 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("Invitations", {
+    await queryInterface.createTable("Reactions", {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
-      reason: {
+      modelType: {
         type: Sequelize.STRING,
       },
-      venue: {
+      modelId: {
+        type: Sequelize.UUID,
+      },
+      reactionType: {
         type: Sequelize.STRING,
       },
-      attachments: {
-        type: Sequelize.ARRAY(Sequelize.STRING),
-      },
-      status: {
-        type: Sequelize.STRING,
-      },
-      ticketId: {
-        type: Sequelize.STRING,
-        allowNull: false,
+      value: {
+        type: Sequelize.BOOLEAN,
       },
       ownerId: {
         type: Sequelize.UUID,
@@ -32,19 +28,6 @@ module.exports = {
           key: "id",
           as: "ownerId",
         },
-      },
-      assignedLawyerId: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        onDelete: "CASCADE",
-        references: {
-          model: "Users",
-          key: "id",
-          as: " assignedLawyerId",
-        },
-      },
-      meta: {
-        type: Sequelize.JSONB,
       },
       createdAt: {
         allowNull: false,
@@ -57,6 +40,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("Invitations");
+    await queryInterface.dropTable("Reactions");
   },
 };

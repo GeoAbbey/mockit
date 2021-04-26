@@ -23,6 +23,9 @@ module.exports = {
           as: "lawyerId",
         },
       },
+      meta: {
+        type: Sequelize.JSONB,
+      },
       modelId: {
         type: Sequelize.UUID,
       },

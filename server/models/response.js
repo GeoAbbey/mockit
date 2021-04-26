@@ -1,6 +1,6 @@
 "use strict";
 import { v4 } from "uuid";
-
+import { nanoid } from "nanoid";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Response extends Model {
@@ -32,6 +32,11 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         allowNull: false,
         defaultValue: () => v4(),
+      },
+      ticketId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: () => nanoid(10),
       },
       status: {
         type: DataTypes.STRING,

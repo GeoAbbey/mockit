@@ -3,7 +3,7 @@ import { v4 } from "uuid";
 
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class InterestedLawyer extends Model {
+  class Reaction extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,18 +11,19 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.SmallClaim, { foreignKey: "modelId" });
-      this.belongsTo(models.User, { as: "profile", foreignKey: "lawyerId" });
+      this.belongsTo(models.Comment, { as: "commentReaction", foreignKey: "modelId" });
+      this.belongsTo(models.Report, { as: "reportReaction", foreignKey: "modelId" });
+      this.belongsTo(models.User, { as: "myLikes", foreignKey: "ownerId" });
+      this.belongsTo(models.User, { as: "myRepost", foreignKey: "ownerId" });
     }
   }
-  InterestedLawyer.init(
+  Reaction.init(
     {
-      baseCharge: { type: DataTypes.NUMBER, allowNull: false },
-      serviceCharge: { type: DataTypes.NUMBER, allowNull: false },
       modelType: { type: DataTypes.STRING, allowNull: false },
-      lawyerId: { type: DataTypes.UUID, allowNull: false },
-      meta: { type: DataTypes.JSONB, defaultValue: {} },
       modelId: { type: DataTypes.UUID, allowNull: false },
+      ownerId: { type: DataTypes.UUID, allowNull: false },
+      reactionType: { type: DataTypes.STRING, allowNull: false },
+      value: { type: DataTypes.BOOLEAN, allowNull: false },
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
@@ -32,8 +33,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "InterestedLawyer",
+      modelName: "Reaction",
     }
   );
-  return InterestedLawyer;
+  return Reaction;
 };

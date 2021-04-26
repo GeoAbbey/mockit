@@ -28,28 +28,10 @@ class CommentsService {
   }
 
   async update(id, commentDTO, oldComment) {
-    const { content, likedBy, amplifiedBy } = oldComment;
-
-    const handleAmplifiedBy = () => {
-      if (commentDTO.amplifierId) {
-        const { amplifierId } = commentDTO;
-        amplifiedBy[amplifierId] = amplifiedBy[amplifierId] ? !amplifiedBy[amplifierId] : true;
-        return amplifiedBy;
-      } else return amplifiedBy;
-    };
-
-    const handleLikedBy = () => {
-      if (commentDTO.reactorId) {
-        const { reactorId } = commentDTO;
-        likedBy[reactorId] = likedBy[reactorId] ? !likedBy[reactorId] : true;
-        return likedBy;
-      } else return likedBy;
-    };
+    const { content } = oldComment;
     return models.Comment.update(
       {
         content: commentDTO.content || content,
-        likedBy: handleLikedBy(),
-        amplifiedBy: handleAmplifiedBy(),
       },
       { where: { id }, returning: true }
     );
