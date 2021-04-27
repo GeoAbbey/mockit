@@ -77,8 +77,11 @@ class CommentsController {
 
   async getAllComments(req, res, next) {
     log("getting all Comments");
-    const { data } = req;
-    const comments = await CommentsService.findMany(data);
+    const {
+      decodedToken: { id: commenterId },
+      params: { id: reportId },
+    } = req;
+    const comments = await CommentsService.findManyByReportId({ commenterId, reportId });
     return res.status(200).send({
       success: true,
       message: "Comments successfully retrieved",

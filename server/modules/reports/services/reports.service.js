@@ -20,33 +20,17 @@ class ReportsService {
 
   async find(id, context) {
     debugLog(`looking for an Report with id ${id}`);
-    if (context) {
-      return models.Report.findByPk(id, {
-        include: [
-          {
-            model: models.User,
-            as: "ownerProfile",
-            attributes: ["firstName", "lastName", "email", "profilePic"],
-          },
-          {
-            model: models.Comment,
-            as: "comments",
-            where: { reportId: id },
-            required: false,
-          },
-        ],
-      });
-    }
     return models.Report.findByPk(id);
   }
 
   async findMany(ownerId) {
     debugLog(`retrieving reports}`);
     return models.sequelize.query(
-      `select *, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'repost') as reposts, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like') as likes, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like' and "ownerId" = '${ownerId}') as has_liked, (select count(id) from "Reactions" where "modelId" = "Reports".id and "reactionType" = 'repost' and "modelType" = 'Report' and "ownerId" = '${ownerId}') as has_reposted, (select count (id) from "Comments" where "reportId" = "Reports".id) as comments from "Reports"
+      `select *, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'repost') as reposts, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like') as likes, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like' and "ownerId" =:ownerId) as has_liked, (select count(id) from "Reactions" where "modelId" = "Reports".id and "reactionType" = 'repost' and "modelType" = 'Report' and "ownerId" = :ownerId) as has_reposted, (select count (id) from "Comments" where "reportId" = "Reports".id) as comments from "Reports"
     `,
       {
         type: QueryTypes.SELECT,
+        replacements: { ownerId },
       }
     );
   }

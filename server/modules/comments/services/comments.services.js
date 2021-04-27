@@ -1,4 +1,5 @@
 import debug from "debug";
+import { QueryTypes } from "sequelize";
 import models from "../../../models";
 
 const debugLog = debug("app:Comments-service");
@@ -22,9 +23,15 @@ class CommentsService {
     return models.Comment.findByPk(id);
   }
 
-  async findMany(data) {
-    debugLog(`retrieving comments with the following filter ${JSON.stringify(data)}`);
-    return models.Comment.findAll(data);
+  async findManyByReportId({ reportId, commenterId }) {
+    debugLog(`retrieving comments}`);
+    return models.sequelize.query(
+      `select *, (select count(id) from "Reactions" where "modelId" = "Comments".id and "modelType" = 'Comment' and "reactionType" = 'repost') as reposts, (select count(id) from "Reactions" where "modelId" = "Comments".id and "modelType" = 'Comment' and  "reactionType" = 'like') as likes, (select count(id) from "Reactions" where "modelId" = "Comments".id and "modelType" = 'Comment' and "reactionType" = 'like' and "commenterId" = :commenterId) as has_liked, (select count(id) from "Reactions" where "modelId" = "Comments".id and "modelType" = 'Comment' and "reactionType" = 'repost' and "commenterId" = :commenterId) as has_reposted from "Comments" where "reportId" = :reportId`,
+      {
+        replacements: { commenterId, reportId },
+        type: QueryTypes.SELECT,
+      }
+    );
   }
 
   async update(id, commentDTO, oldComment) {
