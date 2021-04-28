@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: () => nanoid(10),
       },
+      meta: {
+        type: DataTypes.JSONB,
+        defaultValue: {},
+      },
       status: {
         type: DataTypes.STRING,
         validate: {

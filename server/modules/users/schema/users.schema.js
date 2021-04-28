@@ -37,12 +37,17 @@ export const updateUserSchema = Joi.object().keys({
       phone: Joi.string(),
     }),
   }),
+  responseDetails: Joi.object().keys({
+    online: Joi.boolean(),
+    socketId: Joi.string(),
+  }),
   profilePic: Joi.string(),
   creditCard: Joi.string().creditCard(),
   lawyer: Joi.object().keys({
     isVerified: Joi.boolean(),
     documents: Joi.object(),
   }),
+
   hasAgreedToTerms: Joi.boolean(),
   role: Joi.string().valid("user", "lawyer", "admin"),
 });

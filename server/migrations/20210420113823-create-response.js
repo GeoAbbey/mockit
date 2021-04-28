@@ -11,6 +11,9 @@ module.exports = {
       status: {
         type: Sequelize.STRING,
       },
+      meta: {
+        type: Sequelize.JSONB,
+      },
       ticketId: {
         type: Sequelize.STRING,
         allowNull: false,

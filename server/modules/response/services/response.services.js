@@ -19,26 +19,26 @@ class ResponsesService {
   }
 
   async find(id, context) {
-    debugLog(`looking for an Response with id ${id}`);
-    if (context) {
-      const response = await models.Response.findByPk(id, {
-        include: [
-          {
-            model: models.Review,
-            as: "reviews",
-            where: { modelType: "Response", modelId: id },
-            required: false,
-          },
-          {
-            model: models.User,
-            as: "lawyerProfile",
-            attributes: ["firstName", "lastName", "email", "profilePic"],
-          },
-        ],
-      });
+    debugLog(`looking for a response with id ${id}`);
+    // if (context) {
+    //   const response = await models.Response.findByPk(id, {
+    //     include: [
+    //       {
+    //         model: models.Review,
+    //         as: "reviews",
+    //         where: { modelType: "Response", modelId: id },
+    //         required: false,
+    //       },
+    //       {
+    //         model: models.User,
+    //         as: "lawyerProfile",
+    //         attributes: ["firstName", "lastName", "email", "profilePic"],
+    //       },
+    //     ],
+    //   });
 
-      return response;
-    }
+    //   return response;
+    // }
 
     return models.Response.findByPk(id);
   }
@@ -51,10 +51,17 @@ class ResponsesService {
   async update(id, ResponseDTO, oldResponse) {
     const { status, meetTime, assignedLawyerId } = oldResponse;
 
+    const handleMeeTime = () => {
+      if (ResponseDTO.meetTime) {
+        return new Date().toISOString();
+      }
+      return meetTime;
+    };
+
     return models.Response.update(
       {
         status: ResponseDTO.status || status,
-        meetTime: ResponseDTO.meetTime || meetTime,
+        meetTime: handleMeeTime(),
         assignedLawyerId: ResponseDTO.assignedLawyerId || assignedLawyerId,
       },
       { where: { id }, returning: true }
@@ -62,7 +69,7 @@ class ResponsesService {
   }
 
   async remove(id) {
-    debugLog(`deleting the Response with id ${id}`);
+    debugLog(`deleting the response with id ${id}`);
     return models.Response.destroy({
       where: { id, assignedLawyerId: null },
     });

@@ -1,6 +1,6 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import ResponsesController from "./controllers/response.controller";
-// import { createResponseSchema, updatedResponseSchema } from "./schema/response.schema";
+import { updateResponseSchema } from "./schema/response.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
 
 export class ResponseRoutes extends CommonRoutesConfig {
@@ -12,10 +12,7 @@ export class ResponseRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/responses`)
       .all([Authenticate.verifyToken])
-      .post([
-        // middleware({ schema: createResponseSchema, property: "body" }),
-        [wrapCatch(ResponsesController.makeResponse)],
-      ])
+      .post([[wrapCatch(ResponsesController.makeResponse)]])
       .get([ResponsesController.queryContext, wrapCatch(ResponsesController.getAllResponses)]);
 
     this.app
@@ -25,19 +22,18 @@ export class ResponseRoutes extends CommonRoutesConfig {
         middleware({ schema: validateUUID, property: "params" }),
         ResponsesController.responseExits(),
       ])
-      .patch([
-        // middleware({ schema: updatedResponseSchema, property: "body" }),
-        ResponsesController.checkAccessUser("modify"),
-        wrapCatch(ResponsesController.modifyResponse),
-      ])
-      .put([ResponsesController.checkAccessLawyer(), wrapCatch(ResponsesController.modifyInvite)])
       .post([
         ResponsesController.checkAccessLawyer("markAsComplete"),
         wrapCatch(ResponsesController.marKAsCompleted),
       ])
+      .put([
+        middleware({ schema: updateResponseSchema, property: "body" }),
+        ResponsesController.checkAccessLawyer(),
+        wrapCatch(ResponsesController.modifyResponse),
+      ])
       .delete([
         ResponsesController.checkAccessUser("delete"),
-        wrapCatch(ResponsesController.deleteInvite),
+        wrapCatch(ResponsesController.deleteResponse),
       ]);
 
     this.app
@@ -47,7 +43,7 @@ export class ResponseRoutes extends CommonRoutesConfig {
         middleware({ schema: validateUUID, property: "params" }),
         ResponsesController.responseExits("retrieve"),
         ResponsesController.checkAccessUser("retrieve"),
-        wrapCatch(ResponsesController.getAnInvite),
+        wrapCatch(ResponsesController.getResponse),
       ]);
   }
 }
