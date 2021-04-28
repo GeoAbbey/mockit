@@ -67,7 +67,10 @@ class UsersController {
       profilePic,
     } = req;
     log(`updating the details of user with id ${id}`);
-    if (profilePic[0]) body.profilePic = profilePic[0];
+    console.log({ profilePic });
+    if (profilePic && profilePic[0]) {
+      body.profilePic = profilePic[0];
+    }
     const [, [User]] = await UsersService.update(id, body, user);
     delete User.dataValues.password;
     const token = await Authenticate.signToken(User.dataValues);
@@ -135,6 +138,15 @@ class UsersController {
     next();
   }
 
+  async getUser(req, res, next) {
+    const { user } = req;
+    return res.status(200).send({
+      success: true,
+      message: "password successfully updated",
+      user,
+    });
+  }
+
   userExistMiddleware(context) {
     return async (req, res, next) => {
       log("Checking that the user actually exits");
@@ -170,8 +182,9 @@ class UsersController {
 
   async getAllUsers(req, res, next) {
     log("retrieving all the users on the platform");
-
-    const users = await UsersService.retrieveAll(req.body);
+    const { query } = req;
+    if (!query) query = {};
+    const users = await UsersService.retrieveAll(query);
     return res.status(200).send({
       success: true,
       message: "user successfully retrieved",
