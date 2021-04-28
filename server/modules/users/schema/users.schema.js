@@ -65,3 +65,7 @@ export const loginUserSchema = Joi.object().keys({
 export const newOTP = Joi.object().keys({
   for: Joi.string().valid("reset-password", "verify-email"),
 });
+
+export const queryUserOrLawyer = Joi.object().keys({
+  role: Joi.string().valid("user", "lawyer", "admin", "super-admin"),
+});

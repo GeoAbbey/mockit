@@ -7,6 +7,7 @@ import {
   validOTP,
   validOtpAndPassword,
   newOTP,
+  queryUserOrLawyer,
 } from "./schema/users.schema";
 import {
   middleware,
@@ -45,7 +46,7 @@ export class UserRoutes extends CommonRoutesConfig {
         // middleware({ schema: updateUserSchema, property: "body" }),
         UsersController.userExistMiddleware(),
         AccessControl.checkPermissionUserOrLawyerAccess(),
-        UsersController.updateUser,
+        wrapCatch(UsersController.updateUser),
       ])
       .get([
         AccessControl.checkPermissionUserOrLawyerAccess(),
@@ -66,8 +67,8 @@ export class UserRoutes extends CommonRoutesConfig {
       .patch([
         middleware({ schema: validOTP, property: "body" }),
         AccessControl.checkPermissionUserOrLawyerAccess(),
-        UsersController.validateOTP,
-        UsersController.verifyEmail,
+        wrapCatch(UsersController.validateOTP),
+        wrapCatch(UsersController.verifyEmail),
       ]);
 
     this.app
@@ -75,8 +76,8 @@ export class UserRoutes extends CommonRoutesConfig {
       .all([UsersController.userExistMiddleware()])
       .patch([
         middleware({ schema: validOtpAndPassword, property: "body" }),
-        UsersController.validateOTP,
-        UsersController.resetPassword,
+        wrapCatch(UsersController.validateOTP),
+        wrapCatch(UsersController.resetPassword),
       ]);
 
     this.app
@@ -85,17 +86,22 @@ export class UserRoutes extends CommonRoutesConfig {
         Authenticate.verifyToken,
         middleware({ schema: validateUUID, property: "params" }),
         UsersController.userExistMiddleware(),
+        AccessControl.checkPermissionAdminAccess(),
       ])
       .patch([
         middleware({ schema: updateUserSchema, property: "body" }),
-        AccessControl.checkPermissionAdminAccess(),
-        UsersController.updateUser,
-      ]);
+        wrapCatch(UsersController.updateUser),
+      ])
+      .get([wrapCatch(UsersController.getUser)]);
 
     this.app
       .route(`${this.path}/users`)
       .all([Authenticate.verifyToken])
-      .get([AccessControl.checkPermissionAdminAccess(), UsersController.getAllUsers]);
+      .get([
+        middleware({ schema: queryUserOrLawyer, property: "query" }),
+        AccessControl.checkPermissionAdminAccess(),
+        UsersController.getAllUsers,
+      ]);
 
     return this.app;
   }

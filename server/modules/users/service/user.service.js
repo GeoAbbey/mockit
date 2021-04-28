@@ -30,9 +30,9 @@ class UsersService {
     });
   }
 
-  async retrieveAll() {
-    debugLog(`retrieving all user on the platform`);
-    return models.User.findAll();
+  async retrieveAll(filter) {
+    debugLog(`retrieving all user on the platform using ${JSON.stringify(filter)}`);
+    return models.User.findAll({ where: filter });
   }
 
   async update(id, UserDTO, oldDetails) {

@@ -31,8 +31,13 @@ class Permissions {
     return async (req, res, next) => {
       log("checking admin access to perform a certain operation");
       const { role } = req.decodedToken;
-      if (role !== "super-admin" && role !== "admin")
+
+      console.log({ role, decodedToken: req.decodedToken });
+
+      if (role !== "admin" && role !== "super-admin") {
+        console.log("I shouldn't get here");
         return next(createError(403, "you do not have access to perform this operation"));
+      }
 
       if (role === "admin" && req.body.role === "admin") {
         return next(
