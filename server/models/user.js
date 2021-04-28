@@ -56,6 +56,14 @@ module.exports = (sequelize, DataTypes) => {
           documents: {},
         },
       },
+      responseDetails: {
+        type: DataTypes.JSONB,
+        allowNull: false,
+        defaultValue: {
+          online: false,
+          socketId: "",
+        },
+      },
       firebaseToken: { type: DataTypes.STRING },
       hasAgreedToTerms: { type: DataTypes.BOOLEAN },
       role: {

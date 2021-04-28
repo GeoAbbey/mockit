@@ -16,16 +16,16 @@ class ResponsesController {
 
   async makeResponse(req, res) {
     const eventEmitter = req.app.get("eventEmitter");
+    const { decodedToken } = req;
 
-    // const { body } = req;
-    const ownerId = req.decodedToken.id;
+    const ownerId = decodedToken.id;
     log(`creating a new response for user with id ${ownerId}`);
     const response = await ResponsesService.create({ ownerId });
 
-    // eventEmitter.emit(EVENT_IDENTIFIERS.Response.CREATED, Response);
+    eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.CREATED, { decodedToken, response });
     return res.status(201).send({
       success: true,
-      message: "Response successfully created",
+      message: "response successfully created",
       response,
     });
   }
@@ -33,15 +33,15 @@ class ResponsesController {
   responseExits(context) {
     return async (req, res, next) => {
       const { id } = req.params;
-      log(`verifying that an Response with id ${id} exits`);
-      const Response = await ResponsesService.find(id, context);
-      if (!Response) return next(createError(404, "The Response can not be found"));
-      req.oldResponse = Response;
+      log(`verifying that a response with id ${id} exits`);
+      const response = await ResponsesService.find(id, context);
+      if (!response) return next(createError(404, "The response can not be found"));
+      req.oldResponse = response;
       next();
     };
   }
 
-  async modifyInvite(req, res, next) {
+  async modifyResponse(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
 
     const {
@@ -55,36 +55,36 @@ class ResponsesController {
     }
     const [, [updatedResponse]] = await ResponsesService.update(id, body, oldResponse);
 
-    if (oldResponse.bid)
-      eventEmitter.emit(EVENT_IDENTIFIERS.Response.ASSIGNED, {
-        Response: updatedResponse,
-      });
+    // if (oldResponse.bid)
+    //   eventEmitter.emit(EVENT_IDENTIFIERS.Response.ASSIGNED, {
+    //     Response: updatedResponse,
+    //   });
 
     return res.status(200).send({
       success: true,
       message: !oldResponse.bid
-        ? "Response successfully updated"
-        : "You have been assigned this Response",
-      Response: updatedResponse,
+        ? "response successfully updated"
+        : "You have been assigned this response",
+      response: updatedResponse,
     });
   }
 
-  async deleteInvite(req, res, next) {
+  async deleteResponse(req, res, next) {
     const { id } = req.params;
     log(`deleting an Response with id ${id}`);
     const deletedResponse = await ResponsesService.remove(id);
     return res.status(200).send({
       success: true,
-      message: "Response successfully deleted",
-      Response: deletedResponse,
+      message: "response successfully deleted",
+      response: deletedResponse,
     });
   }
 
-  getAnInvite(req, res, next) {
+  getResponse(req, res, next) {
     const { oldResponse } = req;
     return res.status(200).send({
       success: true,
-      message: "Response successfully retrieved",
+      message: "response successfully retrieved",
       Response: oldResponse,
     });
   }
@@ -92,16 +92,16 @@ class ResponsesController {
   async getAllResponses(req, res, next) {
     log("getting all Responses");
     const { data } = req;
-    const Responses = await ResponsesService.findMany(data);
+    const responses = await ResponsesService.findMany(data);
     return res.status(200).send({
       success: true,
-      message: "Responses successfully retrieved",
-      Responses,
+      message: "responses successfully retrieved",
+      responses,
     });
   }
 
   async marKAsCompleted(req, res, next) {
-    const eventEmitter = req.app.get("eventEmitter");
+    // const eventEmitter = req.app.get("eventEmitter");
 
     const {
       params: { id },
@@ -114,14 +114,14 @@ class ResponsesController {
       oldResponse
     );
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.Response.MARK_AS_COMPLETED, {
-      Response: updatedResponse,
-    });
+    // eventEmitter.emit(EVENT_IDENTIFIERS.Response.MARK_AS_COMPLETED, {
+    //   Response: updatedResponse,
+    // });
 
     return res.status(200).send({
       success: true,
-      message: "You have successfully completed this Response",
-      Response: updatedResponse,
+      message: "You have successfully completed this response",
+      response: updatedResponse,
     });
   }
 
@@ -130,19 +130,17 @@ class ResponsesController {
       const {
         decodedToken: { role, id },
         body,
-        oldResponse: { ownerId, status },
+        oldResponse: { ownerId, assignedLawyerId },
       } = req;
       if (role === "admin" || role === "super-admin") next();
+      if (role === "lawyer" && context !== "retrieve")
+        return next(createError(401, `You do not have access to ${context} this response`));
       if (role === "user" && id !== ownerId) {
-        return next(createError(401, `You do not have access to ${context} this Response`));
+        return next(createError(401, `You do not have access to ${context} this response`));
       }
-      if (role === "user" && id === ownerId && body.assignedLawyerId)
-        return next(createError(403, "you can't assign a lawyer to yourself"));
-      if (context !== "retrieve") {
-        if (role === "user" && status !== "initiated")
-          return next(
-            createError(401, `You can't ${context} an Response once it has been assigned`)
-          );
+      if (context === "retrieve") {
+        if (role === "lawyer" && id !== assignedLawyerId)
+          return next(createError(401, `You do not have access to ${context} this response`));
       }
       next();
     };
@@ -152,15 +150,19 @@ class ResponsesController {
     return async (req, res, next) => {
       const {
         decodedToken: { role, id },
-        oldResponse,
+        oldResponse: { assignedLawyerId },
+        body: { bid, meetTime },
       } = req;
       if (role !== "lawyer")
         return next(createError(401, "You do not have access to perform this operation"));
-      if (context === "markAsComplete") {
-        if (id !== oldResponse.assignedLawyerId)
+      if (context === "markAsComplete" || meetTime) {
+        if (id !== assignedLawyerId)
           return next(createError(401, "You do not have access to perform this operation"));
       }
-      req.oldResponse.bid = true;
+      if (bid && assignedLawyerId)
+        return next(createError(401, "A lawyer has already been assigned to this response"));
+
+      req.oldResponse.bid = bid;
       next();
     };
   }

@@ -67,7 +67,6 @@ class UsersController {
       profilePic,
     } = req;
     log(`updating the details of user with id ${id}`);
-    console.log({ profilePic });
     if (profilePic && profilePic[0]) {
       body.profilePic = profilePic[0];
     }

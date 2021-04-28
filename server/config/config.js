@@ -9,6 +9,7 @@ const common = {
 module.exports = {
   development: {
     username: process.env.USERNAME,
+    url: "http://localhost:3000",
     password: process.env.PASSWORD,
     database: process.env.LOCAL_DATABASE,
     host: process.env.HOST,
@@ -22,6 +23,7 @@ module.exports = {
     password: process.env.PROD_DB_PASSWORD,
     database: process.env.PROD_DB_NAME,
     host: process.env.PROD_DB_HOSTNAME,
+    url: "https://api.zapplawyerbeta.com.ng",
     mongoConnect: process.env.MONGO_DB_CONNECTION_PROD,
     runNotificationService: true,
     ...common,

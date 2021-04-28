@@ -11,5 +11,5 @@ export const updateReviewSchema = Joi.object().keys({
 });
 
 export const queryReviewSchema = Joi.object().keys({
-  modelType: Joi.string().valid("Invitation"),
+  modelType: Joi.string().valid("Invitation", "SmallClaim", "Responses"),
 });

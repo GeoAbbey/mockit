@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       modelType: {
         type: DataTypes.STRING,
         validate: {
-          isIn: [["SmallClaim", "Invitation"]],
+          isIn: [["SmallClaim", "Invitation", "Response"]],
         },
         allowNull: false,
       },

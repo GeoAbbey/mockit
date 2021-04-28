@@ -5,6 +5,6 @@ export const validateUUID = Joi.object().keys({
 });
 
 export const allowedModelSchema = Joi.object().keys({
-  modelType: Joi.string().valid("Invitation", "SmallClaim").required(),
+  modelType: Joi.string().valid("Invitation", "SmallClaim", "Response").required(),
   id: Joi.string().guid({ version: "uuidv4" }).required(),
 });
