@@ -80,12 +80,23 @@ class ResponsesController {
     });
   }
 
-  getResponse(req, res, next) {
+  async getResponse(req, res, next) {
     const { oldResponse } = req;
     return res.status(200).send({
       success: true,
       message: "response successfully retrieved",
       Response: oldResponse,
+    });
+  }
+
+  async getUnassignedResponses(req, res, next) {
+    log("getting all unassigned responses");
+    const data = { where: { assignedLawyerId: null } };
+    const responses = await ResponsesService.findMany(data, true);
+    return res.status(200).send({
+      success: true,
+      message: "responses successfully retrieved",
+      responses,
     });
   }
 
@@ -150,20 +161,21 @@ class ResponsesController {
     return async (req, res, next) => {
       const {
         decodedToken: { role, id },
-        oldResponse: { assignedLawyerId },
+        oldResponse,
         body: { bid, meetTime },
       } = req;
+      if (role === "admin" || role === "super-admin") return next();
       if (role !== "lawyer")
         return next(createError(401, "You do not have access to perform this operation"));
       if (context === "markAsComplete" || meetTime) {
-        if (id !== assignedLawyerId)
+        if (id !== oldResponse.assignedLawyerId)
           return next(createError(401, "You do not have access to perform this operation"));
       }
-      if (bid && assignedLawyerId)
+      if (bid && oldResponse.assignedLawyerId)
         return next(createError(401, "A lawyer has already been assigned to this response"));
+      else if (bid) req.oldResponse.bid = bid;
 
-      req.oldResponse.bid = bid;
-      next();
+      return next();
     };
   }
 

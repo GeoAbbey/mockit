@@ -21,6 +21,14 @@ export class ResponseRoutes extends CommonRoutesConfig {
       ]);
 
     this.app
+      .route(`${this.path}/responses/unassigned`)
+      .get([
+        Authenticate.verifyToken,
+        ResponsesController.checkAccessLawyer(),
+        wrapCatch(ResponsesController.getUnassignedResponses),
+      ]);
+
+    this.app
       .route(`${this.path}/response/:id`)
       .all([
         Authenticate.verifyToken,

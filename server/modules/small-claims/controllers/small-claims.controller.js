@@ -19,7 +19,7 @@ class SmallClaimsController {
 
     const { body, attachments = [] } = req;
     const ownerId = req.decodedToken.id;
-    log(`creating a new SmallClaim for user with id ${ownerId}`);
+    log(`creating a new small claim for user with id ${ownerId}`);
     const smallClaim = await SmallClaimsService.create({ ...body, attachments, ownerId });
 
     eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, smallClaim, "SMALL_CLAIM");
@@ -84,6 +84,18 @@ class SmallClaimsController {
     log("getting all small claims");
     const { data } = req;
     const smallClaims = await SmallClaimsService.findMany(data);
+    return res.status(200).send({
+      success: true,
+      message: "small claims successfully retrieved",
+      smallClaims,
+    });
+  }
+
+  async getUnassignedClaims(req, res, next) {
+    log("getting all unassigned small claims");
+
+    const data = { where: { assignedLawyerId: null } };
+    const smallClaims = await SmallClaimsService.findMany(data, true);
     return res.status(200).send({
       success: true,
       message: "small claims successfully retrieved",
@@ -170,9 +182,9 @@ class SmallClaimsController {
         body: { assignedLawyerId },
         oldSmallClaim: { ownerId, status, interestedLawyers },
       } = req;
+      if (role === "admin" || role === "super-admin") return next();
       if (role === "lawyer")
         return next(createError(401, `You do not have access to ${context} this small claim`));
-      if (role === "admin" || role === "super-admin") next();
       if (role === "user" && id !== ownerId) {
         return next(createError(401, `You do not have access to ${context} this small claim`));
       }
@@ -193,7 +205,7 @@ class SmallClaimsController {
           return next(createError(400, "You can't assign a lawyer that didn't marked interest"));
       }
 
-      next();
+      return next();
     };
   }
 
@@ -203,13 +215,15 @@ class SmallClaimsController {
         decodedToken: { role, id },
         oldSmallClaim,
       } = req;
+
+      if (role === "admin" || role === "super-admin") return next();
       if (role !== "lawyer")
         return next(createError(401, "You do not have access to perform this operation"));
       if (context === "markAsComplete") {
         if (id !== oldSmallClaim.assignedLawyerId)
           return next(createError(401, "You do not have access to perform this operation"));
       }
-      next();
+      return next();
     };
   }
 
@@ -232,7 +246,7 @@ class SmallClaimsController {
     if (role === "user") {
       req.data = { ownerId: id };
     }
-    next();
+    return next();
   }
 }
 

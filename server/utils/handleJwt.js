@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import debug from "debug";
+import createError from "http-errors";
 
 const debugLog = debug("app:utils:jwt");
 
@@ -21,10 +22,7 @@ class Authenticate {
   async verifyToken(req, res, next) {
     const token = req.headers.authorization;
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        error: "Please provide a token",
-      });
+      return next(createError(401, "Please provide a token"));
     }
     debugLog(`verifying token with token ${token}`);
     try {
@@ -33,10 +31,7 @@ class Authenticate {
       req.decodedToken = decodedToken;
       return next();
     } catch (error) {
-      return res.status(401).json({
-        success: false,
-        error: "Token is not valid",
-      });
+      return next(createError(401, "Token is not valid", error));
     }
   }
 }

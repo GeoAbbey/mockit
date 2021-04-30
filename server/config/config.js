@@ -9,6 +9,10 @@ const common = {
 module.exports = {
   development: {
     username: process.env.USERNAME,
+<<<<<<< HEAD
+=======
+    clientUri: "http://localhost:3000",
+>>>>>>> temp
     password: process.env.PASSWORD,
     database: process.env.LOCAL_DATABASE,
     host: process.env.HOST,

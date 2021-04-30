@@ -18,28 +18,8 @@ class ResponsesService {
     return models.Response.create(ResponseDTO);
   }
 
-  async find(id, context) {
+  async find(id) {
     debugLog(`looking for a response with id ${id}`);
-    // if (context) {
-    //   const response = await models.Response.findByPk(id, {
-    //     include: [
-    //       {
-    //         model: models.Review,
-    //         as: "reviews",
-    //         where: { modelType: "Response", modelId: id },
-    //         required: false,
-    //       },
-    //       {
-    //         model: models.User,
-    //         as: "lawyerProfile",
-    //         attributes: ["firstName", "lastName", "email", "profilePic"],
-    //       },
-    //     ],
-    //   });
-
-    //   return response;
-    // }
-
     return models.Response.findByPk(id);
   }
 

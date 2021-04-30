@@ -58,5 +58,13 @@ export class InvitationRoutes extends CommonRoutesConfig {
         InvitationsController.checkAccessUser("retrieve"),
         wrapCatch(InvitationsController.getAnInvite),
       ]);
+
+    this.app
+      .route(`${this.path}/invitations/unassigned`)
+      .get([
+        Authenticate.verifyToken,
+        InvitationsController.checkAccessLawyer(),
+        wrapCatch(InvitationsController.getUnAssignedInvites),
+      ]);
   }
 }

@@ -9,7 +9,7 @@ module.exports = {
      *
      * Example:
      */
-
+    // await queryInterface.sequelize.query("CREATE EXTENSION postgis;");
     return queryInterface.bulkInsert(
       "Users",
       [

@@ -8,6 +8,7 @@ export const configureSockets = (io) => {
 
 export const onConnection = (io) => (socket) => {
   const { userLocation, lawyerLocation } = configureSockets(io);
-  socket.on("user:location", userLocation);
-  socket.on("lawyer:location", lawyerLocation);
+  io.socketId = socket.id;
+  socket.on("user:online:location", userLocation);
+  socket.on("lawyer:online:location", lawyerLocation);
 };
