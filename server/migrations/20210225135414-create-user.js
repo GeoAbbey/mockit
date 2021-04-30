@@ -60,9 +60,6 @@ module.exports = {
       lawyer: {
         type: Sequelize.JSONB,
       },
-      responseDetails: {
-        type: Sequelize.JSONB,
-      },
       gender: {
         type: Sequelize.STRING,
       },
