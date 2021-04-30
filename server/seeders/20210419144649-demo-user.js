@@ -18,10 +18,6 @@ module.exports = {
           role: "admin",
           firstName: "Benjamin",
           gender: "male",
-          responseDetails: JSON.stringify({
-            online: false,
-            socketId: "",
-          }),
           isSubscribed: true,
           isVerified: false,
           lawyer: JSON.stringify({
@@ -43,10 +39,6 @@ module.exports = {
           role: "lawyer",
           firstName: "Gbolahan",
           isSubscribed: true,
-          responseDetails: JSON.stringify({
-            online: false,
-            socketId: "",
-          }),
           gender: "male",
           lawyer: JSON.stringify({
             documents: {},
@@ -67,10 +59,6 @@ module.exports = {
           id: "3e684659-078e-4047-a737-b2c74713a7eb",
           role: "lawyer",
           isSubscribed: true,
-          responseDetails: JSON.stringify({
-            online: false,
-            socketId: "",
-          }),
           gender: "male",
           firstName: "Dumto",
           lawyer: JSON.stringify({
@@ -83,10 +71,6 @@ module.exports = {
           email: "dumto@gmail.com",
           createdAt: new Date(),
           updatedAt: new Date(),
-          responseDetails: JSON.stringify({
-            online: false,
-            socketId: "",
-          }),
           gender: "male",
           otp: JSON.stringify({
             value: "486163",
@@ -98,10 +82,6 @@ module.exports = {
           role: "user",
           firstName: "Abbey",
           gender: "male",
-          responseDetails: JSON.stringify({
-            online: false,
-            socketId: "",
-          }),
           isSubscribed: true,
           lawyer: JSON.stringify({
             documents: {},
@@ -122,10 +102,6 @@ module.exports = {
         {
           id: "3700e7f0-c47d-49c7-8101-2be41b10f330",
           role: "super-admin",
-          responseDetails: JSON.stringify({
-            online: false,
-            socketId: "",
-          }),
           gender: "male",
           isSubscribed: true,
           lawyer: JSON.stringify({
@@ -134,10 +110,6 @@ module.exports = {
           }),
           isVerified: false,
           firstName: "Folarin",
-          responseDetails: JSON.stringify({
-            online: false,
-            socketId: "",
-          }),
           lastName: "Ahmed",
           password: await bcrypt.hash("Password", 10),
           email: "folarin@gmail.com",
