@@ -1,7 +1,22 @@
+import debug from "debug";
+
+import { updateDbWithNewLocation } from "./updateDBWithNewLocation";
+import LocationServices from "../modules/locationDetail/services/locationDetails.services";
+
+const logger = debug("app:socket-events:user-location");
+
 const hoistedIOUser = (io) => {
-  return function userLocation(payload) {
-    console.log(`I ahve received this payload ${payload} 🐥`);
-    io.emit("lawyer:location:server", { name: "in the power of the king 🍅" });
+  return async function userLocation(payload) {
+    logger(`user:online:location I have received this payload ${payload} 🐥🍅`);
+    await updateDbWithNewLocation(payload, io);
+    const { recipient } = io;
+    if (recipient.assigneeId) {
+      logger({ assignedId: recipient.assigneeId }, "user:online");
+      const deliverTo = await LocationServices.find({ where: { ownerId: recipient.assigneeId } });
+      const { socketId } = deliverTo.dataValues;
+
+      io.to(socketId).emit("on:move", { location: recipient.location });
+    }
   };
 };
 

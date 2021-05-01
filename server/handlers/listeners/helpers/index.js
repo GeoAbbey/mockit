@@ -89,3 +89,29 @@ export const layerMarkInterestForClaim = async (events, data) => {
   logger("saving notification sent to the user in the database");
   await models.Notification.bulkCreate(notice, NOTIFICATION_DATA.SMALL_CLAIM.MARK_INTEREST);
 };
+
+export const sendNotificationToEligibleLawyers = async ({ events, lawyersToNotify }) => {
+  logger(`${events} events has been received`);
+
+  const allNotices = [];
+  const tokens = [];
+
+  lawyersToNotify.forEach((lawyer) => {
+    if (lawyer.firebaseToken) tokens.push(lawyer.firebaseToken);
+    allNotices.push({
+      for: events,
+      ownerId: lawyer.id,
+      content: JSON.stringify(NOTIFICATION_DATA.RESPONSE.CREATED),
+    });
+  });
+
+  logger("sending notification to all eligible lawyers");
+  config.runNotificationService &&
+    sendNotificationToClient({
+      tokens: tokens,
+      data: NOTIFICATION_DATA.RESPONSE.CREATED,
+    });
+
+  logger("saving notification sent to eligible lawyers in the database");
+  await models.Notification.bulkCreate(allNotices, NOTIFICATION_DATA.RESPONSE.CREATED);
+};

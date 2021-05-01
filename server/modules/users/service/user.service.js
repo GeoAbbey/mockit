@@ -1,6 +1,7 @@
 import debug from "debug";
 
 import models from "../../../models";
+import { handleFalsy } from "../../../utils";
 
 const debugLog = debug("app:users-service");
 
@@ -42,10 +43,6 @@ class UsersService {
       if (UserDTO.lawyer && UserDTO.lawyer.documents) {
         return { ...lawyer.documents, ...UserDTO.lawyer.documents };
       } else lawyer.documents;
-    };
-
-    const handleFalsy = (newValue, oldValue) => {
-      return newValue === undefined ? oldValue : newValue;
     };
 
     return models.User.update(

@@ -3,7 +3,7 @@ import { v4 } from "uuid";
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class LocationDetail extends Model {
+  class EligibleLawyer extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,10 +11,19 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.User, { foreignKey: "ownerId" });
+      this.belongsTo(models.Response, {
+        as: "eligibleLawyers",
+        foreignKey: "responseId",
+        onDelete: "CASCADE",
+      });
+
+      this.belongsTo(models.User, {
+        foreignKey: "lawyerId",
+        onDelete: "CASCADE",
+      });
     }
   }
-  LocationDetail.init(
+  EligibleLawyer.init(
     {
       id: {
         type: DataTypes.UUID,
@@ -22,17 +31,13 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: () => v4(),
       },
-      socketId: { type: DataTypes.STRING },
-      ownerId: { type: DataTypes.UUID, allowNull: false },
-      online: { type: DataTypes.BOOLEAN, defaultValue: false },
-      meta: { type: DataTypes.JSONB, defaultValue: {} },
-      location: { type: DataTypes.GEOMETRY("POINT") },
-      assigneeId: { type: DataTypes.UUID },
+      responseId: { type: DataTypes.UUID, allowNull: false },
+      lawyerId: { type: DataTypes.UUID, allowNull: false },
     },
     {
       sequelize,
-      modelName: "LocationDetail",
+      modelName: "EligibleLawyer",
     }
   );
-  return LocationDetail;
+  return EligibleLawyer;
 };

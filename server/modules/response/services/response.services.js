@@ -18,8 +18,24 @@ class ResponsesService {
     return models.Response.create(ResponseDTO);
   }
 
-  async find(id) {
+  async find(id, context) {
     debugLog(`looking for a response with id ${id}`);
+    if (context)
+      return models.Response.findByPk(id, {
+        include: [
+          {
+            model: models.EligibleLawyer,
+            as: "eligibleLawyers",
+            required: false,
+          },
+          // {
+          //   model: models.User,
+          //   as: "myEmergencyResponse",
+          //   required: false,
+          // },
+        ],
+      });
+
     return models.Response.findByPk(id);
   }
 

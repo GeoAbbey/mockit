@@ -39,6 +39,9 @@ module.exports = {
       meetTime: {
         type: Sequelize.DATE,
       },
+      startingLocation: {
+        type: Sequelize.GEOMETRY,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

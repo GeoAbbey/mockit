@@ -33,15 +33,16 @@ export const startServer = async () => {
       const { token } = socket.handshake.auth;
       jwt.verify(token, process.env.SECRET_KEY, (err, decodedToken) => {
         if (err) return next(new Error("Authentication error, Invalid Token supplied"));
-        io.decodedToken = decodedToken;
-        next();
+        return next();
       });
     } else {
-      next(new Error("Authentication error, Please provide a token"));
+      return next(new Error("Authentication error, Please provide a token"));
     }
   });
 
   io.on("connection", onConnection(io));
+
+  app.set("io", io);
 
   server.listen(port, () => {
     debugLog(`Zapp Lawyer Backend app  listening at http://localhost:${port}`);

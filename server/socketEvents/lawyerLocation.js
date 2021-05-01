@@ -1,41 +1,22 @@
-import LocationService from "../modules/locationDetail/services/locationDetails.services";
+import debug from "debug";
+
+import { updateDbWithNewLocation } from "./updateDBWithNewLocation";
+import LocationServices from "../modules/locationDetail/services/locationDetails.services";
+
+const logger = debug("app:socket-events:lawyer-location");
 
 const hoistedIOLawyer = (io) => {
   return async function lawyerLocation(payload) {
-    console.log(`I was called with ${payload.coords.longitude} 🐥`);
-    const {
-      decodedToken: { id },
-    } = io;
-    const socketId = io.socketId;
-    const [oldLocationDetails, created] = await LocationService.findOrCreate({
-      where: {
-        ownerId: id,
-      },
-      defaults: {
-        ownerId: id,
-        socketId,
-        online: true,
-        location: {
-          type: "Point",
-          coordinates: [payload.coords.longitude, payload.coords.latitude],
-        },
-      },
-    });
+    logger(`lawyer:online:location I have received this payload ${payload} 🐥🥶`);
+    await updateDbWithNewLocation(payload, io);
+    const { recipient } = io;
+    if (recipient.assigneeId) {
+      logger({ assignedId: recipient.assigneeId }, "lawyer:online");
+      const deliverTo = await LocationServices.find({ where: { ownerId: recipient.assigneeId } });
+      const { socketId } = deliverTo.dataValues;
 
-    console.log({ oldLocationDetails }, "🥶");
-    // const newDetails = await LocationService.update(
-    //   id,
-    //   {
-    //     location: {
-    //       type: "Point",
-    //       coordinates: [payload.coords.longitude, payload.coords.latitude],
-    //     },
-    //     socketId,
-    //   },
-    //   oldLocationDetails
-    // );
-
-    // console.log({ newDetails }, "🍅");
+      io.to(socketId).emit("on:move", { location: recipient.location });
+    }
   };
 };
 

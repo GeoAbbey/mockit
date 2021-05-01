@@ -23,6 +23,22 @@ export const NOTIFICATION_DATA = {
     CREATED: created("Police Invitation"),
     MARK_AS_COMPLETED: completed("Police Invitation"),
   },
+  RESPONSE: {
+    ASSIGNED: {
+      notification: {
+        title: "Lawyer Assigned",
+        body: "Lawyer has been assigned to the emergency Response",
+      },
+    },
+    MEET_TIME: {
+      notification: {
+        title: "Meet Time",
+        body: "Lawyer has indicated that he has met with you.",
+      },
+    },
+    CREATED: created("Emergency Response"),
+    MARK_AS_COMPLETED: completed("Emergency Response"),
+  },
   SMALL_CLAIM: {
     MARK_INTEREST: {
       notification: {

@@ -21,6 +21,12 @@ module.exports = (sequelize, DataTypes) => {
         as: "lawyerProfile",
         onDelete: "CASCADE",
       });
+
+      this.hasMany(models.EligibleLawyer, {
+        as: "eligibleLawyers",
+        foreignKey: "responseId",
+        onDelete: "CASCADE",
+      });
     }
   }
   Response.init(
@@ -41,6 +47,10 @@ module.exports = (sequelize, DataTypes) => {
       meta: {
         type: DataTypes.JSONB,
         defaultValue: {},
+      },
+      startingLocation: {
+        type: DataTypes.GEOMETRY("POINT"),
+        allowNull: false,
       },
       status: {
         type: DataTypes.STRING,

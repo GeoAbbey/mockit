@@ -29,6 +29,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "assignedLawyerId",
       });
       this.hasOne(models.LocationDetail, { foreignKey: "ownerId" });
+      this.hasMany(models.EligibleLawyer, {
+        foreignKey: "lawyerId",
+        onDelete: "CASCADE",
+      });
     }
   }
 
