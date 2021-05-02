@@ -128,14 +128,6 @@ class UsersService {
           },
         },
         profilePic: UserDTO.profilePic || profilePic,
-        responseDetails: {
-          online:
-            (UserDTO.responseDetails && UserDTO.responseDetails.online) ||
-            oldDetails.responseDetails.online,
-          socketId:
-            (UserDTO.responseDetails && UserDTO.responseDetails.socketId) ||
-            oldDetails.responseDetails.socketId,
-        },
         creditCard: UserDTO.creditCard || oldDetails.creditCard,
         lawyer: {
           isVerified: (UserDTO.lawyer && UserDTO.lawyer.isVerified) || lawyer.isVerified,
