@@ -20,6 +20,17 @@ class ReportsService {
 
   async find(id, context) {
     debugLog(`looking for an Report with id ${id}`);
+    if (context) {
+      return models.Report.findByPk(id, {
+        include: [
+          {
+            model: models.User,
+            as: "ownerProfile",
+            attributes: ["firstName", "lastName", "email", "profilePic", "id"],
+          },
+        ],
+      });
+    }
     return models.Report.findByPk(id);
   }
 
