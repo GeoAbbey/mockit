@@ -65,10 +65,20 @@ class UsersController {
       user,
       body,
       profilePic,
+      nextOfKinProfilePic,
+      suretyProfilePic,
     } = req;
     log(`updating the details of user with id ${id}`);
+
+    console.log({ body }, "😱");
     if (profilePic && profilePic[0]) {
       body.profilePic = profilePic[0];
+    }
+    if (nextOfKinProfilePic && nextOfKinProfilePic[0]) {
+      body.guarantors.nextOfKin.profilePic = nextOfKinProfilePic[0];
+    }
+    if (suretyProfilePic && suretyProfilePic[0]) {
+      body.guarantors.surety.profilePic = suretyProfilePic[0];
     }
     const [, [User]] = await UsersService.update(id, body, user);
     delete User.dataValues.password;
