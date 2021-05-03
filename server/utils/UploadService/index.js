@@ -25,11 +25,12 @@ const uploadS3 = (context) =>
         callBack(null, { fieldName: file.fieldname });
       },
     }),
-  }).array(context, 10);
+  });
+// .array(context, 10);
 
-export const uploadMiddleware = (context = "attachments") => {
+export const uploadMiddleware = (context = { name: "attachments", maxCount: 10 }) => {
   return async (req, res, next) => {
-    const use = uploadS3(context);
+    const use = uploadS3().fields([...context]);
     use(req, res, (error) => {
       logger("the upload middleware has been initialized");
       if (req.files == undefined) {
@@ -40,14 +41,26 @@ export const uploadMiddleware = (context = "attachments") => {
       if (error) return next(createError(500, "There was a problem with S3 upload servers", error));
 
       let fileArray = req.files;
+      const names = Object.keys(req.files);
       let fileLocation = [];
 
-      const images = [];
-      for (let i = 0; i < fileArray.length; i++) {
-        fileLocation = fileArray[i].location;
-        images.push(fileLocation);
-      }
-      req[context] = images;
+      // for (let i = 0; i < names.length; i++) {
+      //   const images = [];
+      //   // fileLocation = fileArray[i].location;
+      //   // images.push(fileLocation);
+      //   const fileArr = req[names[i]];
+      //   for (let j = 0; j < req[names[i]].length; j++) {
+      //     images.push(fileArr[j].location);
+      //   }
+      //   req[names[i]] = images;
+      // }
+
+      console.log({
+        files: req.files,
+        profilePic: req.files.profilePic,
+        // profilePicNew: req.profilePic,
+      });
+
       next();
     });
   };

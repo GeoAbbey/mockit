@@ -42,7 +42,11 @@ export class UserRoutes extends CommonRoutesConfig {
       .route(`${this.path}/users/profile`)
       .all([Authenticate.verifyToken])
       .patch([
-        uploadMiddleware("profilePic"),
+        uploadMiddleware([
+          { name: "profilePic", maxCount: 1 },
+          { name: "nextOfKinProfilePic", maxCount: 1 },
+          { name: "suretyProfilePic", maxCount: 1 },
+        ]),
         // middleware({ schema: updateUserSchema, property: "body" }),
         UsersController.userExistMiddleware(),
         AccessControl.checkPermissionUserOrLawyerAccess(),
