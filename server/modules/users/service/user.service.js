@@ -43,18 +43,23 @@ class UsersService {
         return { ...lawyer.documents, ...UserDTO.lawyer.documents };
       } else lawyer.documents;
     };
+
+    const handleFalsy = (newValue, oldValue) => {
+      return newValue === undefined ? oldValue : newValue;
+    };
+
     return models.User.update(
       {
-        notification: UserDTO.notification || oldDetails.notification,
-        isVerified: UserDTO.isVerified || oldDetails.isVerified,
-        isAccountSuspended: UserDTO.isAccountSuspended || oldDetails.isAccountSuspended,
+        notification: handleFalsy(UserDTO.notification, oldDetails.notification),
+        isVerified: handleFalsy(UserDTO.isVerified, oldDetails.isVerified),
+        isAccountSuspended: handleFalsy(UserDTO.isAccountSuspended, oldDetails.isAccountSuspended),
         firstName: UserDTO.firstName || oldDetails.firstName,
         lastName: UserDTO.lastName || oldDetails.lastName,
         email: UserDTO.email || oldDetails.email,
         password: UserDTO.password || oldDetails.password,
         role: UserDTO.role || oldDetails.role,
         gender: UserDTO.gender || oldDetails.gender,
-        isSubscribed: UserDTO.isSubscribed || oldDetails.isSubscribed,
+        isSubscribed: handleFalsy(UserDTO.isSubscribed, oldDetails.isSubscribed),
         firebaseToken: UserDTO.firebaseToken || oldDetails.firebaseToken,
         otp: {
           value: (UserDTO.otp && UserDTO.otp.value) || oldDetails.otp.value,
@@ -176,10 +181,10 @@ class UsersService {
         profilePic: UserDTO.profilePic || profilePic,
         creditCard: UserDTO.creditCard || oldDetails.creditCard,
         lawyer: {
-          isVerified: (UserDTO.lawyer && UserDTO.lawyer.isVerified) || lawyer.isVerified,
+          isVerified: UserDTO.lawyer && handleFalsy(UserDTO.lawyer.isVerified, lawyer.isVerified),
           documents: handleDocuments(),
         },
-        hasAgreedToTerms: UserDTO.hasAgreedToTerms || oldDetails.hasAgreedToTerms,
+        hasAgreedToTerms: handleFalsy(UserDTO.hasAgreedToTerms, oldDetails.hasAgreedToTerms),
       },
       { where: { id }, returning: true }
     );

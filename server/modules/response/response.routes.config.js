@@ -2,6 +2,7 @@ import { CommonRoutesConfig } from "../common/common.routes.config";
 import ResponsesController from "./controllers/response.controller";
 import { updateResponseSchema } from "./schema/response.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
+import { queryContextParams } from "../../utils/allPurpose.schema";
 
 export class ResponseRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {
@@ -13,7 +14,11 @@ export class ResponseRoutes extends CommonRoutesConfig {
       .route(`${this.path}/responses`)
       .all([Authenticate.verifyToken])
       .post([[wrapCatch(ResponsesController.makeResponse)]])
-      .get([ResponsesController.queryContext, wrapCatch(ResponsesController.getAllResponses)]);
+      .get([
+        middleware({ schema: queryContextParams, property: "query" }),
+        ResponsesController.queryContext,
+        wrapCatch(ResponsesController.getAllResponses),
+      ]);
 
     this.app
       .route(`${this.path}/response/:id`)
