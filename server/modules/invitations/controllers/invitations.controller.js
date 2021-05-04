@@ -173,9 +173,18 @@ class InvitationsController {
   }
 
   queryContext(req, res, next) {
-    const { role, id } = req.decodedToken;
+    const {
+      decodedToken: { role, id },
+      query,
+    } = req;
+    console.log({ query });
     if (role === "admin" || role === "super-admin") {
       req.data = {};
+      if (query) {
+        req.data.where = {
+          ...query,
+        };
+      }
     }
     if (role === "lawyer") {
       req.data = { where: { assignedLawyerId: id } };

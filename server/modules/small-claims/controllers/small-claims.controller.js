@@ -214,9 +214,17 @@ class SmallClaimsController {
   }
 
   queryContext(req, res, next) {
-    const { role, id } = req.decodedToken;
+    const {
+      decodedToken: { role, id },
+      query,
+    } = req;
     if (role === "admin" || role === "super-admin") {
       req.data = {};
+      if (query) {
+        req.data = {
+          ...query,
+        };
+      }
     }
     if (role === "lawyer") {
       req.data = { assignedLawyerId: id };
