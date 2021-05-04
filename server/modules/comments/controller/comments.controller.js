@@ -33,7 +33,7 @@ class CommentsController {
     return async (req, res, next) => {
       const { id } = req.params;
       log(`verifying that a comment with id ${id} exits`);
-      const comment = await CommentsService.find(id);
+      const comment = await CommentsService.find(id, context);
       if (!comment) return next(createError(404, "The comment can not be found"));
       req.oldComment = comment;
       next();

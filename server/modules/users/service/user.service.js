@@ -99,6 +99,30 @@ class UsersService {
                 UserDTO.guarantors.nextOfKin.phone) ||
               (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.phone) ||
               null,
+            dob:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.nextOfKin &&
+                UserDTO.guarantors.nextOfKin.dob) ||
+              (guarantors && guarantors.dob && guarantors.nextOfKin.dob) ||
+              null,
+            address:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.nextOfKin &&
+                UserDTO.guarantors.nextOfKin.address) ||
+              (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.address) ||
+              null,
+            profilePic:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.nextOfKin &&
+                UserDTO.guarantors.nextOfKin.profilePic) ||
+              (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.profilePic) ||
+              null,
+            gender:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.nextOfKin &&
+                UserDTO.guarantors.nextOfKin.gender) ||
+              (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.gender) ||
+              null,
           },
           surety: {
             firstName:
@@ -124,6 +148,28 @@ class UsersService {
                 UserDTO.guarantors.surety &&
                 UserDTO.guarantors.surety.phone) ||
               (guarantors && guarantors.surety && guarantors.surety.phone) ||
+              null,
+            dob:
+              (UserDTO.guarantors && UserDTO.guarantors.surety && UserDTO.guarantors.surety.dob) ||
+              (guarantors && guarantors.dob && guarantors.surety.dob) ||
+              null,
+            address:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.surety &&
+                UserDTO.guarantors.surety.address) ||
+              (guarantors && guarantors.surety && guarantors.surety.address) ||
+              null,
+            profilePic:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.surety &&
+                UserDTO.guarantors.surety.profilePic) ||
+              (guarantors && guarantors.surety && guarantors.surety.profilePic) ||
+              null,
+            gender:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.surety &&
+                UserDTO.guarantors.surety.gender) ||
+              (guarantors && guarantors.surety && guarantors.surety.gender) ||
               null,
           },
         },

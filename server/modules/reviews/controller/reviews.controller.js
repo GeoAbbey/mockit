@@ -116,9 +116,13 @@ class ReviewsController {
     let context = {};
     if (req.query.modelType) {
       const { modelType } = req.query;
-      context = { where: { modelType } };
+      context = { modelType };
+      req.data = {
+        ...req.data.where,
+        ...context,
+      };
     }
-    const reviews = await ReviewsService.findMany(context);
+    const reviews = await ReviewsService.findMany(req.data);
     return res.status(200).send({
       success: true,
       message: "review successfully retrieved",
@@ -138,6 +142,17 @@ class ReviewsController {
       }
       next();
     };
+  }
+
+  queryContext(req, res, next) {
+    const { role, id } = req.decodedToken;
+    if (role === "admin" || role === "super-admin") {
+      req.data = { where: {} };
+    }
+    if (role === "lawyer" || role === "user") {
+      req.data = { where: { reviewerId: id } };
+    }
+    return next();
   }
 }
 

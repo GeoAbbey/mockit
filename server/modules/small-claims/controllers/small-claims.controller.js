@@ -81,7 +81,7 @@ class SmallClaimsController {
   }
 
   async getAllSmallClaims(req, res, next) {
-    log("getting all SmallClaims");
+    log("getting all small claims");
     const { data } = req;
     const smallClaims = await SmallClaimsService.findMany(data);
     return res.status(200).send({
@@ -219,10 +219,10 @@ class SmallClaimsController {
       req.data = {};
     }
     if (role === "lawyer") {
-      req.data = { where: { status: "initiated" } };
+      req.data = { assignedLawyerId: id };
     }
     if (role === "user") {
-      req.data = { where: { ownerId: id } };
+      req.data = { ownerId: id };
     }
     next();
   }
