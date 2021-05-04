@@ -64,8 +64,13 @@ class UsersController {
       params: { id = req.decodedToken.id },
       user,
       body,
-      files: { profilePic, nextOfKinProfilePic, suretyProfilePic },
     } = req;
+
+    if (req.files) {
+      var {
+        files: { profilePic, nextOfKinProfilePic, suretyProfilePic },
+      } = req;
+    }
     log(`updating the details of user with id ${id}`);
 
     if (profilePic && profilePic[0]) {
@@ -94,7 +99,6 @@ class UsersController {
       success: true,
       message: "user successfully updated",
       token,
-      User,
     });
   }
 
