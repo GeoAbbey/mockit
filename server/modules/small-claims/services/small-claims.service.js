@@ -1,5 +1,5 @@
 import debug from "debug";
-
+import { QueryTypes } from "sequelize";
 import models from "../../../models";
 
 const debugLog = debug("app:small-claims-service");
@@ -50,18 +50,31 @@ class SmallClaimsService {
     return models.SmallClaim.findByPk(id);
   }
 
-  async findMany(data) {
-    debugLog(`retrieving SmallClaims with the following filter ${JSON.stringify(data)}`);
-    return models.SmallClaim.findAll({
-      include: [
-        {
-          model: models.User,
-          as: "lawyerProfile",
-          attributes: ["firstName", "lastName", "email", "profilePic"],
-          data,
-        },
-      ],
-    });
+  async findMany({ ownerId = "", assignedLawyerId = "" }) {
+    debugLog(
+      `retrieving SmallClaims with the following filter ${JSON.stringify({
+        ownerId,
+        assignedLawyerId,
+      })}`
+    );
+    let filter = "";
+    if (ownerId) {
+      filter = `WHERE "SmallClaims"."ownerId" = :ownerId`;
+    }
+
+    if (assignedLawyerId) {
+      filter = `WHERE "SmallClaims"."assignedLawyerId" = :assignedLawyerId`;
+    }
+    return models.sequelize.query(
+      `SELECT "SmallClaims".claim, "SmallClaims".amount, "SmallClaims"."assignedLawyerId", "SmallClaims".attachments, "SmallClaims".id, "SmallClaims"."ownerId", "lawyerProfile"."lastName" AS "lawyerProfile.lastName", "lawyerProfile"."firstName" AS "lawyerProfile.firstName", "lawyerProfile"."profilePic" AS "lawyerProfile.profilePic", "lawyerProfile".email AS "lawyerProfile.email", "lawyerProfile".phone AS "lawyerProfile.phone", (SELECT AVG("Reviews".rating) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.averageRating" , (SELECT COUNT(id) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.noOfReviews" FROM "SmallClaims" LEFT OUTER JOIN "Users" AS "lawyerProfile" ON "SmallClaims"."assignedLawyerId" = "lawyerProfile".id ${filter};
+    `,
+
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+        replacements: { ownerId, assignedLawyerId },
+      }
+    );
   }
 
   async update(id, smallClaimDTO, oldSmallClaim, filter) {

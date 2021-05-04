@@ -13,8 +13,9 @@ export class InvitationRoutes extends CommonRoutesConfig {
       .route(`${this.path}/invitations`)
       .all([Authenticate.verifyToken])
       .post([
-        middleware({ schema: createInvitationSchema, property: "body" }),
-        [uploadMiddleware(), wrapCatch(InvitationsController.makeInvite)],
+        uploadMiddleware([{ name: "attachments", maxCount: 1 }]),
+        // middleware({ schema: createInvitationSchema, property: "body" }),
+        wrapCatch(InvitationsController.makeInvite),
       ])
       .get([
         InvitationsController.queryContext,

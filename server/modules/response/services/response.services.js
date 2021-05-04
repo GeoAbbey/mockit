@@ -44,7 +44,7 @@ class ResponsesService {
   }
 
   async findMany(data) {
-    debugLog(`retrieving Responses with the following filter ${JSON.stringify(data)}`);
+    debugLog(`retrieving responses with the following filter ${JSON.stringify(data)}`);
     return models.Response.findAll(data);
   }
 

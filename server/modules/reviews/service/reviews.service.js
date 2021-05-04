@@ -56,6 +56,7 @@ class ReviewsService {
   }
 
   async findMany(context) {
+    debugLog(`finding all review with the query context ${JSON.stringify(context)}`);
     return models.Review.findAll(context);
   }
 

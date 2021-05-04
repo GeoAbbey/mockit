@@ -183,7 +183,7 @@ class InvitationsController {
     if (role === "user") {
       req.data = { where: { ownerId: id } };
     }
-    next();
+    return next();
   }
 }
 

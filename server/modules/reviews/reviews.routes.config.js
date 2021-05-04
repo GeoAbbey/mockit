@@ -44,6 +44,6 @@ export class ReviewsRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/reviews`)
       .all([Authenticate.verifyToken, middleware({ schema: queryReviewSchema, property: "query" })])
-      .get([wrapCatch(ReviewsController.getAllReviews)]);
+      .get([ReviewsController.queryContext, wrapCatch(ReviewsController.getAllReviews)]);
   }
 }

@@ -64,21 +64,28 @@ class UsersController {
       params: { id = req.decodedToken.id },
       user,
       body,
-      profilePic,
-      nextOfKinProfilePic,
-      suretyProfilePic,
+      files: { profilePic, nextOfKinProfilePic, suretyProfilePic },
     } = req;
     log(`updating the details of user with id ${id}`);
 
-    // console.log({ files: req.files }, "😱");
     if (profilePic && profilePic[0]) {
-      body.profilePic = profilePic[0];
+      body.profilePic = profilePic[0].location;
     }
     if (nextOfKinProfilePic && nextOfKinProfilePic[0]) {
-      body.guarantors.nextOfKin.profilePic = nextOfKinProfilePic[0];
+      body.guarantors = {
+        ...body.guarantors,
+        nextOfKin: {
+          profilePic: nextOfKinProfilePic[0].location,
+        },
+      };
     }
     if (suretyProfilePic && suretyProfilePic[0]) {
-      body.guarantors.surety.profilePic = suretyProfilePic[0];
+      body.guarantors = {
+        ...body.guarantors,
+        surety: {
+          profilePic: suretyProfilePic[0].location,
+        },
+      };
     }
     const [, [User]] = await UsersService.update(id, body, user);
     delete User.dataValues.password;
@@ -87,6 +94,7 @@ class UsersController {
       success: true,
       message: "user successfully updated",
       token,
+      User,
     });
   }
 
