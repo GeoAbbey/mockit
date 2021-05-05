@@ -31,14 +31,14 @@ export const uploadMiddleware = (context = [{ name: "attachments", maxCount: 10 
     const use = uploadS3.fields([...context]);
     use(req, res, (error) => {
       logger("the upload middleware has been initialized");
-      if (req.files == undefined) {
+      console.log({ file: req.files.attachments, request: req.files });
+      if (Object.keys(req.files).length === 0) {
         logger("no files to upload");
         return next();
       }
 
       if (error) return next(createError(500, "There was a problem with S3 upload servers", error));
 
-      console.log({ files: req.files });
       if (context[0].name === "attachments") {
         let fileArray = req.files.attachments;
 
@@ -48,7 +48,7 @@ export const uploadMiddleware = (context = [{ name: "attachments", maxCount: 10 
         }
         req.attachments = images;
       }
-      next();
+      return next();
     });
   };
 };
