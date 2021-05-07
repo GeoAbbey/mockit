@@ -99,7 +99,6 @@ class UsersController {
       success: true,
       message: "user successfully updated",
       token,
-      User,
     });
   }
 

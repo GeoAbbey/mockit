@@ -52,12 +52,34 @@ class ReviewsService {
     debugLog(`getting a reviews with the following filters ${JSON.stringify(context)}`);
     const { modelId, modelType } = context;
 
-    return models.Review.findAll({ where: { modelId, modelType } });
+    return models.Review.findAll({
+      where: { modelId, modelType },
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: models.User,
+          as: "reviewerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic"],
+          required: false,
+        },
+      ],
+    });
   }
 
   async findMany(context) {
     debugLog(`finding all review with the query context ${JSON.stringify(context)}`);
-    return models.Review.findAll(context);
+    return models.Review.findAll({
+      context,
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: models.User,
+          as: "reviewerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic"],
+          required: false,
+        },
+      ],
+    });
   }
 
   async update(id, ReviewDTO, oldReview) {

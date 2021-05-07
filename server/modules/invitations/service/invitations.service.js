@@ -45,7 +45,24 @@ class InvitationsService {
 
   async findMany(data) {
     debugLog(`retrieving invitations with the following filter ${JSON.stringify(data)}`);
-    return models.Invitation.findAll(data);
+    return models.Invitation.findAll({
+      order: [["createdAt", "DESC"]],
+      data,
+      include: [
+        {
+          model: models.User,
+          as: "ownerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic"],
+          required: false,
+        },
+        {
+          model: models.User,
+          as: "lawyerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic"],
+          required: false,
+        },
+      ],
+    });
   }
 
   async update(id, invitationDTO, oldInvitation) {

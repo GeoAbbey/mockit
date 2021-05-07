@@ -5,6 +5,9 @@ export const createUserSchema = Joi.object().keys({
   lastName: Joi.string().required(),
   email: Joi.string().email({ minDomainSegments: 2 }).required(),
   password: Joi.string().min(6).max(30).required(),
+  phone: Joi.string()
+    .pattern(/^(0|\+234)\d{10}$/)
+    .required(),
   role: Joi.string().valid("user", "lawyer"),
   gender: Joi.string().valid("male", "female").required(),
 });
