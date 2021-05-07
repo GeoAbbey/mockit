@@ -31,8 +31,7 @@ export const uploadMiddleware = (context = [{ name: "attachments", maxCount: 10 
     const use = uploadS3.fields([...context]);
     use(req, res, (error) => {
       logger("the upload middleware has been initialized");
-      console.log({ file: req.files.attachments, request: req.files });
-      if (Object.keys(req.files).length === 0) {
+      if (req.files === undefined || Object.keys(req.files).length === 0) {
         logger("no files to upload");
         return next();
       }

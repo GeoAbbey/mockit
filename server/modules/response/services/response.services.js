@@ -45,7 +45,24 @@ class ResponsesService {
 
   async findMany(data) {
     debugLog(`retrieving responses with the following filter ${JSON.stringify(data)}`);
-    return models.Response.findAll(data);
+    return models.Response.findAll({
+      order: [["createdAt", "DESC"]],
+      data,
+      include: [
+        {
+          model: models.User,
+          as: "ownerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic"],
+          required: false,
+        },
+        {
+          model: models.User,
+          as: "lawyerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic"],
+          required: false,
+        },
+      ],
+    });
   }
 
   async update(id, ResponseDTO, oldResponse) {
