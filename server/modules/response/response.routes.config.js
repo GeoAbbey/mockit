@@ -32,6 +32,14 @@ export class ResponseRoutes extends CommonRoutesConfig {
       ]);
 
     this.app
+      .route(`${this.path}/responses/stats`)
+      .get([
+        Authenticate.verifyToken,
+        ResponsesController.checkAccessAdmin(),
+        wrapCatch(ResponsesController.getStats),
+      ]);
+
+    this.app
       .route(`${this.path}/response/:id`)
       .all([
         Authenticate.verifyToken,

@@ -12,7 +12,7 @@ const hoistedIOLawyer = (io) => {
     const { recipient } = io;
     if (recipient.assigneeId) {
       logger({ assignedId: recipient.assigneeId }, "lawyer:online");
-      const deliverTo = await LocationServices.find({ where: { ownerId: recipient.assigneeId } });
+      const deliverTo = await LocationServices.find({ where: { id: recipient.assigneeId } });
       const { socketId } = deliverTo.dataValues;
 
       io.to(socketId).emit("on:move", { location: recipient.location });

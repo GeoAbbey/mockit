@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Comment.init(
     {
-      content: { type: DataTypes.STRING },
+      content: { type: DataTypes.TEXT },
       commenterId: { type: DataTypes.UUID, allowNull: false },
       reportId: { type: DataTypes.UUID, allowNull: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },

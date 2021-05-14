@@ -10,9 +10,19 @@ module.exports = {
       },
       responseId: {
         type: Sequelize.UUID,
+        references: {
+          model: "Responses",
+          key: "id",
+          as: "responseId",
+        },
       },
       lawyerId: {
         type: Sequelize.UUID,
+        references: {
+          model: "Users",
+          key: "id",
+          as: "lawyerId",
+        },
       },
       createdAt: {
         allowNull: false,

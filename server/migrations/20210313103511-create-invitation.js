@@ -9,10 +9,13 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
       },
       reason: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
       },
       venue: {
         type: Sequelize.STRING,
+      },
+      dateOfVisit: {
+        type: Sequelize.DATE,
       },
       attachments: {
         type: Sequelize.ARRAY(Sequelize.STRING),

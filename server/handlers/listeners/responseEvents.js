@@ -17,24 +17,24 @@ export const responseEvents = (eventEmitter) => {
     logger({ response });
 
     const {
-      dataValues: { ownerId, assignedLawyerId },
+      dataValues: { id, assignedLawyerId },
     } = response;
 
     const [userLocationDetails, lawyerLocationDetails] = await Promise.all([
-      LocationServices.find({ where: { ownerId } }),
+      LocationServices.find({ where: { id } }),
       LocationServices.find({ where: { ownerId: assignedLawyerId } }),
     ]);
 
     const [[, updatedUserDetails], [, updatedLawyerDetails]] = await Promise.all([
       LocationServices.update(
-        userLocationDetails.ownerId,
+        userLocationDetails.id,
         {
           assigneeId: assignedLawyerId,
         },
         userLocationDetails
       ),
       LocationServices.update(
-        lawyerLocationDetails.ownerId,
+        lawyerLocationDetails.id,
         {
           assigneeId: ownerId,
         },
@@ -56,11 +56,11 @@ export const responseEvents = (eventEmitter) => {
     logger({ response });
 
     const {
-      dataValues: { ownerId, assignedLawyerId },
+      dataValues: { id, assignedLawyerId },
     } = response;
 
     const [userLocationDetails, lawyerLocationDetails] = await Promise.all([
-      LocationServices.find({ where: { ownerId } }),
+      LocationServices.find({ where: { id } }),
       LocationServices.find({ where: { ownerId: assignedLawyerId } }),
     ]);
 
@@ -134,7 +134,7 @@ export const responseEvents = (eventEmitter) => {
       response,
       "RESPONSE",
       "MARK_AS_COMPLETED",
-      "ownerId"
+      "id"
     );
   });
 };

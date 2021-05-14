@@ -1,6 +1,7 @@
 import debug from "debug";
 import { QueryTypes } from "sequelize";
 import models from "../../../models";
+import { rawQueries } from "../../../utils/rawQueriers";
 
 const debugLog = debug("app:small-claims-service");
 
@@ -19,7 +20,7 @@ class SmallClaimsService {
   }
 
   async find(id, context) {
-    debugLog(`looking for an SmallClaim with id ${id}`);
+    debugLog(`looking for an small claim with id ${id}`);
     if (context) {
       console.log("I was called using context");
       return models.SmallClaim.findByPk(id, {
@@ -66,7 +67,7 @@ class SmallClaimsService {
       filter = `WHERE "SmallClaims"."assignedLawyerId" = :assignedLawyerId`;
     }
     return models.sequelize.query(
-      `SELECT "SmallClaims".claim, "SmallClaims"."createdAt", "SmallClaims"."updatedAt", "SmallClaims".amount, "SmallClaims"."assignedLawyerId", "SmallClaims".attachments, "SmallClaims".id, "SmallClaims"."ownerId", "lawyerProfile"."lastName" AS "lawyerProfile.lastName", "lawyerProfile"."firstName" AS "lawyerProfile.firstName", "lawyerProfile"."profilePic" AS "lawyerProfile.profilePic", "lawyerProfile".email AS "lawyerProfile.email", "lawyerProfile".phone AS "lawyerProfile.phone", (SELECT AVG("Reviews".rating) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.averageRating" , (SELECT COUNT(id) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.noOfReviews" FROM "SmallClaims" LEFT OUTER JOIN "Users" AS "lawyerProfile" ON "SmallClaims"."assignedLawyerId" = "lawyerProfile".id ${filter} ORDER BY "SmallClaims"."createdAt" DESC;
+      `SELECT "SmallClaims".claim, "SmallClaims"."createdAt", "SmallClaims"."status","SmallClaims"."venue","SmallClaims"."updatedAt", "SmallClaims".amount, "SmallClaims"."assignedLawyerId", "SmallClaims".attachments, "SmallClaims".id, "SmallClaims"."ownerId", "lawyerProfile"."lastName" AS "lawyerProfile.lastName", "lawyerProfile"."firstName" AS "lawyerProfile.firstName", "lawyerProfile"."profilePic" AS "lawyerProfile.profilePic", "lawyerProfile".email AS "lawyerProfile.email", "lawyerProfile".phone AS "lawyerProfile.phone", (SELECT AVG("Reviews".rating) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.averageRating" , (SELECT COUNT(id) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.noOfReviews" FROM "SmallClaims" LEFT OUTER JOIN "Users" AS "lawyerProfile" ON "SmallClaims"."assignedLawyerId" = "lawyerProfile".id ${filter} ORDER BY "SmallClaims"."createdAt" DESC;
     `,
       {
         nest: true,
@@ -103,9 +104,15 @@ class SmallClaimsService {
   }
 
   async remove(id) {
-    debugLog(`deleting the SmallClaim with id ${id}`);
+    debugLog(`deleting the small claim with id ${id}`);
     return models.SmallClaim.destroy({
       where: { id, status: "initiated" },
+    });
+  }
+
+  async stats() {
+    return models.sequelize.query(rawQueries.statistics("SmallClaims"), {
+      type: QueryTypes.SELECT,
     });
   }
 }

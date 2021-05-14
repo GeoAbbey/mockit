@@ -11,19 +11,13 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.User, { foreignKey: "ownerId" });
+      this.belongsTo(models.User, { foreignKey: "id" });
     }
   }
   LocationDetail.init(
     {
-      id: {
-        type: DataTypes.UUID,
-        primaryKey: true,
-        allowNull: false,
-        defaultValue: () => v4(),
-      },
+      id: { type: DataTypes.UUID, allowNull: false, primaryKey: true, allowNull: false },
       socketId: { type: DataTypes.STRING },
-      ownerId: { type: DataTypes.UUID, allowNull: false },
       online: { type: DataTypes.BOOLEAN, defaultValue: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       location: { type: DataTypes.GEOMETRY("POINT") },

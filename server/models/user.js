@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
         as: "assignedEmergencyResponse",
         foreignKey: "assignedLawyerId",
       });
-      this.hasOne(models.LocationDetail, { foreignKey: "ownerId" });
+      this.hasOne(models.LocationDetail, { foreignKey: "id" });
       this.hasMany(models.EligibleLawyer, {
         foreignKey: "lawyerId",
         onDelete: "CASCADE",

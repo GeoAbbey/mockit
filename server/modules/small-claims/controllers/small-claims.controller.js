@@ -175,6 +175,17 @@ class SmallClaimsController {
     });
   }
 
+  async getStats(req, res, next) {
+    log("getting statistics for small claims");
+
+    const allStats = await SmallClaimsService.stats();
+    return res.status(200).send({
+      success: true,
+      message: "small claims statistics successfully retrieved",
+      allStats,
+    });
+  }
+
   checkAccessUser(context) {
     return async (req, res, next) => {
       const {
@@ -224,6 +235,17 @@ class SmallClaimsController {
           return next(createError(401, "You do not have access to perform this operation"));
       }
       return next();
+    };
+  }
+
+  checkAccessAdmin(context) {
+    return async (req, res, next) => {
+      const {
+        decodedToken: { role, id },
+      } = req;
+
+      if (role === "admin" || role === "super-admin") return next();
+      else return next(createError(401, "You do not have permission to access this route"));
     };
   }
 

@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.JSONB,
       },
       content: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
       },
       reportId: {
         type: Sequelize.UUID,

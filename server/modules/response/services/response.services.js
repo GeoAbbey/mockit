@@ -1,6 +1,7 @@
 import debug from "debug";
 import { QueryTypes } from "sequelize";
 import models from "../../../models";
+import { rawQueries } from "../../../utils/rawQueriers";
 
 const debugLog = debug("app:Responses-service");
 
@@ -14,7 +15,7 @@ class ResponsesService {
   }
 
   async create(ResponseDTO) {
-    debugLog("creating an Response");
+    debugLog("creating an response");
     return models.Response.create(ResponseDTO);
   }
 
@@ -28,11 +29,18 @@ class ResponsesService {
             as: "eligibleLawyers",
             required: false,
           },
-          // {
-          //   model: models.User,
-          //   as: "myEmergencyResponse",
-          //   required: false,
-          // },
+          {
+            model: models.User,
+            as: "ownerProfile",
+            attributes: ["firstName", "lastName", "email", "profilePic"],
+            required: false,
+          },
+          {
+            model: models.User,
+            as: "lawyerProfile",
+            attributes: ["firstName", "lastName", "email", "profilePic"],
+            required: false,
+          },
         ],
       });
 
@@ -85,6 +93,12 @@ class ResponsesService {
     debugLog(`deleting the response with id ${id}`);
     return models.Response.destroy({
       where: { id, assignedLawyerId: null },
+    });
+  }
+
+  async stats() {
+    return models.sequelize.query(rawQueries.statistics("Responses"), {
+      type: QueryTypes.SELECT,
     });
   }
 }

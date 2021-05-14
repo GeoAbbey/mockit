@@ -3,10 +3,15 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable("LocationDetails", {
       id: {
+        type: Sequelize.UUID,
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        onDelete: "CASCADE",
+        references: {
+          model: "Users",
+          key: "id",
+          as: "id",
+        },
       },
       socketId: {
         type: Sequelize.STRING,
@@ -17,20 +22,16 @@ module.exports = {
       meta: {
         type: Sequelize.JSONB,
       },
-      ownerId: {
-        type: Sequelize.UUID,
-        onDelete: "CASCADE",
-        references: {
-          model: "Users",
-          key: "id",
-          as: "ownerId",
-        },
-      },
       location: {
         type: Sequelize.GEOMETRY,
       },
       assigneeId: {
         type: Sequelize.UUID,
+        references: {
+          model: "Users",
+          key: "id",
+          as: "assigneeId",
+        },
       },
       createdAt: {
         allowNull: false,

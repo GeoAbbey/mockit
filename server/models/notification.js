@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: () => v4(),
       },
       ownerId: { type: DataTypes.UUID, allowNull: false },
-      content: { type: DataTypes.STRING, allowNull: false },
+      content: { type: DataTypes.TEXT, allowNull: false },
       seen: { type: DataTypes.BOOLEAN, defaultValue: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
     },

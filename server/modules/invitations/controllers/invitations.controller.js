@@ -101,6 +101,17 @@ class InvitationsController {
     });
   }
 
+  async getStats(req, res, next) {
+    log("getting statistics for invitations");
+
+    const allStats = await InvitationsService.stats();
+    return res.status(200).send({
+      success: true,
+      message: "small claims statistics successfully retrieved",
+      allStats,
+    });
+  }
+
   async getAllInvitations(req, res, next) {
     log("getting all invitations");
     const { data } = req;
@@ -157,6 +168,17 @@ class InvitationsController {
           );
       }
       next();
+    };
+  }
+
+  checkAccessAdmin(context) {
+    return async (req, res, next) => {
+      const {
+        decodedToken: { role, id },
+      } = req;
+
+      if (role === "admin" || role === "super-admin") return next();
+      else return next(createError(401, "You do not have permission to access this route"));
     };
   }
 

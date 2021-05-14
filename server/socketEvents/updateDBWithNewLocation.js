@@ -3,14 +3,14 @@ import LocationService from "../modules/locationDetail/services/locationDetails.
 const debugLog = debug("socketEvents:updateDBWithNewLocation");
 
 export const updateDbWithNewLocation = async (payload, io) => {
-  const { ownerId, socketId } = payload;
-  debugLog({ ownerId, socketId }, "🐷");
+  const { id, socketId } = payload;
+  debugLog({ id, socketId }, "🐷");
   const [oldLocationDetails, created] = await LocationService.findOrCreate({
     where: {
-      ownerId,
+      id,
     },
     defaults: {
-      ownerId,
+      id,
       socketId,
       online: true,
       location: {
@@ -24,7 +24,7 @@ export const updateDbWithNewLocation = async (payload, io) => {
 
   if (!created) {
     const [, [newDetails]] = await LocationService.update(
-      ownerId,
+      id,
       {
         location: {
           type: "Point",

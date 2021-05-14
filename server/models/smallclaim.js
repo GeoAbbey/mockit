@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   SmallClaim.init(
     {
-      claim: { type: DataTypes.STRING, allowNull: false },
+      claim: { type: DataTypes.TEXT, allowNull: false },
       amount: { type: DataTypes.INTEGER, allowNull: false },
       attachments: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
       venue: { type: DataTypes.STRING, allowNull: false },

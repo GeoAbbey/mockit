@@ -125,6 +125,17 @@ class ResponsesController {
     });
   }
 
+  async getStats(req, res, next) {
+    log("getting statistics for responses");
+
+    const allStats = await ResponsesService.stats();
+    return res.status(200).send({
+      success: true,
+      message: "responses statistics successfully retrieved",
+      allStats,
+    });
+  }
+
   async marKAsCompleted(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
 
@@ -201,6 +212,17 @@ class ResponsesController {
       }
 
       return next();
+    };
+  }
+
+  checkAccessAdmin(context) {
+    return async (req, res, next) => {
+      const {
+        decodedToken: { role, id },
+      } = req;
+
+      if (role === "admin" || role === "super-admin") return next();
+      else return next(createError(401, "You do not have permission to access this route"));
     };
   }
 

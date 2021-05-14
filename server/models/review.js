@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       reviewerId: { type: DataTypes.UUID, allowNull: false },
       rating: { type: DataTypes.INTEGER, allowNull: false, min: 1, max: 5 },
-      feedback: DataTypes.STRING,
+      feedback: DataTypes.TEXT,
       id: {
         type: DataTypes.UUID,
         primaryKey: true,

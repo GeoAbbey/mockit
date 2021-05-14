@@ -1,6 +1,7 @@
 import debug from "debug";
 import { QueryTypes } from "sequelize";
 import models from "../../../models";
+import { rawQueries } from "../../../utils/rawQueriers";
 
 const debugLog = debug("app:invitations-service");
 
@@ -66,7 +67,7 @@ class InvitationsService {
   }
 
   async update(id, invitationDTO, oldInvitation) {
-    const { status, reason, venue, attachments, assignedLawyerId } = oldInvitation;
+    const { status, reason, venue, attachments, assignedLawyerId, dateOfVisit } = oldInvitation;
     const handleAttachments = () => {
       if (typeof invitationDTO.attachments === "number") {
         attachments.splice(invitationDTO.attachments, 1);
@@ -82,6 +83,7 @@ class InvitationsService {
         status: invitationDTO.status || status,
         reason: invitationDTO.reason || reason,
         venue: invitationDTO.venue || venue,
+        dateOfVisit: invitationDTO.dateOfVisit || dateOfVisit,
         attachments: handleAttachments(),
         assignedLawyerId: invitationDTO.assignedLawyerId || assignedLawyerId,
       },
@@ -93,6 +95,12 @@ class InvitationsService {
     debugLog(`deleting the invitation with id ${id}`);
     return models.Invitation.destroy({
       where: { id, assignedLawyerId: null },
+    });
+  }
+
+  async stats() {
+    return models.sequelize.query(rawQueries.statistics("Invitations"), {
+      type: QueryTypes.SELECT,
     });
   }
 }

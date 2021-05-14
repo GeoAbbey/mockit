@@ -21,7 +21,7 @@ module.exports = {
         },
       },
       content: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
       },
       meta: {
         type: Sequelize.JSONB,
