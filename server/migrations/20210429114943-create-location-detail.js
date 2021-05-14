@@ -1,32 +1,36 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("Reports", {
+    await queryInterface.createTable("LocationDetails", {
       id: {
+        type: Sequelize.UUID,
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        onDelete: "CASCADE",
+        references: {
+          model: "Users",
+          key: "id",
+          as: "id",
+        },
       },
-      content: {
-        type: Sequelize.TEXT,
+      socketId: {
+        type: Sequelize.STRING,
       },
-      attachments: {
-        type: Sequelize.ARRAY(Sequelize.STRING),
+      online: {
+        type: Sequelize.BOOLEAN,
       },
       meta: {
         type: Sequelize.JSONB,
       },
       location: {
-        type: Sequelize.STRING,
+        type: Sequelize.GEOMETRY,
       },
-      reporterId: {
+      assigneeId: {
         type: Sequelize.UUID,
-        onDelete: "CASCADE",
         references: {
           model: "Users",
           key: "id",
-          as: "reporterId",
+          as: "assigneeId",
         },
       },
       createdAt: {
@@ -40,6 +44,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("Reports");
+    await queryInterface.dropTable("LocationDetails");
   },
 };

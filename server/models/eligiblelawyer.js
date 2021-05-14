@@ -1,9 +1,9 @@
 "use strict";
 import { v4 } from "uuid";
-
 const { Model } = require("sequelize");
+
 module.exports = (sequelize, DataTypes) => {
-  class Notification extends Model {
+  class EligibleLawyer extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,27 +11,33 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.User, { as: "profile", foreignKey: "ownerId" });
+      this.belongsTo(models.Response, {
+        as: "eligibleLawyers",
+        foreignKey: "responseId",
+        onDelete: "CASCADE",
+      });
+
+      this.belongsTo(models.User, {
+        foreignKey: "lawyerId",
+        onDelete: "CASCADE",
+      });
     }
   }
-  Notification.init(
+  EligibleLawyer.init(
     {
-      for: { type: DataTypes.STRING, allowNull: false },
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
         defaultValue: () => v4(),
       },
-      ownerId: { type: DataTypes.UUID, allowNull: false },
-      content: { type: DataTypes.TEXT, allowNull: false },
-      seen: { type: DataTypes.BOOLEAN, defaultValue: false },
-      meta: { type: DataTypes.JSONB, defaultValue: {} },
+      responseId: { type: DataTypes.UUID, allowNull: false },
+      lawyerId: { type: DataTypes.UUID, allowNull: false },
     },
     {
       sequelize,
-      modelName: "Notification",
+      modelName: "EligibleLawyer",
     }
   );
-  return Notification;
+  return EligibleLawyer;
 };

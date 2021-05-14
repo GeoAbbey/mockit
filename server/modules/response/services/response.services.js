@@ -1,6 +1,7 @@
 import debug from "debug";
 import { QueryTypes } from "sequelize";
 import models from "../../../models";
+import { rawQueries } from "../../../utils/rawQueriers";
 
 const debugLog = debug("app:Responses-service");
 
@@ -14,31 +15,34 @@ class ResponsesService {
   }
 
   async create(ResponseDTO) {
-    debugLog("creating an Response");
+    debugLog("creating an response");
     return models.Response.create(ResponseDTO);
   }
 
   async find(id, context) {
     debugLog(`looking for a response with id ${id}`);
-    // if (context) {
-    //   const response = await models.Response.findByPk(id, {
-    //     include: [
-    //       {
-    //         model: models.Review,
-    //         as: "reviews",
-    //         where: { modelType: "Response", modelId: id },
-    //         required: false,
-    //       },
-    //       {
-    //         model: models.User,
-    //         as: "lawyerProfile",
-    //         attributes: ["firstName", "lastName", "email", "profilePic"],
-    //       },
-    //     ],
-    //   });
-
-    //   return response;
-    // }
+    if (context)
+      return models.Response.findByPk(id, {
+        include: [
+          {
+            model: models.EligibleLawyer,
+            as: "eligibleLawyers",
+            required: false,
+          },
+          {
+            model: models.User,
+            as: "ownerProfile",
+            attributes: ["firstName", "lastName", "email", "profilePic"],
+            required: false,
+          },
+          {
+            model: models.User,
+            as: "lawyerProfile",
+            attributes: ["firstName", "lastName", "email", "profilePic"],
+            required: false,
+          },
+        ],
+      });
 
     return models.Response.findByPk(id);
   }
@@ -89,6 +93,12 @@ class ResponsesService {
     debugLog(`deleting the response with id ${id}`);
     return models.Response.destroy({
       where: { id, assignedLawyerId: null },
+    });
+  }
+
+  async stats() {
+    return models.sequelize.query(rawQueries.statistics("Responses"), {
+      type: QueryTypes.SELECT,
     });
   }
 }

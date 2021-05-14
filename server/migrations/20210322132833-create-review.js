@@ -13,7 +13,7 @@ module.exports = {
         allowNull: false,
       },
       feedback: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
       },
       modelType: {
         type: Sequelize.STRING,

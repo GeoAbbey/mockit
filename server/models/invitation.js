@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Invitation.init(
     {
-      reason: { type: DataTypes.STRING, allowNull: false },
+      reason: { type: DataTypes.TEXT, allowNull: false },
       ownerId: { type: DataTypes.UUID, allowNull: false },
       assignedLawyerId: { type: DataTypes.UUID, allowNull: true },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
           isIn: [["initiated", "in-progress", "completed"]],
         },
         defaultValue: "initiated",
+      },
+      dateOfVisit: {
+        type: DataTypes.DATE,
+        allowNull: false,
       },
       ticketId: {
         type: DataTypes.STRING,

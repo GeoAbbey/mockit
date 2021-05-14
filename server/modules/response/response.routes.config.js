@@ -1,6 +1,6 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import ResponsesController from "./controllers/response.controller";
-import { updateResponseSchema } from "./schema/response.schema";
+import { updateResponseSchema, createResponseSchema } from "./schema/response.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
 import { queryContextParams } from "../../utils/allPurpose.schema";
 
@@ -13,11 +13,30 @@ export class ResponseRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/responses`)
       .all([Authenticate.verifyToken])
-      .post([[wrapCatch(ResponsesController.makeResponse)]])
+      .post([
+        middleware({ schema: createResponseSchema, property: "body" }),
+        wrapCatch(ResponsesController.makeResponse),
+      ])
       .get([
         middleware({ schema: queryContextParams, property: "query" }),
         ResponsesController.queryContext,
         wrapCatch(ResponsesController.getAllResponses),
+      ]);
+
+    this.app
+      .route(`${this.path}/responses/unassigned`)
+      .get([
+        Authenticate.verifyToken,
+        ResponsesController.checkAccessLawyer(),
+        wrapCatch(ResponsesController.getUnassignedResponses),
+      ]);
+
+    this.app
+      .route(`${this.path}/responses/stats`)
+      .get([
+        Authenticate.verifyToken,
+        ResponsesController.checkAccessAdmin(),
+        wrapCatch(ResponsesController.getStats),
       ]);
 
     this.app
@@ -31,11 +50,6 @@ export class ResponseRoutes extends CommonRoutesConfig {
         ResponsesController.checkAccessLawyer("markAsComplete"),
         wrapCatch(ResponsesController.marKAsCompleted),
       ])
-      .put([
-        middleware({ schema: updateResponseSchema, property: "body" }),
-        ResponsesController.checkAccessLawyer(),
-        wrapCatch(ResponsesController.modifyResponse),
-      ])
       .delete([
         ResponsesController.checkAccessUser("delete"),
         wrapCatch(ResponsesController.deleteResponse),
@@ -43,12 +57,19 @@ export class ResponseRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/response/:id`)
-      .get([
+      .all([
         Authenticate.verifyToken,
         middleware({ schema: validateUUID, property: "params" }),
         ResponsesController.responseExits("retrieve"),
+      ])
+      .get([
         ResponsesController.checkAccessUser("retrieve"),
         wrapCatch(ResponsesController.getResponse),
+      ])
+      .put([
+        middleware({ schema: updateResponseSchema, property: "body" }),
+        ResponsesController.checkAccessLawyer(),
+        wrapCatch(ResponsesController.modifyResponse),
       ]);
   }
 }

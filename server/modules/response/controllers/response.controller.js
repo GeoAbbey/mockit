@@ -16,11 +16,18 @@ class ResponsesController {
 
   async makeResponse(req, res) {
     const eventEmitter = req.app.get("eventEmitter");
-    const { decodedToken } = req;
+    const {
+      decodedToken,
+      body: { longitude, latitude },
+    } = req;
+    const startingLocation = {
+      type: "Point",
+      coordinates: [longitude, latitude],
+    };
 
     const ownerId = decodedToken.id;
     log(`creating a new response for user with id ${ownerId}`);
-    const response = await ResponsesService.create({ ownerId });
+    const response = await ResponsesService.create({ ownerId, startingLocation });
 
     eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.CREATED, { decodedToken, response });
     return res.status(201).send({
@@ -43,6 +50,7 @@ class ResponsesController {
 
   async modifyResponse(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
 
     const {
       body,
@@ -55,10 +63,16 @@ class ResponsesController {
     }
     const [, [updatedResponse]] = await ResponsesService.update(id, body, oldResponse);
 
-    // if (oldResponse.bid)
-    //   eventEmitter.emit(EVENT_IDENTIFIERS.Response.ASSIGNED, {
-    //     Response: updatedResponse,
-    //   });
+    if (body.bid)
+      eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, {
+        response: updatedResponse,
+      });
+
+    if (body.meetTime)
+      eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.MEET_TIME, {
+        response: updatedResponse,
+        io,
+      });
 
     return res.status(200).send({
       success: true,
@@ -80,12 +94,23 @@ class ResponsesController {
     });
   }
 
-  getResponse(req, res, next) {
+  async getResponse(req, res, next) {
     const { oldResponse } = req;
     return res.status(200).send({
       success: true,
       message: "response successfully retrieved",
       Response: oldResponse,
+    });
+  }
+
+  async getUnassignedResponses(req, res, next) {
+    log("getting all unassigned responses");
+    const data = { where: { assignedLawyerId: null } };
+    const responses = await ResponsesService.findMany(data, true);
+    return res.status(200).send({
+      success: true,
+      message: "responses successfully retrieved",
+      responses,
     });
   }
 
@@ -100,8 +125,19 @@ class ResponsesController {
     });
   }
 
+  async getStats(req, res, next) {
+    log("getting statistics for responses");
+
+    const allStats = await ResponsesService.stats();
+    return res.status(200).send({
+      success: true,
+      message: "responses statistics successfully retrieved",
+      allStats,
+    });
+  }
+
   async marKAsCompleted(req, res, next) {
-    // const eventEmitter = req.app.get("eventEmitter");
+    const eventEmitter = req.app.get("eventEmitter");
 
     const {
       params: { id },
@@ -114,9 +150,9 @@ class ResponsesController {
       oldResponse
     );
 
-    // eventEmitter.emit(EVENT_IDENTIFIERS.Response.MARK_AS_COMPLETED, {
-    //   Response: updatedResponse,
-    // });
+    eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED, {
+      response: updatedResponse,
+    });
 
     return res.status(200).send({
       success: true,
@@ -150,20 +186,43 @@ class ResponsesController {
     return async (req, res, next) => {
       const {
         decodedToken: { role, id },
-        oldResponse: { assignedLawyerId },
+        oldResponse,
         body: { bid, meetTime },
       } = req;
+      if (role === "admin" || role === "super-admin") return next();
       if (role !== "lawyer")
         return next(createError(401, "You do not have access to perform this operation"));
       if (context === "markAsComplete" || meetTime) {
-        if (id !== assignedLawyerId)
+        if (id !== oldResponse.assignedLawyerId)
           return next(createError(401, "You do not have access to perform this operation"));
       }
-      if (bid && assignedLawyerId)
+      if (bid && oldResponse.assignedLawyerId)
         return next(createError(401, "A lawyer has already been assigned to this response"));
+      else if (bid) {
+        const { eligibleLawyers } = oldResponse;
+        const found = eligibleLawyers.find((lawyer) => lawyer.dataValues.lawyerId === id);
+        if (!found)
+          return next(
+            createError(
+              401,
+              "You can't bid for this response because you aren't within range to quickly respond"
+            )
+          );
+        req.oldResponse.bid = bid;
+      }
 
-      req.oldResponse.bid = bid;
-      next();
+      return next();
+    };
+  }
+
+  checkAccessAdmin(context) {
+    return async (req, res, next) => {
+      const {
+        decodedToken: { role, id },
+      } = req;
+
+      if (role === "admin" || role === "super-admin") return next();
+      else return next(createError(401, "You do not have permission to access this route"));
     };
   }
 
@@ -186,7 +245,7 @@ class ResponsesController {
     if (role === "user") {
       req.data = { where: { ownerId: id } };
     }
-    next();
+    return next();
   }
 }
 

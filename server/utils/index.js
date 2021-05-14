@@ -7,6 +7,7 @@ import { otp } from "./otp";
 import { validateUUID, allowedModelSchema } from "./allPurpose.schema";
 import { sendMail, sendTemplateEmail } from "./MailService";
 import { uploadMiddleware } from "./UploadService";
+import { handleFalsy } from "./handleFalsy";
 
 export {
   middleware,
@@ -20,4 +21,5 @@ export {
   sendMail,
   sendTemplateEmail,
   uploadMiddleware,
+  handleFalsy,
 };

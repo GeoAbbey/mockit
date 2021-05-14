@@ -9,7 +9,7 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
       },
       claim: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
       },
       amount: {
         type: Sequelize.INTEGER,

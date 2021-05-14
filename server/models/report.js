@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Report.init(
     {
-      content: { type: DataTypes.STRING, allowNull: false },
+      content: { type: DataTypes.TEXT, allowNull: false },
       reporterId: { type: DataTypes.UUID, allowNull: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       location: { type: DataTypes.STRING },

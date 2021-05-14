@@ -8,6 +8,8 @@ import { NotificationRoutes } from "./notifications/notifications.routes.config"
 import { InterestedLawyersRoutes } from "./interestedLawyers/interested-lawyers.routes.config";
 import { ResponseRoutes } from "./response/response.routes.config";
 import { ReactionRoutes } from "./reactions/reactions.routes.config";
+import { EligibleLawyerRoutes } from "./eligibleLawyers/eligibleLawyers.routes.config";
+import { LocationDetailRoutes } from "./locationDetail/location-details.routes.config";
 
 const routes = [
   UserRoutes,
@@ -20,6 +22,8 @@ const routes = [
   InterestedLawyersRoutes,
   ResponseRoutes,
   ReactionRoutes,
+  EligibleLawyerRoutes,
+  LocationDetailRoutes,
 ];
 
 export const initializeRoutes = ({ app, path }) => {

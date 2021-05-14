@@ -24,6 +24,22 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
       ]);
 
     this.app
+      .route(`${this.path}/small-claims/unassigned`)
+      .get([
+        Authenticate.verifyToken,
+        SmallClaimsController.checkAccessAdmin(),
+        wrapCatch(SmallClaimsController.getUnassignedClaims),
+      ]);
+
+    this.app
+      .route(`${this.path}/small-claims/stats`)
+      .get([
+        Authenticate.verifyToken,
+        SmallClaimsController.checkAccessAdmin(),
+        wrapCatch(SmallClaimsController.getStats),
+      ]);
+
+    this.app
       .route(`${this.path}/small-claims/:id`)
       .all([
         Authenticate.verifyToken,
@@ -46,16 +62,20 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/small-claims/:id`)
-      .all([Authenticate.verifyToken, middleware({ schema: validateUUID, property: "params" })])
-      .get([
+      .all([
+        Authenticate.verifyToken,
+        middleware({ schema: validateUUID, property: "params" }),
         SmallClaimsController.smallClaimExits("retrieve"),
+      ])
+      .get([
         SmallClaimsController.checkAccessUser("retrieve"),
         wrapCatch(SmallClaimsController.getASmallClaim),
       ])
       .put([
-        SmallClaimsController.smallClaimExits("retrieve"),
         SmallClaimsController.checkAccessUser("assignLawyer"),
         wrapCatch(SmallClaimsController.assignALawyer),
       ]);
+
+    return this.app;
   }
 }
