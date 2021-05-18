@@ -1,8 +1,8 @@
 import debug from "debug";
 import createError from "http-errors";
 
-import EligibleLawyersService from "../services/EligibleLawyers.services";
-const log = debug("app:EligibleLawyers-controller");
+import EligibleLawyersService from "../services/eligibleLawyers.services";
+const log = debug("app:eligibleLawyers-controller");
 
 class EligibleLawyersController {
   static instance;

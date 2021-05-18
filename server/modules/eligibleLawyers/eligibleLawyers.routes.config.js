@@ -3,7 +3,7 @@ import EligibleLawyersController from "./controllers/eligibleLawyers.controllers
 import {
   createEligibleLawyerSchema,
   filterEligibleLawyerSchema,
-} from "./schema/EligibleLawyers.schema";
+} from "./schema/eligibleLawyers.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
 
 export class EligibleLawyerRoutes extends CommonRoutesConfig {
