@@ -43,7 +43,7 @@ export const uploadMiddleware = (context = [{ name: "attachments", maxCount: 10 
 
         const images = [];
         for (let i = 0; i < fileArray.length; i++) {
-          images.push(fileArray[i].location);
+          images.push({ url: fileArray[i].location, name: fileArray[i].originalname });
         }
         req.attachments = images;
       }
