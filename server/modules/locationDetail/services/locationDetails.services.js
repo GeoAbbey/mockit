@@ -14,9 +14,9 @@ class LocationsService {
     return LocationsService.instance;
   }
 
-  async find(id) {
-    debugLog("creating a location");
-    return models.LocationDetail.findByPk(id);
+  async find(data) {
+    debugLog(`retrieving a location with the id ${JSON.stringify(data)}`);
+    return models.LocationDetail.findOne(data);
   }
 
   async findOrCreate(LocationDTO) {

@@ -17,12 +17,12 @@ export const responseEvents = (eventEmitter) => {
     logger({ response });
 
     const {
-      dataValues: { id, assignedLawyerId },
+      dataValues: { ownerId, assignedLawyerId },
     } = response;
 
     const [userLocationDetails, lawyerLocationDetails] = await Promise.all([
-      LocationServices.find({ where: { id } }),
-      LocationServices.find({ where: { ownerId: assignedLawyerId } }),
+      LocationServices.find({ where: { id: ownerId } }),
+      LocationServices.find({ where: { id: assignedLawyerId } }),
     ]);
 
     const [[, updatedUserDetails], [, updatedLawyerDetails]] = await Promise.all([
@@ -56,17 +56,17 @@ export const responseEvents = (eventEmitter) => {
     logger({ response });
 
     const {
-      dataValues: { id, assignedLawyerId },
+      dataValues: { ownerId, assignedLawyerId },
     } = response;
 
     const [userLocationDetails, lawyerLocationDetails] = await Promise.all([
-      LocationServices.find({ where: { id } }),
-      LocationServices.find({ where: { ownerId: assignedLawyerId } }),
+      LocationServices.find({ where: { id: ownerId } }),
+      LocationServices.find({ where: { id: assignedLawyerId } }),
     ]);
 
-    const [[, updatedUserDetails], [, updatedLawyerDetails]] = await Promise.all([
+    const [[, [updatedUserDetails]], [, [updatedLawyerDetails]]] = await Promise.all([
       LocationServices.update(
-        userLocationDetails.dataValues.ownerId,
+        userLocationDetails.id,
         {
           assigneeId: null,
           online: false,
@@ -74,7 +74,7 @@ export const responseEvents = (eventEmitter) => {
         userLocationDetails
       ),
       LocationServices.update(
-        lawyerLocationDetails.dataValues.ownerId,
+        lawyerLocationDetails.id,
         {
           assigneeId: null,
         },
@@ -83,7 +83,8 @@ export const responseEvents = (eventEmitter) => {
     ]);
 
     io.to(updatedUserDetails.dataValues.socketId).emit("on:meet", {
-      userStatus: updatedUserDetails.dataValues,
+      response,
+      message: "lawyer has acknowledged that he has meet with you.",
     });
 
     await sendNotificationToUserOrLawyer(

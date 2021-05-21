@@ -21,7 +21,7 @@ export const startServer = async () => {
   const server = http.createServer(app);
   const io = socket(server, {
     cors: {
-      origin: config.clientUri,
+      origin: "*",
       methods: ["GET", "POST"],
     },
   });

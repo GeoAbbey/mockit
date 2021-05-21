@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       this.belongsTo(models.User, {
+        as: "lawyerProfile",
         foreignKey: "lawyerId",
         onDelete: "CASCADE",
       });

@@ -99,7 +99,7 @@ class ResponsesController {
     return res.status(200).send({
       success: true,
       message: "response successfully retrieved",
-      Response: oldResponse,
+      response: oldResponse,
     });
   }
 
