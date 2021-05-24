@@ -42,7 +42,7 @@ class UsersController {
   }
 
   async login(req, res, next) {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
     email = email.trim().toLowerCase();
     log(`login in an existing user with id ${email}`);
     const user = await UsersService.findOne(email);
