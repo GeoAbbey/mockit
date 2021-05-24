@@ -25,6 +25,7 @@ class UsersController {
     const hash = await HandlePassword.getHash(req.body.password);
     req.body.password = hash;
     req.body.profilePic = "https://zapplawyer.s3.us-west-2.amazonaws.com/attachments/user.png";
+    req.body.email = req.body.email.trim().toLowerCase();
 
     const user = await UsersService.create(req.body);
     delete user.dataValues.password;
@@ -42,6 +43,7 @@ class UsersController {
 
   async login(req, res, next) {
     const { email, password } = req.body;
+    email = email.trim().toLowerCase();
     log(`login in an existing user with id ${email}`);
     const user = await UsersService.findOne(email);
     if (!user) return next(createError(404, "User not found"));

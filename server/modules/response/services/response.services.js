@@ -28,12 +28,14 @@ class ResponsesService {
             model: models.EligibleLawyer,
             as: "eligibleLawyers",
             required: false,
-            include: {
-              model: models.User,
-              as: "lawyerProfile",
-              attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken"],
-              required: false,
-            },
+            include: [
+              {
+                model: models.User,
+                as: "lawyerProfile",
+                attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken"],
+                required: false,
+              },
+            ],
           },
           {
             model: models.User,
