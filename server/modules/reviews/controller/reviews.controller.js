@@ -86,7 +86,7 @@ class ReviewsController {
           return next(
             createError(403, `You can only have one review per ${modelType} with ${modelId}`)
           );
-        next();
+        return next();
       }
     };
   }
