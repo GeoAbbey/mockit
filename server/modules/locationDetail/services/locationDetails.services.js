@@ -19,6 +19,11 @@ class LocationsService {
     return models.LocationDetail.findOne(data);
   }
 
+  async findByPk(id) {
+    debugLog(`retrieving a location with the id ${JSON.stringify(id)}`);
+    return models.LocationDetail.findByPk(id);
+  }
+
   async findOrCreate(LocationDTO) {
     debugLog("creating or returning a location");
     return models.LocationDetail.findOrCreate(LocationDTO);

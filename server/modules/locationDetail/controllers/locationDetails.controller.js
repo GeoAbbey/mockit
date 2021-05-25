@@ -17,7 +17,7 @@ class LocationDetailsController {
     return async (req, res, next) => {
       const { id } = req.params;
       log(`verifying that a location details with id ${id} exits`);
-      const locationDetail = await LocationDetailsService.find(id);
+      const locationDetail = await LocationDetailsService.findByPk(id);
       if (!locationDetail) return next(createError(404, "The locations details can not be found"));
       req.oldLocationDetail = locationDetail;
       return next();
