@@ -24,7 +24,6 @@ class UsersController {
 
     const hash = await HandlePassword.getHash(req.body.password);
     req.body.password = hash;
-    req.body.profilePic = "https://zapplawyer.s3.us-west-2.amazonaws.com/attachments/user.png";
     req.body.email = req.body.email.trim().toLowerCase();
 
     const user = await UsersService.create(req.body);
@@ -44,7 +43,7 @@ class UsersController {
   async login(req, res, next) {
     let { email, password } = req.body;
     email = email.trim().toLowerCase();
-    log(`login in an existing user with id ${email}`);
+    log(`login in an existing user with email ${email}`);
     const user = await UsersService.findOne(email);
     if (!user) return next(createError(404, "User not found"));
 
@@ -57,6 +56,31 @@ class UsersController {
     return res.status(200).send({
       success: true,
       message: "user successfully retrieved",
+      token,
+    });
+  }
+
+  async changePassword(req, res, next) {
+    let {
+      body: { newPassword, password },
+      decodedToken: { email, id },
+    } = req;
+    log(`changing password for a user with email ${email}`);
+    const user = await UsersService.findOne(email);
+    if (!user) return next(createError(404, "User not found"));
+
+    const match = await HandlePassword.compareHash(password, user.password);
+    if (!match) return next(createError(400, "Invalid email or password"));
+
+    const hash = await HandlePassword.getHash(newPassword);
+    const [, [newUser]] = await UsersService.update(id, { password: hash }, user);
+    delete newUser.dataValues.password;
+
+    const token = await Authenticate.signToken(newUser.dataValues);
+
+    return res.status(200).send({
+      success: true,
+      message: "password successfully updated",
       token,
     });
   }
@@ -158,7 +182,7 @@ class UsersController {
     if (compareAsc(new Date(), parseISO(req.user.otp.expiresIn)) !== -1) {
       return next(createError(403, "supplied OTP has expired"));
     }
-    next();
+    return next();
   }
 
   async getUser(req, res, next) {
@@ -199,7 +223,7 @@ class UsersController {
 
       if (!context && !user) return next(createError(404, "user not found"));
       req.user = user;
-      next();
+      return next();
     };
   }
 

@@ -179,6 +179,7 @@ class UsersService {
         creditCard: UserDTO.creditCard || oldDetails.creditCard,
         lawyer: {
           isVerified: UserDTO.lawyer && handleFalsy(UserDTO.lawyer.isVerified, lawyer.isVerified),
+          description: (UserDTO.lawyer && UserDTO.lawyer.description) || lawyer.description,
           documents: handleDocuments(),
         },
         hasAgreedToTerms: handleFalsy(UserDTO.hasAgreedToTerms, oldDetails.hasAgreedToTerms),
