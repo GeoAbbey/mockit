@@ -8,6 +8,7 @@ import {
   validOtpAndPassword,
   newOTP,
   queryUserOrLawyer,
+  changePasswordSchema,
 } from "./schema/users.schema";
 import {
   middleware,
@@ -82,6 +83,14 @@ export class UserRoutes extends CommonRoutesConfig {
         middleware({ schema: validOtpAndPassword, property: "body" }),
         wrapCatch(UsersController.validateOTP),
         wrapCatch(UsersController.resetPassword),
+      ]);
+
+    this.app
+      .route(`${this.path}/users/change-password`)
+      .all([Authenticate.verifyToken])
+      .patch([
+        middleware({ schema: changePasswordSchema, property: "body" }),
+        wrapCatch(UsersController.changePassword),
       ]);
 
     this.app

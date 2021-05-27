@@ -1,5 +1,5 @@
 import debug from "debug";
-import { Op } from "sequelize";
+import { Op, QueryTypes } from "sequelize";
 import models from "../../../models";
 
 const debugLog = debug("app:reviews-service");
@@ -19,7 +19,7 @@ class ReviewsService {
     const validModelIdWithOwnerOrLawyer = await models[modelType].findOne({
       where: {
         id: modelId,
-        status: "completed",
+        status: completed,
         [Op.or]: [
           {
             ownerId: reviewerId,
@@ -54,12 +54,12 @@ class ReviewsService {
 
     return models.Review.findAll({
       where: { modelId, modelType },
-      order: [["createdAt", "DESC"]],
+      order: [[createdAt, DESC]],
       include: [
         {
           model: models.User,
-          as: "reviewerProfile",
-          attributes: ["firstName", "lastName", "email", "profilePic"],
+          as: reviewerProfile,
+          attributes: [firstName, lastName, email, profilePic],
           required: false,
         },
       ],
@@ -70,12 +70,12 @@ class ReviewsService {
     debugLog(`finding all review with the query context ${JSON.stringify(context)}`);
     return models.Review.findAll({
       context,
-      order: [["createdAt", "DESC"]],
+      order: [[createdAt, DESC]],
       include: [
         {
           model: models.User,
-          as: "reviewerProfile",
-          attributes: ["firstName", "lastName", "email", "profilePic"],
+          as: reviewerProfile,
+          attributes: [firstName, lastName, email, profilePic],
           required: false,
         },
       ],
@@ -92,6 +92,16 @@ class ReviewsService {
       { where: { id }, returning: true }
     );
   }
+  // async getStats(id) {
+  //   debugLog(`retrieving statistics for a lawyer with ${id}`);
+  //   return models.sequelize.query(
+  //     `SELECT COUNT(id) FROM Reviews WHERE reviewerId = '7642ae8b-d521-405c-bce2-c54da4a24a79'`,
+  //     {
+  //       replacements: { id },
+  //       type: QueryTypes.SELECT,
+  //     }
+  //   );
+  // }
 }
 
 export default ReviewsService.getInstance();

@@ -130,6 +130,20 @@ class ReviewsController {
     });
   }
 
+  async getAllReviewStats(req, res, next) {
+    const {
+      params: { id },
+    } = req;
+
+    const stats = await ReviewsService.getStats(id);
+
+    return res.status(200).send({
+      success: true,
+      message: "review successfully updated",
+      stats,
+    });
+  }
+
   checkAccessUser(context) {
     return async (req, res, next) => {
       const {

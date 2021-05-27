@@ -52,13 +52,18 @@ module.exports = (sequelize, DataTypes) => {
       dob: { type: DataTypes.STRING, isDate: true },
       guarantors: { type: DataTypes.JSONB },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
-      profilePic: { type: DataTypes.STRING },
+      profilePic: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "https://zapplawyer.s3.us-west-2.amazonaws.com/attachments/user.png",
+      },
       creditCard: { type: DataTypes.STRING, isCreditCard: true },
       lawyer: {
         type: DataTypes.JSONB,
         allowNull: false,
         defaultValue: {
           isVerified: false,
+          description: "",
           documents: {},
         },
       },

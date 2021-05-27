@@ -52,6 +52,7 @@ export const updateUserSchema = Joi.object().keys({
   creditCard: Joi.string().creditCard(),
   lawyer: Joi.object().keys({
     isVerified: Joi.boolean(),
+    description: Joi.string(),
     documents: Joi.object(),
   }),
 
@@ -80,4 +81,9 @@ export const newOTP = Joi.object().keys({
 
 export const queryUserOrLawyer = Joi.object().keys({
   role: Joi.string().valid("user", "lawyer", "admin", "super-admin"),
+});
+
+export const changePasswordSchema = Joi.object().keys({
+  password: Joi.string().required(),
+  newPassword: Joi.string().required(),
 });
