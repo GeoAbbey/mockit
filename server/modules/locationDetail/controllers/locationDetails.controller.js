@@ -58,7 +58,6 @@ class LocationDetailsController {
         decodedToken: { role, id },
       } = req;
 
-      console.log({ role }, "🤮");
       if (role === "admin" || role === "super-admin") return next();
       if (role !== "lawyer")
         return next(createError(401, "You don not have permission to access this route"));

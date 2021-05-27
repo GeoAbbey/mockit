@@ -29,7 +29,7 @@ export class EligibleLawyerRoutes extends CommonRoutesConfig {
       .route(`${this.path}/eligible-lawyer/:id`)
       .all([
         Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
+        middleware({ schema: validateUUID("id"), property: "params" }),
         EligibleLawyersController.checkAccessAdmin(),
       ])
       .delete([

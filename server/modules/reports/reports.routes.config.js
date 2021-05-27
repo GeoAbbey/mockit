@@ -23,7 +23,7 @@ export class ReportRoutes extends CommonRoutesConfig {
       .route(`${this.path}/report/:id`)
       .all([
         Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
+        middleware({ schema: validateUUID("id"), property: "params" }),
         ReportsController.reportExits(),
       ])
       .patch([
@@ -41,7 +41,7 @@ export class ReportRoutes extends CommonRoutesConfig {
       .route(`${this.path}/report/:id`)
       .get([
         Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
+        middleware({ schema: validateUUID("id"), property: "params" }),
         ReportsController.reportExits("retrieve"),
         wrapCatch(ReportsController.getAReport),
       ]);

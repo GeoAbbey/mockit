@@ -1,6 +1,7 @@
 import debug from "debug";
 import { QueryTypes } from "sequelize";
 import models from "../../../models";
+import { handleFalsy } from "../../../utils";
 import { rawQueries } from "../../../utils/rawQueriers";
 
 const debugLog = debug("app:invitations-service");
@@ -19,7 +20,7 @@ class InvitationsService {
     return models.Invitation.create(invitationDTO);
   }
 
-  async find(id, context) {
+  async find(id, context, t = undefined) {
     debugLog(`looking for an invitation with id ${id}`);
     if (context) {
       const invitation = await models.Invitation.findByPk(id, {
@@ -41,7 +42,7 @@ class InvitationsService {
       return invitation;
     }
 
-    return models.Invitation.findByPk(id);
+    return models.Invitation.findByPk(id, t);
   }
 
   async findMany(data) {
@@ -66,8 +67,16 @@ class InvitationsService {
     });
   }
 
-  async update(id, invitationDTO, oldInvitation) {
-    const { status, reason, venue, attachments, assignedLawyerId, dateOfVisit } = oldInvitation;
+  async update(id, invitationDTO, oldInvitation, t = undefined) {
+    const {
+      status,
+      reason,
+      venue,
+      attachments,
+      assignedLawyerId,
+      dateOfVisit,
+      paid,
+    } = oldInvitation;
     const handleAttachments = () => {
       if (typeof invitationDTO.attachments === "number") {
         attachments.splice(invitationDTO.attachments, 1);
@@ -78,16 +87,19 @@ class InvitationsService {
       }
       return attachments;
     };
+
     return models.Invitation.update(
       {
         status: invitationDTO.status || status,
         reason: invitationDTO.reason || reason,
         venue: invitationDTO.venue || venue,
+        paid: handleFalsy(invitationDTO.paid, paid),
         dateOfVisit: invitationDTO.dateOfVisit || dateOfVisit,
         attachments: handleAttachments(),
         assignedLawyerId: invitationDTO.assignedLawyerId || assignedLawyerId,
       },
-      { where: { id }, returning: true }
+      { where: { id }, returning: true },
+      t
     );
   }
 

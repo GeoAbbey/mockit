@@ -27,7 +27,7 @@ export class ReviewsRoutes extends CommonRoutesConfig {
       .route(`${this.path}/review/:id`)
       .all([
         Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
+        middleware({ schema: validateUUID("id"), property: "params" }),
         ReviewsController.reviewExits(),
       ])
       .get([wrapCatch(ReviewsController.getSpecificReview)])

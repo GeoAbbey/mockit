@@ -5,6 +5,10 @@ const common = {
   googleApplicationCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS,
   dialect: process.env.DIALECT,
   radius: process.env.RADIUS,
+  invitationCost: process.env.INVITATION_COST,
+  costOfSubscriptionUnit: process.env.SUBSCRIPTION_UNIT_COST,
+  payStackSecretKey: process.env.PAYSTACK_SECRET,
+  payStackPublicKey: process.env.PAYSTACK_PUBLIC,
 };
 
 module.exports = {

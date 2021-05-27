@@ -40,6 +40,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: () => nanoid(10),
       },
+      paid: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: () => false,
+      },
       status: {
         type: DataTypes.STRING,
         validate: {

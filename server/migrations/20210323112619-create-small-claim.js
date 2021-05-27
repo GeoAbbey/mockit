@@ -30,6 +30,9 @@ module.exports = {
       meta: {
         type: Sequelize.JSONB,
       },
+      paid: {
+        type: Sequelize.BOOLEAN,
+      },
       ownerId: {
         type: Sequelize.UUID,
         onDelete: "CASCADE",

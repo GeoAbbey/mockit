@@ -43,7 +43,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
       .route(`${this.path}/small-claims/:id`)
       .all([
         Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
+        middleware({ schema: validateUUID("id"), property: "params" }),
         SmallClaimsController.smallClaimExits(),
       ])
       .delete([
@@ -64,7 +64,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
       .route(`${this.path}/small-claims/:id`)
       .all([
         Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
+        middleware({ schema: validateUUID("id"), property: "params" }),
         SmallClaimsController.smallClaimExits("retrieve"),
       ])
       .get([

@@ -28,7 +28,7 @@ export class InvitationRoutes extends CommonRoutesConfig {
       .route(`${this.path}/invitation/:id`)
       .all([
         Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
+        middleware({ schema: validateUUID("id"), property: "params" }),
         wrapCatch(InvitationsController.invitationExits()),
       ])
       .patch([
@@ -53,7 +53,7 @@ export class InvitationRoutes extends CommonRoutesConfig {
       .route(`${this.path}/invitation/:id`)
       .get([
         Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
+        middleware({ schema: validateUUID("id"), property: "params" }),
         InvitationsController.invitationExits("retrieve"),
         InvitationsController.checkAccessUser("retrieve"),
         wrapCatch(InvitationsController.getAnInvite),

@@ -1,22 +1,12 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("Responses", {
+    await queryInterface.createTable("Transactions", {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-      },
-      status: {
-        type: Sequelize.STRING,
-      },
-      meta: {
-        type: Sequelize.JSONB,
-      },
-      ticketId: {
-        type: Sequelize.STRING,
-        allowNull: false,
       },
       ownerId: {
         type: Sequelize.UUID,
@@ -27,23 +17,24 @@ module.exports = {
           as: "ownerId",
         },
       },
-      assignedLawyerId: {
+      modelType: {
+        type: Sequelize.STRING,
+      },
+      modelId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+      },
+      amount: {
+        type: Sequelize.INTEGER,
+      },
+      performedBy: {
         type: Sequelize.UUID,
         onDelete: "CASCADE",
         references: {
           model: "Users",
           key: "id",
-          as: "assignedLawyerId",
+          as: "performedBy",
         },
-      },
-      paid: {
-        type: Sequelize.BOOLEAN,
-      },
-      meetTime: {
-        type: Sequelize.DATE,
-      },
-      startingLocation: {
-        type: Sequelize.GEOMETRY,
       },
       createdAt: {
         allowNull: false,
@@ -53,9 +44,12 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
+      deletedAt: {
+        type: Sequelize.DATE,
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("Responses");
+    await queryInterface.dropTable("Transactions");
   },
 };

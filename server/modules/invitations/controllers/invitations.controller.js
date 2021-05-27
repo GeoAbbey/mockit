@@ -40,7 +40,7 @@ class InvitationsController {
       const invitation = await InvitationsService.find(id, context);
       if (!invitation) return next(createError(404, "The invitation can not be found"));
       req.oldInvitation = invitation;
-      next();
+      return next();
     };
   }
 

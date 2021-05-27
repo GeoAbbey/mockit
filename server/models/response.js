@@ -48,6 +48,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.JSONB,
         defaultValue: {},
       },
+      paid: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: () => false,
+      },
       startingLocation: {
         type: DataTypes.GEOMETRY("POINT"),
         allowNull: false,

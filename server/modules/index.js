@@ -10,6 +10,9 @@ import { ResponseRoutes } from "./response/response.routes.config";
 import { ReactionRoutes } from "./reactions/reactions.routes.config";
 import { EligibleLawyerRoutes } from "./eligibleLawyers/eligibleLawyers.routes.config";
 import { LocationDetailRoutes } from "./locationDetail/location-details.routes.config";
+import { AccountInfoRoutes } from "./accountInfo/accountInfo.routes.config";
+import { TransactionRoutes } from "./transactions/transactions.config";
+import { PaymentRoutes } from "./payment/payment.route.config";
 
 const routes = [
   UserRoutes,
@@ -24,6 +27,9 @@ const routes = [
   ReactionRoutes,
   EligibleLawyerRoutes,
   LocationDetailRoutes,
+  AccountInfoRoutes,
+  TransactionRoutes,
+  PaymentRoutes,
 ];
 
 export const initializeRoutes = ({ app, path }) => {
