@@ -25,6 +25,9 @@ module.exports = {
       location: {
         type: Sequelize.GEOMETRY,
       },
+      speed: {
+        type: Sequelize.STRING,
+      },
       assigneeId: {
         type: Sequelize.UUID,
         references: {

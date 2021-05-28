@@ -15,7 +15,11 @@ const hoistedIOUser = (io) => {
       const deliverTo = await LocationServices.find({ where: { id: recipient.assigneeId } });
       const { socketId } = deliverTo.dataValues;
 
-      io.to(socketId).emit("on:move", { location: recipient.location });
+      io.to(socketId).emit("on:move", {
+        location: recipient.location,
+        distance: calcCrow(recipient.location.coordinates, location.coordinates),
+        speed: recipient.speed,
+      });
     }
   };
 };
