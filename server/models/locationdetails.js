@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       id: { type: DataTypes.UUID, allowNull: false, primaryKey: true, allowNull: false },
       socketId: { type: DataTypes.STRING },
+      speed: { type: DataTypes.STRING },
       online: { type: DataTypes.BOOLEAN, defaultValue: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       location: { type: DataTypes.GEOMETRY("POINT") },

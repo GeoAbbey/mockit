@@ -13,6 +13,7 @@ export const updateDbWithNewLocation = async (payload, io) => {
       id,
       socketId,
       online: true,
+      speed: payload.coords.speed,
       location: {
         type: "Point",
         coordinates: [payload.coords.longitude, payload.coords.latitude],
@@ -26,6 +27,7 @@ export const updateDbWithNewLocation = async (payload, io) => {
     const [, [newDetails]] = await LocationService.update(
       id,
       {
+        speed: payload.coords.speed,
         location: {
           type: "Point",
           coordinates: [payload.coords.longitude, payload.coords.latitude],
