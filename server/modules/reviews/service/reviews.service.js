@@ -92,16 +92,16 @@ class ReviewsService {
       { where: { id }, returning: true }
     );
   }
-  // async getStats(id) {
-  //   debugLog(`retrieving statistics for a lawyer with ${id}`);
-  //   return models.sequelize.query(
-  //     `SELECT COUNT(id) FROM Reviews WHERE reviewerId = '7642ae8b-d521-405c-bce2-c54da4a24a79'`,
-  //     {
-  //       replacements: { id },
-  //       type: QueryTypes.SELECT,
-  //     }
-  //   );
-  // }
+  async getStats(id) {
+    debugLog(`retrieving statistics for a lawyer with ${id}`);
+    return models.sequelize.query(
+      `SELECT "Users".email, "Users"."firebaseToken", "Users"."phone", "Users"."lawyer", "Users"."lastName", "Users"."firstName", "Users"."profilePic",(select count(id) from "Reviews" where "reviewerId" = :id) as total_rating,(select avg(rating) from "Reviews" where "reviewerId" = :id) as avg_rating,(select count(id) from "Reviews" where "reviewerId" = :id and rating > 2) as positive_rating FROM "Users" WHERE "Users".id = :id;`,
+      {
+        replacements: { id },
+        type: QueryTypes.SELECT,
+      }
+    );
+  }
 }
 
 export default ReviewsService.getInstance();
