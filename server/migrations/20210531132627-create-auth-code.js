@@ -1,15 +1,12 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("PayIns", {
+    await queryInterface.createTable("AuthCodes", {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-      },
-      for: {
-        type: Sequelize.STRING,
       },
       ownerId: {
         type: Sequelize.UUID,
@@ -20,14 +17,15 @@ module.exports = {
           as: "ownerId",
         },
       },
-      amount: {
-        type: Sequelize.INTEGER,
-      },
-      reference: {
+      authorizationCode: {
         type: Sequelize.STRING,
       },
-      subQuantity: { type: Sequelize.JSONB },
-      modelId: { type: Sequelize.UUID },
+      last4: {
+        type: Sequelize.STRING,
+      },
+      cardDetails: {
+        type: Sequelize.JSONB,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -36,12 +34,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      deletedAt: {
-        type: Sequelize.DATE,
-      },
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("PayIns");
+    await queryInterface.dropTable("AuthCodes");
   },
 };

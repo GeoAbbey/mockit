@@ -98,8 +98,7 @@ class InvitationsService {
         attachments: handleAttachments(),
         assignedLawyerId: invitationDTO.assignedLawyerId || assignedLawyerId,
       },
-      { where: { id }, returning: true },
-      t
+      { where: { id }, returning: true, ...t }
     );
   }
 

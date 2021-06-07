@@ -15,8 +15,6 @@ class InvitationsController {
   }
 
   async makeInvite(req, res) {
-    const eventEmitter = req.app.get("eventEmitter");
-
     const { body, attachments = [] } = req;
     const ownerId = req.decodedToken.id;
     log(`creating a new invitation for user with id ${ownerId}`);
@@ -26,6 +24,7 @@ class InvitationsController {
       invitation,
       decodedToken: req.decodedToken,
     });
+
     return res.status(201).send({
       success: true,
       message: "invitation successfully created",
@@ -205,6 +204,7 @@ class InvitationsController {
           return next(
             createError(401, "This invitation has already been assigned to another lawyer")
           );
+        if (!oldInvitation.paid) return next(createError(401, "Invitation hasn't been  paid for"));
         req.oldInvitation.bid = true;
       }
       return next();

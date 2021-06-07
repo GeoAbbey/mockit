@@ -31,6 +31,8 @@ class InterestedLawyersController {
       modelId: id,
     });
 
+    if (!interest) return next(createError(400, `The ${modelType} with id ${id} cannot be found`));
+
     eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, interest);
 
     return res.status(200).send({
@@ -50,14 +52,14 @@ class InterestedLawyersController {
         const interest = await InterestedLawyersService.find(req.params.id);
         if (!interest) return next(createError(404, "This interest can not be found"));
         req.oldInterest = interest;
-        next();
+        return next();
       } else {
         const interest = await InterestedLawyersService.findOne({ modelId, modelType, lawyerId });
         if (interest)
           return next(
             createError(403, `You can only indicate interest once per ${modelType} with ${modelId}`)
           );
-        next();
+        return next();
       }
     };
   }

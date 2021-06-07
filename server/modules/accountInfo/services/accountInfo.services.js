@@ -48,8 +48,7 @@ class AccountInfosService {
               )
             : subscriptionCount,
       },
-      { where: { id }, returning: true },
-      t
+      { where: { id }, returning: true, ...t }
     );
   }
 }

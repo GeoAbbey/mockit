@@ -1,0 +1,35 @@
+import debug from "debug";
+import axios from "axios";
+
+import models from "../../../models";
+import { payStack } from "../../../utils/paymentService";
+
+const payment = payStack(axios);
+
+const debugLog = debug("app:payouts-service");
+
+class PayoutsService {
+  static instance;
+  static getInstance() {
+    if (!PayoutsService.instance) {
+      PayoutsService.instance = new PayoutsService();
+    }
+    return PayoutsService.instance;
+  }
+
+  async create(PayoutDTO) {
+    debugLog("creating a Payout");
+    const res = await payment.transfer(PayoutDTO);
+    if (res.success === false) return res;
+
+    const dataFromPayStack = {
+      data: res.response.data,
+      code: res.response.data.transfer_code,
+      payStackId: res.response.data.id,
+      lawyerId: JSON.parse(res.response.data.reason).lawyerId,
+    };
+    return models.Payout.create(dataFromPayStack);
+  }
+}
+
+export default PayoutsService.getInstance();

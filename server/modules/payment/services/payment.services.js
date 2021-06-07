@@ -6,9 +6,12 @@ import AccountInfosService from "../../accountInfo/services/accountInfo.services
 import TransactionService from "../../transactions/services/transaction.services";
 import SmallClaimsService from "../../small-claims/services/small-claims.service";
 import ResponsesService from "../../response/services/response.services";
+import PayInServices from "../../payIn/services/pay-in.services";
+import AuthCodeServices from "../../authCode/services/auth-code.services";
 
 const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
+import { EVENT_IDENTIFIERS } from "../../../constants";
 
 const config = configOptions[env];
 
@@ -23,7 +26,7 @@ class PaymentsService {
     return PaymentsService.instance;
   }
 
-  async create(PaymentDTO) {
+  async create(PaymentDTO, eventEmitter) {
     debugLog("creating a payment");
     const mapper = {
       invitation: this.handleInvitation,
@@ -31,11 +34,256 @@ class PaymentsService {
       smallClaim: this.handleSmallClaim,
     };
 
-    return mapper[PaymentDTO.modelType](PaymentDTO);
+    return mapper[PaymentDTO.modelType](PaymentDTO, eventEmitter);
   }
 
-  async handleInvitation(args) {
-    console.log("I am handling payment for invitations", args);
+  async processPayIn({ data }) {
+    const mapper = {
+      subscription: this.handleSubscriptionPayIn,
+      singleSmallClaim: this.handleSingleSmallClaim,
+      singleInvitation: this.handleSingleInvitation,
+      wallet: this.handleWalletPayIn,
+    };
+
+    return mapper[data.metadata.type]({ data });
+  }
+
+  async handleSingleInvitation({ data }) {
+    let result = await models.sequelize.transaction(async (t) => {
+      // increase the unit of the subscription purchased
+      const { metadata, amount, reference } = data;
+      const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
+        transaction: t,
+      });
+      if (referenceIsAlreadyUsed) {
+        return {
+          message: `you account has already been credited with the supplied reference ${reference}`,
+          success: false,
+        };
+      }
+
+      const oldInvitation = await InvitationsService.find(metadata.modelId, null, {
+        transaction: t,
+      });
+
+      if (oldInvitation.dataValues.paid) {
+        return {
+          message: "this item has already been paid for",
+          success: false,
+        };
+      }
+
+      const [, [paidInvitation]] = await InvitationsService.update(
+        metadata.modelId,
+        { paid: true },
+        oldInvitation,
+        { transaction: t }
+      );
+
+      //create a pay-in record that captures this payIn
+      const receipt = await PayInServices.create(
+        {
+          for: metadata.type,
+          amount,
+          reference,
+          ownerId: metadata.id,
+        },
+        { transaction: t }
+      );
+
+      //TODO
+      //if can credentials doesn't exist save it.
+      const { authorization } = data;
+      console.log({ authorization });
+
+      const authDetails = await AuthCodeServices.findOrCreate({
+        where: { ownerId: metadata.id, authorizationCode: authorization.authorization_code },
+        defaults: {
+          last4: authorization.last4,
+          cardDetails: authorization,
+        },
+        transaction: t,
+      });
+      return { success: true, service: paidInvitation };
+    });
+
+    return result;
+  }
+  async handleSingleSmallClaim({ data }) {
+    let result = await models.sequelize.transaction(async (t) => {
+      // increase the unit of the subscription purchased
+      const { metadata, amount, reference } = data;
+      const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
+        transaction: t,
+      });
+      if (referenceIsAlreadyUsed) {
+        return {
+          message: `you account has already been credited with the supplied reference ${reference}`,
+          success: false,
+        };
+      }
+
+      const oldClaim = await SmallClaimsService.find(metadata.modelId, null, { transaction: t });
+
+      if (oldClaim.dataValues.paid) {
+        return {
+          message: "this item has already been paid for",
+          success: false,
+        };
+      }
+
+      const [, [paidSmallClaim]] = await SmallClaimsService.update(
+        metadata.modelId,
+        { paid: true },
+        oldClaim,
+        { transaction: t }
+      );
+
+      //create a pay-in record that captures this payIn
+      const receipt = await PayInServices.create(
+        {
+          for: metadata.type,
+          amount,
+          reference,
+          ownerId: metadata.id,
+        },
+        { transaction: t }
+      );
+
+      //TODO
+      //if can credentials doesn't exist save it.
+      const { authorization } = data;
+      const authDetails = await AuthCodeServices.findOrCreate(
+        {
+          where: { ownerId: metadata.id, authorizationCode: authorization.authorization_code },
+          defaults: {
+            last4: authorization.last4,
+            cardDetails: authorization,
+          },
+        },
+        { transaction: t }
+      );
+      return { success: true, service: paidSmallClaim };
+    });
+
+    return result;
+  }
+
+  async handleWalletPayIn({ data }) {
+    let result = await models.sequelize.transaction(async (t) => {
+      // increase the unit of the subscription purchased
+      const { metadata, amount, reference } = data;
+      const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
+        transaction: t,
+      });
+      if (referenceIsAlreadyUsed) {
+        return {
+          message: `you account has already been credited with the supplied reference ${reference}`,
+          success: false,
+        };
+      }
+
+      const oldAccountInfo = await AccountInfosService.find(metadata.id, { transaction: t });
+      const [, [newAccountInfo]] = await AccountInfosService.update(
+        metadata.id,
+        {
+          info: "wallet",
+          operation: "add",
+          walletAmount: amount,
+        },
+        oldAccountInfo,
+        { transaction: t }
+      );
+      //create a pay-in record that captures this payIn
+      const receipt = await PayInServices.create(
+        {
+          for: metadata.type,
+          amount,
+          reference,
+          ownerId: metadata.id,
+        },
+        { transaction: t }
+      );
+
+      //TODO
+      //if can credentials doesn't exist save it.
+      const { authorization } = data;
+      const authDetails = await AuthCodeServices.findOrCreate(
+        {
+          where: { ownerId: metadata.id, authorizationCode: authorization.authorization_code },
+          defaults: {
+            last4: authorization.last4,
+            cardDetails: authorization,
+          },
+        },
+        { transaction: t }
+      );
+
+      return { success: true, service: newAccountInfo };
+    });
+
+    return result;
+  }
+
+  async handleSubscriptionPayIn({ data }) {
+    let result = await models.sequelize.transaction(async (t) => {
+      // increase the unit of the subscription purchased
+      const { metadata, amount, reference } = data;
+      const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, t);
+      if (referenceIsAlreadyUsed) {
+        return {
+          message: `you account has already been credited with the supplied reference ${reference}`,
+          success: false,
+        };
+      }
+
+      const oldAccountInfo = await AccountInfosService.find(metadata.id, { transaction: t });
+      const [, [newAccountInfo]] = await AccountInfosService.update(
+        metadata.id,
+        {
+          info: "subscription",
+          operation: "add",
+          subscriptionCount: parseInt(amount / 100 / parseInt(config.costOfSubscriptionUnit)),
+        },
+        oldAccountInfo,
+        { transaction: t }
+      );
+      //create a pay-in record that captures this payIn
+      const receipt = await PayInServices.create(
+        {
+          for: metadata.type,
+          amount,
+          reference,
+          subQuantity: {
+            count: parseInt(amount / 100 / parseInt(config.costOfSubscriptionUnit)),
+            pricePerCount: config.costOfSubscriptionUnit,
+          },
+          ownerId: metadata.id,
+        },
+        { transaction: t }
+      );
+
+      //TODO
+      //if can credentials doesn't exist save it.
+      const { authorization } = data;
+      const authDetails = await AuthCodeServices.findOrCreate(
+        {
+          where: { ownerId: metadata.id, authorizationCode: authorization.authorization_code },
+          defaults: {
+            last4: authorization.last4,
+            cardDetails: authorization,
+          },
+        },
+        { transaction: t }
+      );
+      return { success: true, service: newAccountInfo };
+    });
+
+    return result;
+  }
+
+  async handleInvitation(args, emitter) {
+    debugLog("I am handling payment for invitations", args);
     try {
       let result = await models.sequelize.transaction(async (t) => {
         const oldInvitation = await InvitationsService.find(args.modelId, null, { transaction: t });
@@ -60,7 +308,7 @@ class PaymentsService {
           {
             info: "wallet",
             operation: "deduct",
-            walletAmount: parseInt(config.invitationCost),
+            walletAmount: parseInt(config.invitationCost) * 100,
           },
           oldAccountInfo,
           { transaction: t }
@@ -84,6 +332,7 @@ class PaymentsService {
           { transaction: t }
         );
 
+        emitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, paidInvitation);
         return { success: true, service: paidInvitation };
       });
 
@@ -122,13 +371,12 @@ class PaymentsService {
           };
         }
 
-        console.log({ oldClaim });
         const newAccountInfo = await AccountInfosService.update(
           args.id,
           {
             info: "wallet",
             operation: "deduct",
-            walletAmount: totalCostOfService,
+            walletAmount: totalCostOfService * 100,
           },
           oldAccountInfo,
           { transaction: t }

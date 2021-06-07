@@ -13,6 +13,9 @@ import { LocationDetailRoutes } from "./locationDetail/location-details.routes.c
 import { AccountInfoRoutes } from "./accountInfo/accountInfo.routes.config";
 import { TransactionRoutes } from "./transactions/transactions.config";
 import { PaymentRoutes } from "./payment/payment.route.config";
+import { AuthCodeRoutes } from "./authCode/authCode.route.config";
+import { RecipientRoutes } from "./recipient/recipient.route.config";
+import { PayoutRoutes } from "./payout/payout.routes.config";
 
 const routes = [
   UserRoutes,
@@ -30,6 +33,9 @@ const routes = [
   AccountInfoRoutes,
   TransactionRoutes,
   PaymentRoutes,
+  AuthCodeRoutes,
+  RecipientRoutes,
+  PayoutRoutes,
 ];
 
 export const initializeRoutes = ({ app, path }) => {

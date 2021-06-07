@@ -219,6 +219,9 @@ export const EVENT_IDENTIFIERS = {
     MEET_TIME: "MEET_TIME_CREATED",
     MARK_AS_COMPLETED: "RESPONSE_MARK_AS_COMPLETED",
   },
+  USER: {
+    CREATED: "USER_CREATED",
+  },
 };
 
 export const ROLES = {

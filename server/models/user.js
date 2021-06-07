@@ -36,6 +36,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "lawyerId",
         onDelete: "CASCADE",
       });
+      this.hasMany(models.PayIn, { foreignKey: "ownerId" });
+      this.hasMany(models.AuthCode, { foreignKey: "ownerId" });
+      this.hasMany(models.Payout, { foreignKey: "lawyerId" });
     }
   }
 

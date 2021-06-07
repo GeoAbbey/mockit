@@ -115,8 +115,7 @@ class SmallClaimsService {
         attachments: handleAttachments(),
         paid: handleFalsy(smallClaimDTO.paid, paid),
       },
-      { where: { id }, returning: true },
-      t
+      { where: { id }, returning: true, ...t }
     );
   }
 

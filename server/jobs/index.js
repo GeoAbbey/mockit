@@ -1,5 +1,5 @@
 import { agenda } from "./agenda";
-import { sendWelcomeEmail } from "./sendWelcomeMail";
+import { JobHandlers } from "./handlers";
 
 agenda
   .on("ready", () => console.log("Agenda started!"))
@@ -11,7 +11,16 @@ agenda.define(
     priority: "high",
     concurrency: 10,
   },
-  sendWelcomeEmail.handler
+  JobHandlers.sendWelcomeMail
+);
+
+agenda.define(
+  "create-payout",
+  {
+    priority: "normal",
+    concurrency: 10,
+  },
+  JobHandlers.createPayout
 );
 
 agenda.start();

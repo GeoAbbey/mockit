@@ -1,33 +1,31 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("PayIns", {
+    await queryInterface.createTable("Payouts", {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
-      for: {
-        type: Sequelize.STRING,
-      },
-      ownerId: {
+      lawyerId: {
         type: Sequelize.UUID,
         onDelete: "CASCADE",
         references: {
           model: "Users",
           key: "id",
-          as: "ownerId",
+          as: "lawyerId",
         },
       },
-      amount: {
-        type: Sequelize.INTEGER,
-      },
-      reference: {
+      code: {
+        allowNull: false,
         type: Sequelize.STRING,
       },
-      subQuantity: { type: Sequelize.JSONB },
-      modelId: { type: Sequelize.UUID },
+      payStackId: {
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
+      data: { allowNull: false, type: Sequelize.JSONB },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -36,12 +34,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      deletedAt: {
-        type: Sequelize.DATE,
-      },
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("PayIns");
+    await queryInterface.dropTable("Payouts");
   },
 };

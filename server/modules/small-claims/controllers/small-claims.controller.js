@@ -151,6 +151,7 @@ class SmallClaimsController {
       smallClaim: updatedSmallClaim,
     });
   }
+
   async assignALawyer(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
 
@@ -191,7 +192,7 @@ class SmallClaimsController {
       const {
         decodedToken: { role, id },
         body: { assignedLawyerId },
-        oldSmallClaim: { ownerId, status, interestedLawyers },
+        oldSmallClaim: { ownerId, status, interestedLawyers, paid },
       } = req;
       if (role === "admin" || role === "super-admin") return next();
       if (role === "lawyer")
@@ -207,8 +208,10 @@ class SmallClaimsController {
       }
 
       if (context === "assignLawyer") {
+        if (!paid) return next(createError(401, `kindly pay for this claim to assign a lawyer`));
         if (status === "in-progress")
-          next(createError(403, `A lawyer has already been assigned to this small claim`));
+          return next(createError(403, `A lawyer has already been assigned to this small claim`));
+
         const lawyerMarkedInterest = interestedLawyers.find(
           (lawyer) => lawyer.profile.id == assignedLawyerId
         );

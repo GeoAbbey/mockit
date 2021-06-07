@@ -3,6 +3,7 @@ import createError from "http-errors";
 import { EVENT_IDENTIFIERS } from "../../../constants";
 
 import ResponsesService from "../services/response.services";
+import AccountInfoServices from "../../accountInfo/services/accountInfo.services";
 const log = debug("app:responses-controller");
 
 class ResponsesController {
@@ -14,7 +15,7 @@ class ResponsesController {
     return ResponsesController.instance;
   }
 
-  async makeResponse(req, res) {
+  async makeResponse(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
     const {
       decodedToken,
@@ -27,12 +28,24 @@ class ResponsesController {
 
     const ownerId = decodedToken.id;
     log(`creating a new response for user with id ${ownerId}`);
+    const {
+      dataValues: { subscriptionCount },
+    } = await AccountInfoServices.find(ownerId);
+
+    if (subscriptionCount < 1)
+      return next(
+        createError(
+          401,
+          "You don't have a subscription bundle to create an emergency response kindly purchase one"
+        )
+      );
+
     const response = await ResponsesService.create({ ownerId, startingLocation });
 
     eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.CREATED, { decodedToken, response });
     return res.status(201).send({
       success: true,
-      message: "response successfully created",
+      message: "1 subscription has been successfully used in creating this response",
       response,
     });
   }
@@ -44,7 +57,7 @@ class ResponsesController {
       const response = await ResponsesService.find(id, context);
       if (!response) return next(createError(404, "The response can not be found"));
       req.oldResponse = response;
-      next();
+      return next();
     };
   }
 
