@@ -121,11 +121,11 @@ export const responseEvents = (eventEmitter) => {
     });
 
     const answer = await EligibleLawyersService.bulkCreate(lawyerModifiedWithResponseId);
-    console.log({ answer });
 
     await sendNotificationToEligibleLawyers({
       events: EVENT_IDENTIFIERS.RESPONSE.CREATED,
       lawyersToNotify: results,
+      response,
     });
   });
 

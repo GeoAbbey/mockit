@@ -36,7 +36,7 @@ class InterestedLawyersService {
   }
 
   async update(id, interestDTO, oldInterest) {
-    debugLog(`updating an interest with  the following ${id}`);
+    debugLog(`updating an interest with the following ${id}`);
     const { baseCharge, serviceCharge } = oldInterest;
 
     return models.InterestedLawyer.update(

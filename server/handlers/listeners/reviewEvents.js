@@ -25,6 +25,7 @@ const notifyForReviews = async (events, review, action) => {
   const mapper = {
     Invitation: "police invitation",
     SmallClaim: "small claim",
+    Response: "response",
   };
 
   const reviewedCase = await models[review.modelType].findByPk(review.modelId, {
@@ -49,11 +50,23 @@ const notifyForReviews = async (events, review, action) => {
       ? ownerProfile.dataValues
       : lawyerProfile.dataValues;
 
+  const notificationFrom =
+    review.reviewerId === lawyerProfile.dataValues.id
+      ? lawyerProfile.dataValues
+      : ownerProfile.dataValues;
+
   const notice = [
     {
       for: EVENT_IDENTIFIERS.REVIEW.CREATED,
       ownerId: detailsToNotify.id,
-      content: JSON.stringify(NOTIFICATION_DATA.REVIEW(mapper[review.modelType], action)),
+      content: JSON.stringify(
+        NOTIFICATION_DATA.REVIEW({
+          context: mapper[review.modelType],
+          action,
+          to: notificationFrom.firebaseToken,
+          id: notificationFrom.id,
+        })
+      ),
     },
   ];
 
@@ -61,12 +74,22 @@ const notifyForReviews = async (events, review, action) => {
   config.runNotificationService &&
     sendNotificationToClient({
       tokens: [detailsToNotify.firebaseToken],
-      data: NOTIFICATION_DATA.REVIEW(mapper[review.modelType], action),
+      data: NOTIFICATION_DATA.REVIEW({
+        context: mapper[review.modelType],
+        action,
+        to: notificationFrom.firebaseToken,
+        id: notificationFrom.id,
+      }),
     });
 
   logger("saving notification sent to the user in the database");
   await models.Notification.bulkCreate(
     notice,
-    NOTIFICATION_DATA.REVIEW(mapper[review.modelType], action)
+    NOTIFICATION_DATA.REVIEW({
+      context: mapper[review.modelType],
+      action,
+      to: notificationFrom.firebaseToken,
+      id: notificationFrom.id,
+    })
   );
 };
