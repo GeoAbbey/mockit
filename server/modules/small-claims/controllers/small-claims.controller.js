@@ -266,6 +266,7 @@ class SmallClaimsController {
       req.data = { assignedLawyerId: id };
     }
     if (role === "user") {
+      console.log({ decodedToken: req.decodedToken });
       req.data = { ownerId: id };
     }
     return next();

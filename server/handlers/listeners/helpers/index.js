@@ -21,7 +21,7 @@ export const sendNotificationToLawyers = async (events, data, modelName, action)
   allLawyers.forEach((lawyer) => {
     if (lawyer.firebaseToken) tokens.push(lawyer.firebaseToken);
     allNotices.push({
-      for: EVENT_IDENTIFIERS[modelName][action]({ to: firebaseToken, id: data.dataValues.ownerId }),
+      for: EVENT_IDENTIFIERS[modelName][action],
       ownerId: lawyer.id,
       content: JSON.stringify(NOTIFICATION_DATA[modelName][action]),
     });
@@ -47,19 +47,20 @@ export const sendNotificationToLawyers = async (events, data, modelName, action)
 export const sendNotificationToUserOrLawyer = async (events, data, modelName, action, context) => {
   logger(`${events} events has been received`);
   const modelOwner = await models.User.findByPk(data[context]);
-  const notifier = context === "ownerId" ? "assignedLawyerId" : "ownerId";
-  const {
-    dataValues: { firebaseToken, id },
-  } = await models.User.findByPk(data.dataValues[notifier]);
+
+  // const notifier = context === "ownerId" ? "assignedLawyerId" : "ownerId";
+  // const {
+  //   dataValues: { firebaseToken, id },
+  // } = await models.User.findByPk(data.dataValues[notifier]);
 
   const { firebaseToken: userToken, id: userId } = modelOwner.dataValues;
 
   const tokens = [userToken];
   const notice = [
     {
-      for: EVENT_IDENTIFIERS[modelName][action]({ to: firebaseToken, id }),
+      for: EVENT_IDENTIFIERS[modelName][action],
       ownerId: userId,
-      content: JSON.stringify(NOTIFICATION_DATA[modelName][action]({ to: firebaseToken, id })),
+      content: JSON.stringify(NOTIFICATION_DATA[modelName][action]({ to: userToken, id: userId })),
     },
   ];
 
@@ -67,13 +68,13 @@ export const sendNotificationToUserOrLawyer = async (events, data, modelName, ac
   config.runNotificationService &&
     sendNotificationToClient({
       tokens,
-      data: NOTIFICATION_DATA[modelName][action]({ to: firebaseToken, id }),
+      data: NOTIFICATION_DATA[modelName][action]({ to: userToken, id: userId }),
     });
 
   logger("saving notification sent to the user in the database");
   await models.Notification.bulkCreate(
     notice,
-    NOTIFICATION_DATA[modelName][action]({ to: firebaseToken, id })
+    NOTIFICATION_DATA[modelName][action]({ to: userToken, id: userId })
   );
 };
 
