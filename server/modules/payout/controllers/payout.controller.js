@@ -30,7 +30,7 @@ class PayoutsController {
     const payout = await PayoutsService.create({
       recipient: code,
       reason: JSON.stringify({ modelType, modelId, text, id, lawyerId }),
-      amount: await this.getAmount(modelType),
+      amount: await this.getAmount(modelType, modelId),
     });
 
     if (payout.success === false) return next(createError(400, payout.response));
@@ -42,13 +42,13 @@ class PayoutsController {
     });
   };
 
-  async getAmount(modelType) {
+  async getAmount(modelType, modelId) {
     if (modelType === "invitation")
       return config.invitationCost * (config.lawyerPercentage / 100) * 100;
     if (modelType === "response")
       return config.costOfSubscriptionUnit * (config.lawyerPercentage / 100) * 100;
     if (modelType === "smallClaim") {
-      const oldClaim = await SmallClaimsService.find(args.modelId, true);
+      const oldClaim = await SmallClaimsService.find(modelId, true);
       const lawyerId = oldClaim.dataValues.assignedLawyerId;
       const {
         dataValues: { baseCharge, serviceCharge },
@@ -58,6 +58,7 @@ class PayoutsController {
       return totalCost * (config.lawyerPercentage / 100) * 100;
     }
   }
+
   checkAccessAdmin(context) {
     return async (req, res, next) => {
       const {

@@ -82,7 +82,15 @@ class PaymentsController {
           type,
         }),
       wallet: () =>
-        this.handleWalletCardPayIn({ email, firstName, lastName, id, authCode, amount, type }),
+        this.handleWalletOrCooperateCardPayIn({
+          email,
+          firstName,
+          lastName,
+          id,
+          authCode,
+          amount,
+          type,
+        }),
       singleInvitation: () =>
         this.handleSingleInvitationCardPayIn({
           email,
@@ -103,6 +111,16 @@ class PaymentsController {
           type,
           authCode,
         }),
+      cooperate: () =>
+        this.handleWalletOrCooperateCardPayIn({
+          email,
+          firstName,
+          lastName,
+          id,
+          authCode,
+          amount,
+          type,
+        }),
     };
 
     const result = await mapper[type]();
@@ -111,7 +129,7 @@ class PaymentsController {
     return res.status(200).send(result.response);
   };
 
-  async handleWalletCardPayIn(args) {
+  async handleWalletOrCooperateCardPayIn(args) {
     let data = walletPay(args);
 
     if (data.success === false) return data;
@@ -151,11 +169,14 @@ class PaymentsController {
 
     const mapper = {
       subscription: () => this.handleSubscriptionPayIn({ quantity, email, id, type }),
-      wallet: () => this.handleWalletPayIn({ amount, email, firstName, lastName, id, type }),
+      wallet: () =>
+        this.handleWalletOrCooperatePayIn({ amount, email, firstName, lastName, id, type }),
       singleInvitation: () =>
         this.handleSingleInvitationPayIn({ email, firstName, lastName, id, modelId, type }),
       singleSmallClaim: () =>
         this.handleSingleSmallClaimPayIn({ email, firstName, lastName, id, modelId, type }),
+      cooperate: () =>
+        this.handleWalletOrCooperatePayIn({ email, firstName, lastName, id, amount, type }),
     };
 
     const result = await mapper[type]();
@@ -171,7 +192,7 @@ class PaymentsController {
     return payment.initializePayment(data);
   }
 
-  async handleWalletPayIn(args) {
+  async handleWalletOrCooperatePayIn(args) {
     const data = walletPay(args);
 
     if (data.success === false) return data;

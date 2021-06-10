@@ -4,9 +4,16 @@ import { EVENT_IDENTIFIERS, NOTIFICATION_DATA } from "../../constants";
 import {
   sendNotificationToLawyers,
   sendNotificationToUserOrLawyer,
-  layerMarkInterestForClaim,
+  layerMarkInterestOrUpdateStatusForClaim,
 } from "./helpers";
 const logger = debug("app:handlers:listeners:small-claim-events");
+
+import RecipientsService from "../../modules/recipient/services/recipient.services";
+import PayoutsController from "../../modules/payout/controllers/payout.controller";
+
+import { schedule } from "../../jobs/scheduler";
+
+const getAmount = PayoutsController.getAmount;
 
 export const smallClaimEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, (data, decodedToken) => {
@@ -20,7 +27,12 @@ export const smallClaimEvents = (eventEmitter) => {
   });
 
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, async (data, decodedToken) => {
-    layerMarkInterestForClaim(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, data, decodedToken);
+    layerMarkInterestOrUpdateStatusForClaim(
+      EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST,
+      "MARK_INTEREST",
+      data,
+      decodedToken
+    );
   });
 
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.ASSIGNED, async (data, decodedToken) => {
@@ -34,13 +46,53 @@ export const smallClaimEvents = (eventEmitter) => {
     );
   });
 
-  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED, async (data, decodedToken) => {
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED, async (claim, decodedToken) => {
     sendNotificationToUserOrLawyer(
       EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED,
-      data,
+      claim,
       decodedToken,
       "SMALL_CLAIM",
       "MARK_AS_COMPLETED",
+      "ownerId"
+    );
+
+    const {
+      dataValues: { assignedLawyerId, id, ownerId },
+    } = claim;
+
+    const lawyerRecipientDetails = await RecipientsService.find(assignedLawyerId);
+
+    const data = {
+      recipient: lawyerRecipientDetails.dataValues.code,
+      reason: JSON.stringify({
+        modelType: "smallClaim",
+        modelId: id,
+        text: "payment made from mark as complete",
+        id: ownerId,
+        lawyerId: assignedLawyerId,
+      }),
+      amount: await getAmount("smallClaim", id),
+    };
+
+    await schedule.createPayout(data);
+  });
+
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS, async (data, decodedToken) => {
+    layerMarkInterestOrUpdateStatusForClaim(
+      EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS,
+      "MARK_AS_IN_PROGRESS",
+      data,
+      decodedToken
+    );
+  });
+
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, async (data, decodedToken) => {
+    sendNotificationToUserOrLawyer(
+      EVENT_IDENTIFIERS.SMALL_CLAIM.PAID,
+      data,
+      decodedToken,
+      "SMALL_CLAIM",
+      "PAID",
       "ownerId"
     );
   });

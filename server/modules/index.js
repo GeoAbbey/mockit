@@ -16,6 +16,7 @@ import { PaymentRoutes } from "./payment/payment.route.config";
 import { AuthCodeRoutes } from "./authCode/authCode.route.config";
 import { RecipientRoutes } from "./recipient/recipient.route.config";
 import { PayoutRoutes } from "./payout/payout.routes.config";
+import { CooperateRoutes } from "./cooperate/cooperate.routes.config";
 
 const routes = [
   UserRoutes,
@@ -36,6 +37,7 @@ const routes = [
   AuthCodeRoutes,
   RecipientRoutes,
   PayoutRoutes,
+  CooperateRoutes,
 ];
 
 export const initializeRoutes = ({ app, path }) => {

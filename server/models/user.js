@@ -39,6 +39,7 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.PayIn, { foreignKey: "ownerId" });
       this.hasMany(models.AuthCode, { foreignKey: "ownerId" });
       this.hasMany(models.Payout, { foreignKey: "lawyerId" });
+      this.hasOne(models.Cooperate, { foreignKey: "id" });
     }
   }
 
@@ -62,7 +63,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: "https://zapplawyer.s3.us-west-2.amazonaws.com/attachments/user.png",
       },
-      creditCard: { type: DataTypes.STRING, isCreditCard: true },
       lawyer: {
         type: DataTypes.JSONB,
         allowNull: false,

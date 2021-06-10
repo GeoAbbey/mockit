@@ -132,7 +132,7 @@ export const layerMarkInterestForClaim = async (events, data, decodedToken) => {
 
   const notice = [
     {
-      for: EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST,
+      for: EVENT_IDENTIFIERS.SMALL_CLAIM[action],
       ownerId: ownerProfile.id,
       content: JSON.stringify(
         NOTIFICATION_DATA.SMALL_CLAIM.MARK_INTEREST({

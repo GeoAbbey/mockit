@@ -7,7 +7,7 @@ export const PaymentWithSubOrWalletSchema = Joi.object().keys({
 
 export const PayInSchema = Joi.object().keys({
   type: Joi.string()
-    .valid("singleSmallClaim", "singleInvitation", "wallet", "subscription")
+    .valid("singleSmallClaim", "singleInvitation", "wallet", "subscription", "cooperate")
     .required(),
   amount: Joi.number().min(1000),
   quantity: Joi.number().min(1).max(20),

@@ -1,5 +1,4 @@
 import debug from "debug";
-import { QueryTypes } from "sequelize";
 import models from "../../../models";
 
 const debugLog = debug("app:AuthCodes-service");

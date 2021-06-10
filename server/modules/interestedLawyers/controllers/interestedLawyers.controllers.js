@@ -1,9 +1,10 @@
 import debug from "debug";
 import createError from "http-errors";
 import { EVENT_IDENTIFIERS } from "../../../constants";
+import { toKobo } from "../../../utils/toKobo";
 
 import InterestedLawyersService from "../services/interestedLawyers.services";
-const log = debug("app:small-claims-controller");
+const logger = debug("app:small-claims-controller");
 
 class InterestedLawyersController {
   static instance;
@@ -23,9 +24,11 @@ class InterestedLawyersController {
       decodedToken: { id: lawyerId },
     } = req;
 
+    logger(`creating an interest for lawyer with ID ${lawyerId} on ${modelType} with ID ${id}`);
+
     const interest = await InterestedLawyersService.create({
-      baseCharge,
-      serviceCharge,
+      baseCharge: toKobo(baseCharge),
+      serviceCharge: toKobo(serviceCharge),
       lawyerId,
       modelType,
       modelId: id,

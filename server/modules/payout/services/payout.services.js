@@ -19,16 +19,29 @@ class PayoutsService {
 
   async create(PayoutDTO) {
     debugLog("creating a Payout");
-    const res = await payment.transfer(PayoutDTO);
-    if (res.success === false) return res;
+    //check if payment has already been made for the service.
+    const { lawyerId, modelId, modelType } = JSON.parse(PayoutDTO.reason);
 
-    const dataFromPayStack = {
-      data: res.response.data,
-      code: res.response.data.transfer_code,
-      payStackId: res.response.data.id,
-      lawyerId: JSON.parse(res.response.data.reason).lawyerId,
-    };
-    return models.Payout.create(dataFromPayStack);
+    const isAlreadyPaid = await models.Payout.findOne({ where: { lawyerId, modelId, modelType } });
+    if (isAlreadyPaid) {
+      return {
+        success: false,
+        response: `Lawyer with ID ${lawyerId} has already been paid for ${modelType} with ${modelId}`,
+      };
+    } else {
+      const res = await payment.transfer(PayoutDTO);
+      if (res.success === false) return res;
+
+      const dataFromPayStack = {
+        data: res.response.data,
+        code: res.response.data.transfer_code,
+        payStackId: res.response.data.id,
+        modelType,
+        modelId,
+        lawyerId,
+      };
+      return models.Payout.create(dataFromPayStack);
+    }
   }
 }
 

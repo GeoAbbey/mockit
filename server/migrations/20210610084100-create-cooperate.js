@@ -1,33 +1,34 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("Payouts", {
+    await queryInterface.createTable("Cooperates", {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
-      lawyerId: {
-        type: Sequelize.UUID,
-        onDelete: "CASCADE",
-        references: {
-          model: "Users",
-          key: "id",
-          as: "lawyerId",
-        },
-      },
-      code: {
+      companyName: {
         allowNull: false,
         type: Sequelize.STRING,
       },
-      modelType: { allowNull: false, type: Sequelize.STRING },
-      modelId: { allowNull: false, type: Sequelize.STRING },
-      payStackId: {
+      companyAddress: {
         allowNull: false,
         type: Sequelize.STRING,
       },
-      data: { allowNull: false, type: Sequelize.JSONB },
+      companyEmail: {
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
+      walletAmount: {
+        type: Sequelize.INTEGER,
+      },
+      allowedEmails: {
+        type: Sequelize.ARRAY(Sequelize.STRING),
+      },
+      contactName: { type: Sequelize.STRING, allowNull: false },
+      contactPhone: { type: Sequelize.STRING, allowNull: false },
+      code: { type: Sequelize.STRING, allowNull: false },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -39,6 +40,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("Payouts");
+    await queryInterface.dropTable("Cooperates");
   },
 };

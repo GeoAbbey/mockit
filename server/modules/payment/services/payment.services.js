@@ -8,10 +8,12 @@ import SmallClaimsService from "../../small-claims/services/small-claims.service
 import ResponsesService from "../../response/services/response.services";
 import PayInServices from "../../payIn/services/pay-in.services";
 import AuthCodeServices from "../../authCode/services/auth-code.services";
+import CooperateService from "../../cooperate/services/cooperate.services";
 
 const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
 import { EVENT_IDENTIFIERS } from "../../../constants";
+import { toKobo } from "../../../utils/toKobo";
 
 const config = configOptions[env];
 
@@ -43,6 +45,7 @@ class PaymentsService {
       singleSmallClaim: this.handleSingleSmallClaim,
       singleInvitation: this.handleSingleInvitation,
       wallet: this.handleWalletPayIn,
+      cooperate: this.handleCooperatePayIn,
     };
 
     return mapper[data.metadata.type]({ data });
@@ -225,6 +228,62 @@ class PaymentsService {
     return result;
   }
 
+  async handleCooperatePayIn({ data }) {
+    // ...to do implement services
+    let result = await models.sequelize.transaction(async (t) => {
+      // increase the unit of the subscription purchased
+      const { metadata, amount, reference } = data;
+      const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
+        transaction: t,
+      });
+      if (referenceIsAlreadyUsed) {
+        return {
+          message: `you account has already been credited with the supplied reference ${reference}`,
+          success: false,
+        };
+      }
+
+      const oldCooperateInfo = await CooperateService.find(metadata.id, { transaction: t });
+      const [, [newCooperateInfo]] = await CooperateService.update(
+        metadata.id,
+        {
+          operation: "add",
+          walletAmount: amount,
+        },
+        oldCooperateInfo,
+        { transaction: t }
+      );
+      //create a pay-in record that captures this payIn
+      const receipt = await PayInServices.create(
+        {
+          for: metadata.type,
+          amount,
+          reference,
+          ownerId: metadata.id,
+        },
+        { transaction: t }
+      );
+
+      //TODO
+      //if can credentials doesn't exist save it.
+      const { authorization } = data;
+      const authDetails = await AuthCodeServices.findOrCreate(
+        {
+          where: { ownerId: metadata.id, authorizationCode: authorization.authorization_code },
+          defaults: {
+            last4: authorization.last4,
+            cardDetails: authorization,
+          },
+        },
+        { transaction: t }
+      );
+
+      return { success: true, service: newCooperateInfo };
+    });
+
+    return result;
+  }
+
   async handleSubscriptionPayIn({ data }) {
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
@@ -295,8 +354,12 @@ class PaymentsService {
           };
         }
         const oldAccountInfo = await AccountInfosService.find(args.id, { transaction: t });
+        console.log({
+          oldAccountInfo: oldAccountInfo.walletAmount,
+          invitationCost: config.invitationCost * 100,
+        });
 
-        if (oldAccountInfo.walletAmount < config.invitationCost) {
+        if (oldAccountInfo.walletAmount < toKobo(config.invitationCost)) {
           return {
             message: "you do not have sufficient funds to prosecute this transaction",
             success: false,
@@ -308,7 +371,7 @@ class PaymentsService {
           {
             info: "wallet",
             operation: "deduct",
-            walletAmount: parseInt(config.invitationCost) * 100,
+            walletAmount: toKobo(config.invitationCost),
           },
           oldAccountInfo,
           { transaction: t }
@@ -327,7 +390,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "invitation",
             modelId: args.modelId,
-            amount: parseInt(config.invitationCost),
+            amount: toKobo(config.invitationCost),
           },
           { transaction: t }
         );
@@ -342,7 +405,7 @@ class PaymentsService {
     }
   }
 
-  async handleSmallClaim(args) {
+  async handleSmallClaim(args, emitter) {
     debugLog("handling payment for small claim", args);
     try {
       let result = await models.sequelize.transaction(async (t) => {
@@ -399,6 +462,8 @@ class PaymentsService {
           },
           { transaction: t }
         );
+
+        emitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim);
 
         return { success: true, service: paidSmallClaim };
       });

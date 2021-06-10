@@ -31,6 +31,8 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.STRING,
       },
+      modelType: { allowNull: false, type: DataTypes.STRING },
+      modelId: { allowNull: false, type: DataTypes.STRING },
       data: { allowNull: false, type: DataTypes.JSONB },
     },
     {
