@@ -33,7 +33,7 @@ class InvitationsService {
           {
             model: models.User,
             as: "lawyerProfile",
-            attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken"],
+            attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
           },
         ],
       });
@@ -53,13 +53,13 @@ class InvitationsService {
         {
           model: models.User,
           as: "ownerProfile",
-          attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken"],
+          attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
           required: false,
         },
         {
           model: models.User,
           as: "lawyerProfile",
-          attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken"],
+          attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
           required: false,
         },
       ],
