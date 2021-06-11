@@ -1,4 +1,4 @@
-const created = ({ context, to, id }) => ({
+const created = ({ context, id }) => ({
   notification: {
     title: `${context} Created`,
     body: "kindly indicated interest to get assigned to the case",
@@ -8,12 +8,11 @@ const created = ({ context, to, id }) => ({
     id,
     status: "small claim assigned",
     view: "lawyer_requested_popup",
-    google_sent_time: Date.now(),
+    google_sent_time: new Date().toISOString(),
   },
-  to,
 });
 
-const completed = ({ context, to, id }) => ({
+const completed = ({ context, id }) => ({
   notification: {
     title: `${context} Completed`,
     body: `Lawyer has marked ${context.toLowerCase()} as completed kindly drop a review`,
@@ -23,33 +22,30 @@ const completed = ({ context, to, id }) => ({
     id,
     status: "small claim assigned",
     view: "lawyer_requested_popup",
-    google_sent_time: Date.now(),
+    google_sent_time: new Date().toISOString(),
   },
-  to,
 });
 
 export const NOTIFICATION_DATA = {
   INVITATION: {
-    ASSIGNED: ({ to, id }) => ({
+    ASSIGNED: ({ id }) => ({
       notification: {
         body: "Lawyer Assigned",
         title: "A lawyer has been assigned to a case",
       },
-      priority: "high",
       data: {
         click_action: "button_function",
         id,
         status: "small claim assigned",
         view: "lawyer_requested_popup",
-        google_sent_time: Date.now(),
+        google_sent_time: new Date().toISOString(),
       },
-      to,
     }),
-    CREATED: ({ to, id }) => created({ context: "Police Invitation", to, id }),
-    MARK_AS_COMPLETED: ({ to, id }) => completed({ context: "Police Invitation", to, id }),
+    CREATED: ({ id }) => created({ context: "Police Invitation", id }),
+    MARK_AS_COMPLETED: ({ id }) => completed({ context: "Police Invitation", id }),
   },
   RESPONSE: {
-    ASSIGNED: ({ to, id }) => ({
+    ASSIGNED: ({ id }) => ({
       notification: {
         title: "Lawyer Assigned",
         body: "Lawyer has been assigned to the emergency Response",
@@ -59,11 +55,10 @@ export const NOTIFICATION_DATA = {
         id,
         status: "small claim assigned",
         view: "lawyer_requested_popup",
-        google_sent_time: Date.now(),
+        google_sent_time: new Date().toISOString(),
       },
-      to,
     }),
-    MEET_TIME: ({ to, id }) => ({
+    MEET_TIME: ({ id }) => ({
       notification: {
         title: "Meet Time",
         body: "Lawyer has indicated that he has met with you.",
@@ -73,15 +68,14 @@ export const NOTIFICATION_DATA = {
         id,
         status: "small claim assigned",
         view: "lawyer_requested_popup",
-        google_sent_time: Date.now(),
+        google_sent_time: new Date().toISOString(),
       },
-      to,
     }),
-    CREATED: ({ to, id }) => created({ context: "Emergency Response", to, id }),
-    MARK_AS_COMPLETED: ({ to, id }) => completed({ context: "Emergency Response", to, id }),
+    CREATED: ({ id }) => created({ context: "Emergency Response", id }),
+    MARK_AS_COMPLETED: ({ id }) => completed({ context: "Emergency Response", id }),
   },
   SMALL_CLAIM: {
-    MARK_INTEREST: ({ to, id }) => ({
+    MARK_INTEREST: ({ id }) => ({
       notification: {
         title: "Lawyer Indicated Interest",
         body:
@@ -92,13 +86,12 @@ export const NOTIFICATION_DATA = {
         id,
         status: "small claim assigned",
         view: "lawyer_requested_popup",
-        google_sent_time: Date.now(),
+        google_sent_time: new Date().toISOString(),
       },
-      to,
     }),
-    CREATED: ({ to, id }) => created({ context: "Small Claim", to, id }),
-    MARK_AS_COMPLETED: ({ to, id }) => completed({ context: "Small Claim", to, id }),
-    ASSIGNED: ({ to, id }) => ({
+    CREATED: ({ id }) => created({ context: "Small Claim", id }),
+    MARK_AS_COMPLETED: ({ id }) => completed({ context: "Small Claim", id }),
+    ASSIGNED: ({ id }) => ({
       notification: {
         title: "Case Assigned",
         body: "You have been assigned a small claim kindly proceed with it execution",
@@ -108,13 +101,12 @@ export const NOTIFICATION_DATA = {
         id,
         status: "small claim assigned",
         view: "lawyer_requested_popup",
-        google_sent_time: Date.now(),
+        google_sent_time: new Date().toISOString(),
       },
-      to,
     }),
   },
 
-  REVIEW: ({ context, action, id, to }) => ({
+  REVIEW: ({ context, action, id }) => ({
     notification: {
       title: `Review ${action.toLowerCase()}`,
       body: `A review has been ${action.toLowerCase()} for the ${context} you are associated with`,
@@ -124,9 +116,8 @@ export const NOTIFICATION_DATA = {
       id,
       status: "small claim assigned",
       view: "lawyer_requested_popup",
-      google_sent_time: Date.now(),
+      google_sent_time: new Date().toISOString(),
     },
-    to,
   }),
 };
 

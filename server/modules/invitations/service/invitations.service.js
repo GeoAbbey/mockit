@@ -48,7 +48,7 @@ class InvitationsService {
     debugLog(`retrieving invitations with the following filter ${JSON.stringify(data)}`);
     return models.Invitation.findAll({
       order: [["createdAt", "DESC"]],
-      data,
+      ...data,
       include: [
         {
           model: models.User,
