@@ -45,7 +45,7 @@ class LocationsService {
 
   async findLawyersWithinRadius({ longitude, latitude, radius }) {
     return models.sequelize.query(
-      `SELECT "Users"."id", "Users"."firebaseToken" FROM "LocationDetails" INNER JOIN "Users" ON "LocationDetails"."id" = "Users".id WHERE ST_Distance_Sphere(location, ST_MakePoint(:longitude,:latitude)) <= :radius * 1000 AND "LocationDetails"."online" = true AND "Users"."role" = 'lawyer'`,
+      `SELECT "Users"."id", "Users"."firebaseToken" FROM "LocationDetails" INNER JOIN "Users" ON "LocationDetails"."id" = "Users".id WHERE ST_DWithin(location, ST_MakePoint(:longitude,:latitude), 5000) AND "LocationDetails"."online" = true AND "Users"."role" = 'lawyer'`,
       {
         type: QueryTypes.SELECT,
         replacements: { longitude, latitude, radius },
