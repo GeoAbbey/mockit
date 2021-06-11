@@ -12,9 +12,6 @@ const logger = debug("app:handlers:listeners:helpers");
 export const sendNotificationToLawyers = async (events, data, modelName, action) => {
   logger(`${events} events has been received`);
   const allLawyers = await models.User.findAll({ where: { role: ROLES.LAWYER } });
-  // const {
-  //   dataValues: { firebaseToken },
-  // } = await models.User.findByPk(data.dataValues.ownerId);
 
   const tokens = [];
   const allNotices = [];

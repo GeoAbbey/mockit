@@ -111,9 +111,10 @@ export const responseEvents = (eventEmitter) => {
     const results = await LocationServices.findLawyersWithinRadius({
       longitude: coordinates[0],
       latitude: coordinates[1],
-      radius: config.radius,
+      radius: parseInt(config.radius),
     });
 
+    console.log({ results });
     const lawyerModifiedWithResponseId = [];
 
     results.forEach((result) => {
@@ -137,7 +138,7 @@ export const responseEvents = (eventEmitter) => {
       response,
       "RESPONSE",
       "MARK_AS_COMPLETED",
-      "id"
+      "ownerId"
     );
   });
 };
