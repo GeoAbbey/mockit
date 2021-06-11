@@ -12,9 +12,9 @@ const logger = debug("app:handlers:listeners:helpers");
 export const sendNotificationToLawyers = async (events, data, modelName, action) => {
   logger(`${events} events has been received`);
   const allLawyers = await models.User.findAll({ where: { role: ROLES.LAWYER } });
-  const {
-    dataValues: { firebaseToken },
-  } = await models.User.findByPk(data.dataValues.ownerId);
+  // const {
+  //   dataValues: { firebaseToken },
+  // } = await models.User.findByPk(data.dataValues.ownerId);
 
   const tokens = [];
   const allNotices = [];
@@ -23,7 +23,11 @@ export const sendNotificationToLawyers = async (events, data, modelName, action)
     allNotices.push({
       for: EVENT_IDENTIFIERS[modelName][action],
       ownerId: lawyer.id,
-      content: JSON.stringify(NOTIFICATION_DATA[modelName][action]),
+      content: JSON.stringify(
+        NOTIFICATION_DATA[modelName][action]({
+          id: data.dataValues.ownerId,
+        })
+      ),
     });
   });
 
@@ -32,7 +36,6 @@ export const sendNotificationToLawyers = async (events, data, modelName, action)
     sendNotificationToClient({
       tokens,
       data: NOTIFICATION_DATA[modelName][action]({
-        to: firebaseToken,
         id: data.dataValues.ownerId,
       }),
     });
@@ -40,18 +43,13 @@ export const sendNotificationToLawyers = async (events, data, modelName, action)
   logger("saving notification for qualified lawyers on the database");
   await models.Notification.bulkCreate(
     allNotices,
-    NOTIFICATION_DATA[modelName][action]({ to: firebaseToken, id: data.dataValues.ownerId })
+    NOTIFICATION_DATA[modelName][action]({ id: data.dataValues.ownerId })
   );
 };
 
 export const sendNotificationToUserOrLawyer = async (events, data, modelName, action, context) => {
   logger(`${events} events has been received`);
   const modelOwner = await models.User.findByPk(data[context]);
-
-  // const notifier = context === "ownerId" ? "assignedLawyerId" : "ownerId";
-  // const {
-  //   dataValues: { firebaseToken, id },
-  // } = await models.User.findByPk(data.dataValues[notifier]);
 
   const { firebaseToken: userToken, id: userId } = modelOwner.dataValues;
 
@@ -60,7 +58,7 @@ export const sendNotificationToUserOrLawyer = async (events, data, modelName, ac
     {
       for: EVENT_IDENTIFIERS[modelName][action],
       ownerId: userId,
-      content: JSON.stringify(NOTIFICATION_DATA[modelName][action]({ to: userToken, id: userId })),
+      content: JSON.stringify(NOTIFICATION_DATA[modelName][action]({ id: userId })),
     },
   ];
 
@@ -68,13 +66,13 @@ export const sendNotificationToUserOrLawyer = async (events, data, modelName, ac
   config.runNotificationService &&
     sendNotificationToClient({
       tokens,
-      data: NOTIFICATION_DATA[modelName][action]({ to: userToken, id: userId }),
+      data: NOTIFICATION_DATA[modelName][action]({ id: userId }),
     });
 
   logger("saving notification sent to the user in the database");
   await models.Notification.bulkCreate(
     notice,
-    NOTIFICATION_DATA[modelName][action]({ to: userToken, id: userId })
+    NOTIFICATION_DATA[modelName][action]({ id: userId })
   );
 };
 
