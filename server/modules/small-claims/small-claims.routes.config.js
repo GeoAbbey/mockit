@@ -27,7 +27,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
       .route(`${this.path}/small-claims/unassigned`)
       .get([
         Authenticate.verifyToken,
-        SmallClaimsController.checkAccessAdmin(),
+        SmallClaimsController.checkAccessLawyer(),
         wrapCatch(SmallClaimsController.getUnassignedClaims),
       ]);
 
