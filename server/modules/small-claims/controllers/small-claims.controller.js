@@ -94,7 +94,7 @@ class SmallClaimsController {
   async getUnassignedClaims(req, res, next) {
     log("getting all unassigned small claims");
 
-    const data = { where: { assignedLawyerId: null } };
+    const data = { assignedLawyerId: null };
     const smallClaims = await SmallClaimsService.findMany(data, true);
     return res.status(200).send({
       success: true,
