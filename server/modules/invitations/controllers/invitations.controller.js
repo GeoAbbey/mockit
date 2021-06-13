@@ -22,7 +22,10 @@ class InvitationsController {
     log(`creating a new invitation for user with id ${ownerId}`);
     const invitation = await InvitationsService.create({ attachments, ...body, ownerId });
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, invitation);
+    eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
+      invitation,
+      decodedToken: req.decodedToken,
+    });
     return res.status(201).send({
       success: true,
       message: "invitation successfully created",
@@ -58,6 +61,7 @@ class InvitationsController {
     if (oldInvitation.bid)
       eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.ASSIGNED, {
         invitation: updatedInvitation,
+        decodedToken,
       });
 
     return res.status(200).send({

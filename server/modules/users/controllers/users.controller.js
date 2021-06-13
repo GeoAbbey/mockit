@@ -189,7 +189,7 @@ class UsersController {
     const { user } = req;
     return res.status(200).send({
       success: true,
-      message: "password successfully updated",
+      message: "user successfully retrieved",
       user,
     });
   }

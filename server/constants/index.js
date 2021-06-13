@@ -1,109 +1,184 @@
-const created = ({ context, id }) => ({
+const generic = ({
+  title,
+  body,
+  sender_firebase_token,
+  sender_id,
+  status_id,
+  sender_name,
+  receiver_role,
+  view,
+  status,
+  click_action,
+}) => ({
   notification: {
-    title: `${context} Created`,
-    body: "kindly indicated interest to get assigned to the case",
+    title,
+    body,
   },
   data: {
-    click_action: "user_requesting",
-    id,
-    status: "small claim assigned",
-    view: "lawyer_requested_popup",
-    google_sent_time: new Date().toISOString(),
-  },
-});
-
-const completed = ({ context, id }) => ({
-  notification: {
-    title: `${context} Completed`,
-    body: `Lawyer has marked ${context.toLowerCase()} as completed kindly drop a review`,
-  },
-  data: {
-    click_action: "user_requesting",
-    id,
-    status: "small claim assigned",
-    view: "lawyer_requested_popup",
+    sender_id,
+    sender_name,
+    status_id,
+    sender_firebase_token,
+    receiver_role,
+    status,
+    view,
+    click_action,
     google_sent_time: new Date().toISOString(),
   },
 });
 
 export const NOTIFICATION_DATA = {
   INVITATION: {
-    ASSIGNED: ({ id }) => ({
-      notification: {
-        body: "Lawyer Assigned",
-        title: "A lawyer has been assigned to a case",
-      },
-      data: {
-        click_action: "button_function",
-        id,
-        status: "small claim assigned",
-        view: "lawyer_requested_popup",
-        google_sent_time: new Date().toISOString(),
-      },
-    }),
-    CREATED: ({ id }) => created({ context: "Police Invitation", id }),
-    MARK_AS_COMPLETED: ({ id }) => completed({ context: "Police Invitation", id }),
+    ASSIGNED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+      generic({
+        title: "Lawyer Assigned",
+        body: "A lawyer has been assigned to a case",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "user",
+        status: "police_invitation",
+        view: "user_police_invitation_detail_screen",
+        click_action: "lawyer_shown_interest",
+      }),
+    CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+      generic({
+        title: "Police Invitation Created",
+        body: "Kindly Indicate Interest to get assigned to the case",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "lawyer",
+        view: "lawyer_police_invitation_screen",
+        status: "police_invitation",
+        click_action: "new_police_invitation_created",
+      }),
+    MARK_AS_COMPLETED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+      generic({
+        title: "Police Invitation Created",
+        body: "Kindly Indicate Interest to get assigned to the case",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "user",
+        status: "police_invitation",
+        view: "consultation_screen",
+        click_action: "case_closed",
+      }),
   },
   RESPONSE: {
-    ASSIGNED: ({ id }) => ({
-      notification: {
-        title: "Lawyer Assigned",
-        body: "Lawyer has been assigned to the emergency Response",
-      },
-      data: {
-        click_action: "user_requesting",
-        id,
-        status: "small claim assigned",
-        view: "lawyer_requested_popup",
-        google_sent_time: new Date().toISOString(),
-      },
-    }),
-    MEET_TIME: ({ id }) => ({
-      notification: {
+    ASSIGNED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+      generic({
+        title: "Emergency Response Assigned",
+        body: "A Lawyer has been assigned to your emergency response",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "user",
+        view: "user_emergency_response_screen",
+        status: "emergency_response",
+        click_action: "assigned_emergency_response",
+      }),
+
+    MEET_TIME: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+      generic({
         title: "Meet Time",
         body: "Lawyer has indicated that he has met with you.",
-      },
-      data: {
-        click_action: "user_requesting",
-        id,
-        status: "small claim assigned",
-        view: "lawyer_requested_popup",
-        google_sent_time: new Date().toISOString(),
-      },
-    }),
-    CREATED: ({ id }) => created({ context: "Emergency Response", id }),
-    MARK_AS_COMPLETED: ({ id }) => completed({ context: "Emergency Response", id }),
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "user",
+        view: "user_emergency_response_screen",
+        status: "emergency_response",
+        click_action: "meet_with_lawyer",
+      }),
+    CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+      generic({
+        title: "Emergency Response Created",
+        body: "Kindly Indicate Interest to get assigned to the case",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "lawyer",
+        view: "lawyer_emergency_response_screen",
+        status: "emergency_response",
+        click_action: "create_emergency_response",
+      }),
+    MARK_AS_COMPLETED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+      generic({
+        title: "Emergency Response Completed",
+        body: "Response has been completed kindly drop a review",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "user",
+        view: "consultation_screen",
+        status: "emergency_response",
+        click_action: "lawyer_mark_as_completed",
+      }),
   },
+
   SMALL_CLAIM: {
-    MARK_INTEREST: ({ id }) => ({
-      notification: {
+    MARK_INTEREST: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+      generic({
         title: "Lawyer Indicated Interest",
         body:
-          "A Lawyer has indicated interest to the small claim you created kindly check reviews and assign the case",
-      },
-      data: {
-        click_action: "user_requesting",
-        id,
-        status: "small claim assigned",
-        view: "lawyer_requested_popup",
-        google_sent_time: new Date().toISOString(),
-      },
-    }),
-    CREATED: ({ id }) => created({ context: "Small Claim", id }),
-    MARK_AS_COMPLETED: ({ id }) => completed({ context: "Small Claim", id }),
-    ASSIGNED: ({ id }) => ({
-      notification: {
+          "A Lawyer has indicated interest to the small claim you created kindly check review, and assign the case",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "user",
+        status: "small_claim",
+        view: "user_small_claim_detail_screen",
+        click_action: "lawyer_shown_interest",
+      }),
+    CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+      generic({
+        title: "Small Claims Created",
+        body: "Kindly Indicate Interest to get assigned to the case",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "lawyer",
+        view: "small_claim_screen",
+        status: "small_claim",
+        click_action: "new_small_claim_created",
+      }),
+    MARK_AS_COMPLETED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+      generic({
+        title: "Small Claims Created",
+        body: "Kindly Indicate Interest to get assigned to the case",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "user",
+        view: "consultation_screen",
+        status: "small_claim",
+        click_action: "case_closed",
+      }),
+    ASSIGNED: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
+      generic({
         title: "Case Assigned",
         body: "You have been assigned a small claim kindly proceed with it execution",
-      },
-      data: {
-        click_action: "user_requesting",
-        id,
-        status: "small claim assigned",
-        view: "lawyer_requested_popup",
-        google_sent_time: new Date().toISOString(),
-      },
-    }),
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "lawyer",
+        view: "lawyer_small_claim_detail_screen",
+        status: "small_claim",
+        click_action: "user_choose_me_for_claim",
+      }),
   },
 
   REVIEW: ({ context, action, id }) => ({

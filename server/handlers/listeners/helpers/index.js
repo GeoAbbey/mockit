@@ -9,7 +9,7 @@ const config = configOptions[env];
 
 const logger = debug("app:handlers:listeners:helpers");
 
-export const sendNotificationToLawyers = async (events, data, modelName, action) => {
+export const sendNotificationToLawyers = async (events, data, decodedToken, modelName, action) => {
   logger(`${events} events has been received`);
   const allLawyers = await models.User.findAll({ where: { role: ROLES.LAWYER } });
 
@@ -22,7 +22,10 @@ export const sendNotificationToLawyers = async (events, data, modelName, action)
       ownerId: lawyer.id,
       content: JSON.stringify(
         NOTIFICATION_DATA[modelName][action]({
-          id: data.dataValues.ownerId,
+          sender_id: data.dataValues.ownerId,
+          status_id: data.dataValues.id,
+          sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+          sender_firebase_token: decodedToken.firebaseToken,
         })
       ),
     });
@@ -33,29 +36,51 @@ export const sendNotificationToLawyers = async (events, data, modelName, action)
     sendNotificationToClient({
       tokens,
       data: NOTIFICATION_DATA[modelName][action]({
-        id: data.dataValues.ownerId,
+        sender_id: data.dataValues.ownerId,
+        status_id: data.dataValues.id,
+        sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+        sender_firebase_token: decodedToken.firebaseToken,
       }),
     });
 
   logger("saving notification for qualified lawyers on the database");
   await models.Notification.bulkCreate(
     allNotices,
-    NOTIFICATION_DATA[modelName][action]({ id: data.dataValues.ownerId })
+    NOTIFICATION_DATA[modelName][action]({
+      sender_id: data.dataValues.ownerId,
+      status_id: data.dataValues.id,
+      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+      sender_firebase_token: decodedToken.firebaseToken,
+    })
   );
 };
 
-export const sendNotificationToUserOrLawyer = async (events, data, modelName, action, context) => {
+export const sendNotificationToUserOrLawyer = async (
+  events,
+  data,
+  decodedToken,
+  modelName,
+  action,
+  context
+) => {
   logger(`${events} events has been received`);
   const modelOwner = await models.User.findByPk(data[context]);
 
-  const { firebaseToken: userToken, id: userId } = modelOwner.dataValues;
+  const { firebaseToken, id } = modelOwner.dataValues;
 
-  const tokens = [userToken];
+  const tokens = [firebaseToken];
   const notice = [
     {
       for: EVENT_IDENTIFIERS[modelName][action],
-      ownerId: userId,
-      content: JSON.stringify(NOTIFICATION_DATA[modelName][action]({ id: userId })),
+      ownerId: id,
+      content: JSON.stringify(
+        NOTIFICATION_DATA[modelName][action]({
+          sender_id: data.dataValues.ownerId,
+          status_id: data.dataValues.id,
+          sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+          sender_firebase_token: decodedToken.firebaseToken,
+        })
+      ),
     },
   ];
 
@@ -63,17 +88,27 @@ export const sendNotificationToUserOrLawyer = async (events, data, modelName, ac
   config.runNotificationService &&
     sendNotificationToClient({
       tokens,
-      data: NOTIFICATION_DATA[modelName][action]({ id: userId }),
+      data: NOTIFICATION_DATA[modelName][action]({
+        sender_id: data.dataValues.ownerId,
+        status_id: data.dataValues.id,
+        sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+        sender_firebase_token: decodedToken.firebaseToken,
+      }),
     });
 
   logger("saving notification sent to the user in the database");
   await models.Notification.bulkCreate(
     notice,
-    NOTIFICATION_DATA[modelName][action]({ id: userId })
+    NOTIFICATION_DATA[modelName][action]({
+      sender_id: data.dataValues.ownerId,
+      status_id: data.dataValues.id,
+      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+      sender_firebase_token: decodedToken.firebaseToken,
+    })
   );
 };
 
-export const layerMarkInterestForClaim = async (events, data) => {
+export const layerMarkInterestForClaim = async (events, data, decodedToken) => {
   logger(`${events} events has been received`);
 
   const caseOfInterest = await models[data.modelType].findByPk(data.modelId, {
@@ -101,8 +136,10 @@ export const layerMarkInterestForClaim = async (events, data) => {
       ownerId: ownerProfile.id,
       content: JSON.stringify(
         NOTIFICATION_DATA.SMALL_CLAIM.MARK_INTEREST({
-          to: lawyerProfile.firebaseToken,
-          id: lawyerProfile.id,
+          sender_id: data.dataValues.ownerId,
+          status_id: data.dataValues.id,
+          sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+          sender_firebase_token: decodedToken.firebaseToken,
         })
       ),
     },
@@ -113,8 +150,10 @@ export const layerMarkInterestForClaim = async (events, data) => {
     sendNotificationToClient({
       tokens: [ownerProfile.firebaseToken],
       data: NOTIFICATION_DATA.SMALL_CLAIM.MARK_INTEREST({
-        to: lawyerProfile.firebaseToken,
-        id: lawyerProfile.id,
+        sender_id: data.dataValues.ownerId,
+        status_id: data.dataValues.id,
+        sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+        sender_firebase_token: decodedToken.firebaseToken,
       }),
     });
 
@@ -122,18 +161,21 @@ export const layerMarkInterestForClaim = async (events, data) => {
   await models.Notification.bulkCreate(
     notice,
     NOTIFICATION_DATA.SMALL_CLAIM.MARK_INTEREST({
-      to: lawyerProfile.firebaseToken,
-      id: lawyerProfile.id,
+      sender_id: data.dataValues.ownerId,
+      status_id: data.dataValues.id,
+      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+      sender_firebase_token: decodedToken.firebaseToken,
     })
   );
 };
 
-export const sendNotificationToEligibleLawyers = async ({ events, lawyersToNotify, response }) => {
+export const sendNotificationToEligibleLawyers = async ({
+  events,
+  lawyersToNotify,
+  response,
+  decodedToken,
+}) => {
   logger(`${events} events has been received`);
-
-  const {
-    dataValues: { firebaseToken, id },
-  } = await models.User.findByPk(response.dataValues.ownerId);
 
   const allNotices = [];
   const tokens = [];
@@ -143,7 +185,14 @@ export const sendNotificationToEligibleLawyers = async ({ events, lawyersToNotif
     allNotices.push({
       for: events,
       ownerId: lawyer.id,
-      content: JSON.stringify(NOTIFICATION_DATA.RESPONSE.CREATED),
+      content: JSON.stringify(
+        NOTIFICATION_DATA.RESPONSE.CREATED({
+          sender_id: response.dataValues.ownerId,
+          status_id: response.dataValues.id,
+          sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+          sender_firebase_token: decodedToken.firebaseToken,
+        })
+      ),
     });
   });
 
@@ -151,12 +200,22 @@ export const sendNotificationToEligibleLawyers = async ({ events, lawyersToNotif
   config.runNotificationService &&
     sendNotificationToClient({
       tokens: tokens,
-      data: NOTIFICATION_DATA.RESPONSE.CREATED({ to: firebaseToken, id }),
+      data: NOTIFICATION_DATA.RESPONSE.CREATED({
+        sender_id: response.dataValues.ownerId,
+        status_id: response.dataValues.id,
+        sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+        sender_firebase_token: decodedToken.firebaseToken,
+      }),
     });
 
   logger("saving notification sent to eligible lawyers in the database");
   await models.Notification.bulkCreate(
     allNotices,
-    NOTIFICATION_DATA.RESPONSE.CREATED({ to: firebaseToken, id })
+    NOTIFICATION_DATA.RESPONSE.CREATED({
+      sender_id: response.dataValues.ownerId,
+      status_id: response.dataValues.id,
+      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+      sender_firebase_token: decodedToken.firebaseToken,
+    })
   );
 };

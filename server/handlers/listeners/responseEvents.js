@@ -11,10 +11,8 @@ import { sendNotificationToUserOrLawyer, sendNotificationToEligibleLawyers } fro
 const logger = debug("app:handlers:listeners:response-events");
 
 export const responseEvents = (eventEmitter) => {
-  eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, async ({ response }) => {
+  eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, async ({ response, decodedToken }) => {
     logger(`${EVENT_IDENTIFIERS.RESPONSE.ASSIGNED} event was received`);
-
-    logger({ response });
 
     const {
       dataValues: { ownerId, assignedLawyerId },
@@ -46,16 +44,15 @@ export const responseEvents = (eventEmitter) => {
     await sendNotificationToUserOrLawyer(
       EVENT_IDENTIFIERS.RESPONSE.ASSIGNED,
       response,
+      decodedToken,
       "RESPONSE",
       "ASSIGNED",
       "ownerId"
     );
   });
 
-  eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.MEET_TIME, async ({ response, io }) => {
+  eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.MEET_TIME, async ({ response, io, decodedToken }) => {
     logger(`${EVENT_IDENTIFIERS.RESPONSE.MEET_TIME} event was received`);
-
-    logger({ response });
 
     const {
       dataValues: { ownerId, assignedLawyerId },
@@ -92,13 +89,14 @@ export const responseEvents = (eventEmitter) => {
     await sendNotificationToUserOrLawyer(
       EVENT_IDENTIFIERS.RESPONSE.MEET_TIME,
       response,
+      decodedToken,
       "RESPONSE",
       "MEET_TIME",
       "ownerId"
     );
   });
 
-  eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.CREATED, async ({ response }) => {
+  eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.CREATED, async ({ response, decodedToken }) => {
     logger(`${EVENT_IDENTIFIERS.RESPONSE.CREATED} event was received`);
     const {
       dataValues: { id: responseId },
@@ -127,18 +125,23 @@ export const responseEvents = (eventEmitter) => {
       events: EVENT_IDENTIFIERS.RESPONSE.CREATED,
       lawyersToNotify: results,
       response,
+      decodedToken,
     });
   });
 
-  eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED, async ({ response }) => {
-    logger(`${EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED} event was received`);
+  eventEmitter.on(
+    EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED,
+    async ({ response, decodedToken }) => {
+      logger(`${EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED} event was received`);
 
-    sendNotificationToUserOrLawyer(
-      EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED,
-      response,
-      "RESPONSE",
-      "MARK_AS_COMPLETED",
-      "ownerId"
-    );
-  });
+      sendNotificationToUserOrLawyer(
+        EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED,
+        response,
+        decodedToken,
+        "RESPONSE",
+        "MARK_AS_COMPLETED",
+        "ownerId"
+      );
+    }
+  );
 };
