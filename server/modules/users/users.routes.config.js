@@ -48,7 +48,6 @@ export class UserRoutes extends CommonRoutesConfig {
           { name: "nextOfKinProfilePic", maxCount: 1 },
           { name: "suretyProfilePic", maxCount: 1 },
         ]),
-        // middleware({ schema: updateUserSchema, property: "body" }),
         UsersController.userExistMiddleware(),
         AccessControl.checkPermissionUserOrLawyerAccess(),
         wrapCatch(UsersController.updateUser),
@@ -99,9 +98,9 @@ export class UserRoutes extends CommonRoutesConfig {
         Authenticate.verifyToken,
         middleware({ schema: validateUUID, property: "params" }),
         UsersController.userExistMiddleware(),
-        AccessControl.checkPermissionAdminAccess(),
       ])
       .patch([
+        AccessControl.checkPermissionAdminAccess(),
         middleware({ schema: updateUserSchema, property: "body" }),
         wrapCatch(UsersController.updateUser),
       ])

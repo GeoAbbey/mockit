@@ -66,11 +66,13 @@ class ResponsesController {
     if (body.bid)
       eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, {
         response: updatedResponse,
+        decodedToken,
       });
 
     if (body.meetTime)
       eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.MEET_TIME, {
         response: updatedResponse,
+        decodedToken,
         io,
       });
 
@@ -141,6 +143,7 @@ class ResponsesController {
 
     const {
       params: { id },
+      decodedToken,
       oldResponse,
     } = req;
 
@@ -152,6 +155,7 @@ class ResponsesController {
 
     eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED, {
       response: updatedResponse,
+      decodedToken,
     });
 
     return res.status(200).send({
@@ -168,7 +172,7 @@ class ResponsesController {
         body,
         oldResponse: { ownerId, assignedLawyerId },
       } = req;
-      if (role === "admin" || role === "super-admin") next();
+      if (role === "admin" || role === "super-admin") return next();
       if (role === "lawyer" && context !== "retrieve")
         return next(createError(401, `You do not have access to ${context} this response`));
       if (role === "user" && id !== ownerId) {
@@ -178,7 +182,7 @@ class ResponsesController {
         if (role === "lawyer" && id !== assignedLawyerId)
           return next(createError(401, `You do not have access to ${context} this response`));
       }
-      next();
+      return next();
     };
   }
 
