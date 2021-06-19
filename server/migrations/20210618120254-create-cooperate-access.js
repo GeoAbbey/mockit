@@ -1,7 +1,7 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("Transactions", {
+    await queryInterface.createTable("CooperateAccesses", {
       id: {
         allowNull: false,
         primaryKey: true,
@@ -10,33 +10,20 @@ module.exports = {
       },
       ownerId: {
         type: Sequelize.UUID,
-        onDelete: "CASCADE",
+        allowNull: false,
         references: {
           model: "Users",
           key: "id",
           as: "ownerId",
         },
       },
-      modelType: {
-        type: Sequelize.STRING,
-      },
-      code: {
-        type: Sequelize.STRING,
-      },
-      modelId: {
+      userId: {
         type: Sequelize.UUID,
         allowNull: false,
-      },
-      amount: {
-        type: Sequelize.INTEGER,
-      },
-      performedBy: {
-        type: Sequelize.UUID,
-        onDelete: "CASCADE",
         references: {
           model: "Users",
           key: "id",
-          as: "performedBy",
+          as: "userId",
         },
       },
       createdAt: {
@@ -47,12 +34,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      deletedAt: {
-        type: Sequelize.DATE,
-      },
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("Transactions");
+    await queryInterface.dropTable("CooperateAccesses");
   },
 };

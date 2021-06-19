@@ -25,16 +25,19 @@ class PaymentsController {
 
     const {
       body: { modelId, modelType },
-      decodedToken: { id },
+      params: { code = undefined },
+      decodedToken,
     } = req;
-    log(`creating a Payment for user with id ${id}`);
+    log(`creating a Payment for user with id ${decodedToken.id}`);
     const payment = await PaymentsService.create(
       {
-        id,
+        id: decodedToken.id,
         modelId,
         modelType,
+        code,
       },
-      eventEmitter
+      eventEmitter,
+      decodedToken
     );
 
     if (!payment.success) return next(createError(400, `${payment.message}`));

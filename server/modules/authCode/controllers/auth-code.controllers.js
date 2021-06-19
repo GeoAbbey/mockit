@@ -19,18 +19,18 @@ class AuthCodesController {
     const deletedAuthCode = await AuthCodesService.remove(id);
     return res.status(200).send({
       success: true,
-      message: "AuthCode successfully deleted",
-      AuthCode: deletedAuthCode,
+      message: "credit successfully deleted",
+      authCode: deletedAuthCode,
     });
   }
 
-  authCodeExists(req, res, next) {
-    const { oldAuthCode } = req;
-    return res.status(200).send({
-      success: true,
-      message: "auth code has been successfully deleted.",
-      AuthCode: oldAuthCode,
-    });
+  async authCodeExists(req, res, next) {
+    const { id } = req.params;
+    const result = await AuthCodesService.find(id);
+    if (!result) return next(createError(404, `The requested credit card cannot be found`));
+
+    req.oldAuthCode = result;
+    return next();
   }
 
   checkAccessUser(context) {

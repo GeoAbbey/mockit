@@ -3,7 +3,7 @@ import { v4 } from "uuid";
 
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Transaction extends Model {
+  class CooperateAccess extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,40 +11,32 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.User, { foreignKey: "ownerId" });
+      this.belongsTo(models.Cooperate, {
+        foreignKey: "ownerId",
+      });
     }
   }
-  Transaction.init(
+  CooperateAccess.init(
     {
+      userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
+      ownerId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
         defaultValue: () => v4(),
       },
-      ownerId: { type: DataTypes.UUID, allowNull: false },
-      performedBy: { type: DataTypes.UUID, allowNull: false },
-      modelType: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      modelId: {
-        type: DataTypes.UUID,
-        allowNull: false,
-      },
-      code: {
-        type: DataTypes.STRING,
-      },
-      amount: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
     },
     {
       sequelize,
-      paranoid: true,
-      modelName: "Transaction",
+      modelName: "CooperateAccess",
     }
   );
-  return Transaction;
+  return CooperateAccess;
 };

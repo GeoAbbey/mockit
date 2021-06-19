@@ -108,7 +108,7 @@ export const sendNotificationToUserOrLawyer = async (
   );
 };
 
-export const layerMarkInterestForClaim = async (events, data, decodedToken) => {
+export const layerMarkInterestOrUpdateStatusForClaim = async (events, data, decodedToken) => {
   logger(`${events} events has been received`);
 
   const caseOfInterest = await models[data.modelType].findByPk(data.modelId, {

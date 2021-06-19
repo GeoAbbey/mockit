@@ -169,7 +169,21 @@ export const NOTIFICATION_DATA = {
     ASSIGNED: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
       generic({
         title: "Case Assigned",
-        body: "You have been assigned a small claim kindly proceed with it execution",
+        body:
+          "You have been assigned a small claim kindly proceed with it execution once payment is confirmed",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "lawyer",
+        view: "lawyer_small_claim_detail_screen",
+        status: "small_claim",
+        click_action: "user_choose_me_for_claim",
+      }),
+    PAID: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
+      generic({
+        title: "Paid Claim",
+        body: "Claim has have been paid for kindly proceed with it execution",
         sender_firebase_token,
         sender_id,
         status_id,

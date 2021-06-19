@@ -40,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.AuthCode, { foreignKey: "ownerId" });
       this.hasMany(models.Payout, { foreignKey: "lawyerId" });
       this.hasOne(models.Cooperate, { foreignKey: "id" });
+      this.hasMany(models.CooperateAccess, { foreignKey: "ownerId" });
     }
   }
 

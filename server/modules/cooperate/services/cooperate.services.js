@@ -23,6 +23,11 @@ class CooperateService {
     return models.Cooperate.findByPk(id, t);
   }
 
+  async findOne(code) {
+    debugLog(`looking for cooperate account with code ${code}`);
+    return models.Cooperate.findOne({ where: { code } });
+  }
+
   async update(id, CooperateDTO, oldCooperateDInfo, t = undefined) {
     const { walletAmount } = oldCooperateDInfo;
 

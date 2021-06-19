@@ -15,7 +15,10 @@ export class AuthCodeRoutes extends CommonRoutesConfig {
         Authenticate.verifyToken,
         middleware({ schema: validateUUID("id"), property: "params" }),
       ])
-      .delete([wrapCatch(AuthCodesController.deleteAuthCode)]);
+      .delete([
+        wrapCatch(AuthCodesController.authCodeExists),
+        wrapCatch(AuthCodesController.deleteAuthCode),
+      ]);
 
     return this.app;
   }

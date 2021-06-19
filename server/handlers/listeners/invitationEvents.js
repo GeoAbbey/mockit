@@ -10,6 +10,7 @@ const getAmount = PayoutsController.getAmount;
 
 export const invitationEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.INVITATION.CREATED, async ({ invitation, decodedToken }) => {
+    console.log({ invitation, decodedToken }, "🐥");
     sendNotificationToLawyers(
       EVENT_IDENTIFIERS.INVITATION.CREATED,
       invitation,

@@ -4,6 +4,7 @@ import {
   PaymentWithSubOrWalletSchema,
   PayInSchema,
   PaymentAuthCodeSchema,
+  CooperateCode,
 } from "./schema/payment.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
 
@@ -17,6 +18,15 @@ export class PaymentRoutes extends CommonRoutesConfig {
       .route(`${this.path}/payment-wallet-or-sub`)
       .all([Authenticate.verifyToken])
       .post([
+        middleware({ schema: PaymentWithSubOrWalletSchema, property: "body" }),
+        wrapCatch(PaymentsController.walletOrSubPayment),
+      ]);
+
+    this.app
+      .route(`${this.path}/payment-wallet-or-sub/:code`)
+      .all([Authenticate.verifyToken])
+      .post([
+        middleware({ schema: CooperateCode, property: "params" }),
         middleware({ schema: PaymentWithSubOrWalletSchema, property: "body" }),
         wrapCatch(PaymentsController.walletOrSubPayment),
       ]);

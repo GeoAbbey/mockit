@@ -9,6 +9,7 @@ import ResponsesService from "../../response/services/response.services";
 import PayInServices from "../../payIn/services/pay-in.services";
 import AuthCodeServices from "../../authCode/services/auth-code.services";
 import CooperateService from "../../cooperate/services/cooperate.services";
+import CooperateAccessService from "../../cooperateAccess/services/cooperate-access.services";
 
 const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
@@ -28,7 +29,7 @@ class PaymentsService {
     return PaymentsService.instance;
   }
 
-  async create(PaymentDTO, eventEmitter) {
+  async create(PaymentDTO, eventEmitter, decodedToken) {
     debugLog("creating a payment");
     const mapper = {
       invitation: this.handleInvitation,
@@ -36,7 +37,8 @@ class PaymentsService {
       smallClaim: this.handleSmallClaim,
     };
 
-    return mapper[PaymentDTO.modelType](PaymentDTO, eventEmitter);
+    if (PaymentDTO.code) return this.handleCooperate(PaymentDTO, eventEmitter, decodedToken);
+    return mapper[PaymentDTO.modelType](PaymentDTO, eventEmitter, decodedToken);
   }
 
   async processPayIn({ data }) {
@@ -233,6 +235,7 @@ class PaymentsService {
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
       const { metadata, amount, reference } = data;
+      console.log({ data }, "💰");
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
         transaction: t,
       });
@@ -244,6 +247,7 @@ class PaymentsService {
       }
 
       const oldCooperateInfo = await CooperateService.find(metadata.id, { transaction: t });
+      console.log({ oldCooperateInfo }, "🍋");
       const [, [newCooperateInfo]] = await CooperateService.update(
         metadata.id,
         {
@@ -341,7 +345,164 @@ class PaymentsService {
     return result;
   }
 
-  async handleInvitation(args, emitter) {
+  async handleCooperate(args, emitter, decodedToken) {
+    //get the cooporate account and the check the access.
+    const oldCooperateInfo = await CooperateService.findOne(args.code);
+    console.log({ oldCooperateInfo });
+
+    const hasAccess = await CooperateAccessService.findOne({
+      id: decodedToken.id,
+      ownerId: oldCooperateInfo.dataValues.id,
+    });
+
+    if (!hasAccess)
+      return {
+        message: "You do not have access to use this cooperate code",
+        success: false,
+      };
+
+    const mapper = {
+      invitation: this.handleInvitationWithCooperate,
+      smallClaim: this.handleSmallClaimWithCooperate,
+    };
+
+    return mapper[args.modelType](args, emitter, decodedToken);
+  }
+
+  async handleSmallClaimWithCooperate(args, emitter, decodedToken) {
+    debugLog("I am handling a small claim with a cooperate reference");
+
+    try {
+      let result = await models.sequelize.transaction(async (t) => {
+        const oldClaim = await SmallClaimsService.find(args.modelId, true, { transaction: t });
+
+        if (oldClaim.dataValues.paid) {
+          return {
+            message: "this item has already been paid for",
+            success: false,
+          };
+        }
+
+        const oldCooperateInfo = await CooperateService.findOne(args.code);
+
+        const lawyerId = oldClaim.dataValues.assignedLawyerId;
+        const {
+          dataValues: { baseCharge, serviceCharge },
+        } = oldClaim.dataValues.interestedLawyers.find((lawyer) => lawyer.lawyerId === lawyerId);
+
+        const totalCostOfService = baseCharge + serviceCharge;
+
+        if (oldCooperateInfo.walletAmount < totalCostOfService) {
+          return {
+            message: "you do not have sufficient funds to prosecute this transaction",
+            success: false,
+          };
+        }
+
+        const newCooperateInfo = await CooperateService.update(
+          oldCooperateInfo.dataValues.id,
+          {
+            operation: "deduct",
+            walletAmount: totalCostOfService,
+          },
+          oldCooperateInfo,
+          { transaction: t }
+        );
+
+        const [, [paidClaim]] = await SmallClaimsService.update(
+          args.modelId,
+          { paid: true },
+          oldClaim,
+          { transaction: t }
+        );
+
+        const receipt = await TransactionService.create(
+          {
+            code: args.code,
+            ownerId: args.id,
+            performedBy: args.id,
+            modelType: "smallClaim",
+            modelId: args.modelId,
+            amount: totalCostOfService,
+          },
+          { transaction: t }
+        );
+
+        emitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidClaim, decodedToken);
+
+        return { success: true, service: paidClaim };
+      });
+
+      return result;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async handleInvitationWithCooperate(args, emitter, decodedToken) {
+    debugLog("I am handling a police invitation with a cooperate reference");
+
+    try {
+      let result = await models.sequelize.transaction(async (t) => {
+        const oldInvitation = await InvitationsService.find(args.modelId, null, { transaction: t });
+
+        if (oldInvitation.dataValues.paid) {
+          return {
+            message: "this item has already been paid for",
+            success: false,
+          };
+        }
+        const oldCooperateInfo = await CooperateService.findOne(args.code);
+
+        if (oldCooperateInfo.walletAmount < toKobo(config.invitationCost)) {
+          return {
+            message: "you do not have sufficient funds to prosecute this transaction",
+            success: false,
+          };
+        }
+
+        const newCooperateInfo = await CooperateService.update(
+          oldCooperateInfo.dataValues.id,
+          {
+            operation: "deduct",
+            walletAmount: toKobo(config.invitationCost),
+          },
+          oldCooperateInfo,
+          { transaction: t }
+        );
+
+        const [, [paidInvitation]] = await InvitationsService.update(
+          args.modelId,
+          { paid: true },
+          oldInvitation,
+          { transaction: t }
+        );
+
+        const receipt = await TransactionService.create(
+          {
+            code: args.code,
+            ownerId: args.id,
+            performedBy: args.id,
+            modelType: "invitation",
+            modelId: args.modelId,
+            amount: toKobo(config.invitationCost),
+          },
+          { transaction: t }
+        );
+
+        emitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
+          invitation: paidInvitation,
+          decodedToken,
+        });
+        return { success: true, service: paidInvitation };
+      });
+
+      return result;
+    } catch (error) {
+      return error;
+    }
+  }
+  async handleInvitation(args, emitter, decodedToken) {
     debugLog("I am handling payment for invitations", args);
     try {
       let result = await models.sequelize.transaction(async (t) => {
@@ -395,7 +556,7 @@ class PaymentsService {
           { transaction: t }
         );
 
-        emitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, paidInvitation);
+        emitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, paidInvitation, decodedToken);
         return { success: true, service: paidInvitation };
       });
 

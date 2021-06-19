@@ -17,3 +17,7 @@ export const PayInSchema = Joi.object().keys({
 export const PaymentAuthCodeSchema = PayInSchema.append({
   authCode: Joi.string().required(),
 });
+
+export const CooperateCode = Joi.object().keys({
+  code: Joi.string().required(),
+});

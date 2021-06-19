@@ -6,7 +6,11 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        references: {
+          model: "Users",
+          key: "id",
+          as: "id",
+        },
       },
       companyName: {
         allowNull: false,
@@ -22,9 +26,6 @@ module.exports = {
       },
       walletAmount: {
         type: Sequelize.INTEGER,
-      },
-      allowedEmails: {
-        type: Sequelize.ARRAY(Sequelize.STRING),
       },
       contactName: { type: Sequelize.STRING, allowNull: false },
       contactPhone: { type: Sequelize.STRING, allowNull: false },
