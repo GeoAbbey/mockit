@@ -176,7 +176,6 @@ class UsersService {
           },
         },
         profilePic: UserDTO.profilePic || profilePic,
-        creditCard: UserDTO.creditCard || oldDetails.creditCard,
         lawyer: {
           isVerified: UserDTO.lawyer && handleFalsy(UserDTO.lawyer.isVerified, lawyer.isVerified),
           description: (UserDTO.lawyer && UserDTO.lawyer.description) || lawyer.description,
