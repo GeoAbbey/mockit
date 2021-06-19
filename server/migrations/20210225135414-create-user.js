@@ -87,9 +87,6 @@ module.exports = {
       profilePic: {
         type: Sequelize.STRING,
       },
-      creditCard: {
-        type: Sequelize.STRING,
-      },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,

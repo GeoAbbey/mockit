@@ -96,7 +96,7 @@ export class UserRoutes extends CommonRoutesConfig {
       .route(`${this.path}/users/:id`)
       .all([
         Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
+        middleware({ schema: validateUUID("id"), property: "params" }),
         UsersController.userExistMiddleware(),
       ])
       .patch([

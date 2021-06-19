@@ -48,9 +48,7 @@ class SmallClaimsController {
       oldSmallClaim,
       params: { id },
     } = req;
-    if (body.assignedLawyerId) {
-      body.status = "in-progress";
-    }
+
     const [, [updatedSmallClaim]] = await SmallClaimsService.update(id, body, oldSmallClaim);
     return res.status(200).send({
       success: true,
@@ -111,18 +109,38 @@ class SmallClaimsController {
       oldSmallClaim,
     } = req;
 
-    const filter = { where: { id }, returning: true };
     const [, [updatedSmallClaim]] = await SmallClaimsService.update(
       id,
       { status: "completed" },
-      oldSmallClaim,
-      filter
+      oldSmallClaim
     );
     eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED, updatedSmallClaim);
 
     return res.status(200).send({
       success: true,
       message: "You have successfully completed this small claim",
+      smallClaim: updatedSmallClaim,
+    });
+  }
+
+  async updateToInProgress(req, res, next) {
+    const eventEmitter = req.app.get("eventEmitter");
+
+    const {
+      params: { id },
+      oldSmallClaim,
+    } = req;
+
+    const [, [updatedSmallClaim]] = await SmallClaimsService.update(
+      id,
+      { status: "in-progress" },
+      oldSmallClaim
+    );
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS, updatedSmallClaim);
+
+    return res.status(200).send({
+      success: true,
+      message: "You have successfully started this claim",
       smallClaim: updatedSmallClaim,
     });
   }
@@ -151,6 +169,7 @@ class SmallClaimsController {
       smallClaim: updatedSmallClaim,
     });
   }
+
   async assignALawyer(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
 
@@ -162,7 +181,7 @@ class SmallClaimsController {
 
     const [, [updatedSmallClaim]] = await SmallClaimsService.update(
       id,
-      { status: "in-progress", assignedLawyerId },
+      { assignedLawyerId },
       oldSmallClaim
     );
 
@@ -170,7 +189,7 @@ class SmallClaimsController {
 
     return res.status(200).send({
       success: true,
-      message: "You have successfully assigned a lawyer to this small claim",
+      message: "You have successfully assigned a lawyer to this small claim kindly make payment",
       smallClaim: updatedSmallClaim,
     });
   }
@@ -191,7 +210,7 @@ class SmallClaimsController {
       const {
         decodedToken: { role, id },
         body: { assignedLawyerId },
-        oldSmallClaim: { ownerId, status, interestedLawyers },
+        oldSmallClaim: { ownerId, status, interestedLawyers, paid },
       } = req;
       if (role === "admin" || role === "super-admin") return next();
       if (role === "lawyer")
@@ -208,7 +227,8 @@ class SmallClaimsController {
 
       if (context === "assignLawyer") {
         if (status === "in-progress")
-          next(createError(403, `A lawyer has already been assigned to this small claim`));
+          return next(createError(403, `A lawyer has already been assigned to this small claim`));
+
         const lawyerMarkedInterest = interestedLawyers.find(
           (lawyer) => lawyer.profile.id == assignedLawyerId
         );
@@ -224,15 +244,25 @@ class SmallClaimsController {
     return async (req, res, next) => {
       const {
         decodedToken: { role, id },
-        oldSmallClaim,
+        oldSmallClaim: { assignedLawyerId = null, status, paid },
       } = req;
 
       if (role === "admin" || role === "super-admin") return next();
       if (role !== "lawyer")
         return next(createError(401, "You do not have access to perform this operation"));
       if (context === "markAsComplete") {
-        if (id !== oldSmallClaim.assignedLawyerId)
+        if (id !== assignedLawyerId)
           return next(createError(401, "You do not have access to perform this operation"));
+        if (status !== "in-progress") {
+          return next(
+            createError(401, "You have to start this claim before marking it as completed")
+          );
+        }
+      }
+
+      if (context === "updateStatus") {
+        if (!paid)
+          return next(createError(401, "You can not start a claim that hasn't been paid for"));
       }
       return next();
     };

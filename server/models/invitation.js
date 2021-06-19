@@ -43,6 +43,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: false,
       },
+      paid: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: () => false,
+      },
       ticketId: {
         type: DataTypes.STRING,
         allowNull: false,

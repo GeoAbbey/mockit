@@ -13,7 +13,7 @@ export class LocationDetailRoutes extends CommonRoutesConfig {
       .route(`${this.path}/location/visibility/:id`)
       .all([
         Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
+        middleware({ schema: validateUUID("id"), property: "params" }),
         wrapCatch(LocationDetailsController.locationDetailExits()),
       ])
       .put([

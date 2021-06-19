@@ -29,11 +29,18 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "assignedLawyerId",
       });
       this.hasOne(models.LocationDetail, { foreignKey: "id" });
+      this.hasOne(models.AccountInfo, { foreignKey: "id" });
+      this.hasOne(models.Transaction, { foreignKey: "ownerId" });
       this.hasMany(models.EligibleLawyer, {
         as: "lawyerProfile",
         foreignKey: "lawyerId",
         onDelete: "CASCADE",
       });
+      this.hasMany(models.PayIn, { foreignKey: "ownerId" });
+      this.hasMany(models.AuthCode, { foreignKey: "ownerId" });
+      this.hasMany(models.Payout, { foreignKey: "lawyerId" });
+      this.hasOne(models.Cooperate, { foreignKey: "id" });
+      this.hasMany(models.CooperateAccess, { foreignKey: "ownerId" });
     }
   }
 
@@ -57,7 +64,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: "https://zapplawyer.s3.us-west-2.amazonaws.com/attachments/user.png",
       },
-      creditCard: { type: DataTypes.STRING, isCreditCard: true },
       lawyer: {
         type: DataTypes.JSONB,
         allowNull: false,

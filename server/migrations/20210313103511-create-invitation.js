@@ -20,6 +20,9 @@ module.exports = {
       attachments: {
         type: Sequelize.ARRAY(Sequelize.STRING),
       },
+      paid: {
+        type: Sequelize.BOOLEAN,
+      },
       status: {
         type: Sequelize.STRING,
       },

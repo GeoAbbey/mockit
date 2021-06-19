@@ -29,7 +29,10 @@ export class InterestedLawyersRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/interested-lawyers/:id`)
-      .all([Authenticate.verifyToken, middleware({ schema: validateUUID, property: "params" })])
+      .all([
+        Authenticate.verifyToken,
+        middleware({ schema: validateUUID("id"), property: "params" }),
+      ])
       .patch([
         middleware({ schema: updateMarkInterestSchema, property: "body" }),
         InterestedLawyersController.interestExits(),

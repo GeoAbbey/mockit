@@ -169,7 +169,21 @@ export const NOTIFICATION_DATA = {
     ASSIGNED: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
       generic({
         title: "Case Assigned",
-        body: "You have been assigned a small claim kindly proceed with it execution",
+        body:
+          "You have been assigned a small claim kindly proceed with it execution once payment is confirmed",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "lawyer",
+        view: "lawyer_small_claim_detail_screen",
+        status: "small_claim",
+        click_action: "user_choose_me_for_claim",
+      }),
+    PAID: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
+      generic({
+        title: "Paid Claim",
+        body: "Claim has have been paid for kindly proceed with it execution",
         sender_firebase_token,
         sender_id,
         status_id,
@@ -209,8 +223,10 @@ export const EVENT_IDENTIFIERS = {
   },
   SMALL_CLAIM: {
     CREATED: "SMALL_CLAIM_CREATED",
+    PAID: "SMALL_CLAIM_PAID",
     ASSIGNED: "SMALL_CLAIM_ASSIGNED",
     MARK_INTEREST: "SMALL_CLAIM_MARK_INTEREST",
+    MARK_AS_IN_PROGRESS: "SMALL_CLAIM_MARK_AS_IN_PROGRESS",
     MARK_AS_COMPLETED: "SMALL_CLAIM_MARK_AS_COMPLETED",
   },
   RESPONSE: {
@@ -218,6 +234,9 @@ export const EVENT_IDENTIFIERS = {
     ASSIGNED: "RESPONSE_ASSIGNED",
     MEET_TIME: "MEET_TIME_CREATED",
     MARK_AS_COMPLETED: "RESPONSE_MARK_AS_COMPLETED",
+  },
+  USER: {
+    CREATED: "USER_CREATED",
   },
 };
 

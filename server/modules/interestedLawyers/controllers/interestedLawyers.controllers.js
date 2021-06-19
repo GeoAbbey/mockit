@@ -1,9 +1,10 @@
 import debug from "debug";
 import createError from "http-errors";
 import { EVENT_IDENTIFIERS } from "../../../constants";
+import { toKobo } from "../../../utils/toKobo";
 
 import InterestedLawyersService from "../services/interestedLawyers.services";
-const log = debug("app:small-claims-controller");
+const logger = debug("app:small-claims-controller");
 
 class InterestedLawyersController {
   static instance;
@@ -23,13 +24,17 @@ class InterestedLawyersController {
       decodedToken: { id: lawyerId },
     } = req;
 
+    logger(`creating an interest for lawyer with ID ${lawyerId} on ${modelType} with ID ${id}`);
+
     const interest = await InterestedLawyersService.create({
-      baseCharge,
-      serviceCharge,
+      baseCharge: toKobo(baseCharge),
+      serviceCharge: toKobo(serviceCharge),
       lawyerId,
       modelType,
       modelId: id,
     });
+
+    if (!interest) return next(createError(400, `The ${modelType} with id ${id} cannot be found`));
 
     eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, interest);
 
@@ -50,14 +55,14 @@ class InterestedLawyersController {
         const interest = await InterestedLawyersService.find(req.params.id);
         if (!interest) return next(createError(404, "This interest can not be found"));
         req.oldInterest = interest;
-        next();
+        return next();
       } else {
         const interest = await InterestedLawyersService.findOne({ modelId, modelType, lawyerId });
         if (interest)
           return next(
             createError(403, `You can only indicate interest once per ${modelType} with ${modelId}`)
           );
-        next();
+        return next();
       }
     };
   }

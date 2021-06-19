@@ -1,6 +1,7 @@
 import debug from "debug";
 import { QueryTypes } from "sequelize";
 import models from "../../../models";
+import { handleFalsy } from "../../../utils";
 import { rawQueries } from "../../../utils/rawQueriers";
 
 const debugLog = debug("app:Responses-service");
@@ -19,40 +20,44 @@ class ResponsesService {
     return models.Response.create(ResponseDTO);
   }
 
-  async find(id, context) {
+  async find(id, context, t = undefined) {
     debugLog(`looking for a response with id ${id}`);
     if (context)
-      return models.Response.findByPk(id, {
-        include: [
-          {
-            model: models.EligibleLawyer,
-            as: "eligibleLawyers",
-            required: false,
-            include: [
-              {
-                model: models.User,
-                as: "lawyerProfile",
-                attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken"],
-                required: false,
-              },
-            ],
-          },
-          {
-            model: models.User,
-            as: "ownerProfile",
-            attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken"],
-            required: false,
-          },
-          {
-            model: models.User,
-            as: "lawyerProfile",
-            attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken"],
-            required: false,
-          },
-        ],
-      });
+      return models.Response.findByPk(
+        id,
+        {
+          include: [
+            {
+              model: models.EligibleLawyer,
+              as: "eligibleLawyers",
+              required: false,
+              include: [
+                {
+                  model: models.User,
+                  as: "lawyerProfile",
+                  attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken"],
+                  required: false,
+                },
+              ],
+            },
+            {
+              model: models.User,
+              as: "ownerProfile",
+              attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken"],
+              required: false,
+            },
+            {
+              model: models.User,
+              as: "lawyerProfile",
+              attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken"],
+              required: false,
+            },
+          ],
+        },
+        t
+      );
 
-    return models.Response.findByPk(id);
+    return models.Response.findByPk(id, t);
   }
 
   async findMany(data) {
@@ -77,8 +82,8 @@ class ResponsesService {
     });
   }
 
-  async update(id, ResponseDTO, oldResponse) {
-    const { status, meetTime, assignedLawyerId } = oldResponse;
+  async update(id, ResponseDTO, oldResponse, t = undefined) {
+    const { status, meetTime, assignedLawyerId, paid } = oldResponse;
 
     const handleMeeTime = () => {
       if (ResponseDTO.meetTime) {
@@ -91,9 +96,11 @@ class ResponsesService {
       {
         status: ResponseDTO.status || status,
         meetTime: handleMeeTime(),
+        paid: handleFalsy(ResponseDTO.paid, paid),
         assignedLawyerId: ResponseDTO.assignedLawyerId || assignedLawyerId,
       },
-      { where: { id }, returning: true }
+      { where: { id }, returning: true },
+      t
     );
   }
 

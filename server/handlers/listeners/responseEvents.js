@@ -1,6 +1,7 @@
 import debug from "debug";
 import { EVENT_IDENTIFIERS } from "../../constants";
 import LocationServices from "../../modules/locationDetail/services/locationDetails.services";
+import PaymentsService from "../../modules/payment/services/payment.services";
 import EligibleLawyersService from "../../modules/eligibleLawyers/services/eligibleLawyers.services";
 
 const env = process.env.NODE_ENV || "development";
@@ -9,6 +10,13 @@ const config = configOptions[env];
 
 import { sendNotificationToUserOrLawyer, sendNotificationToEligibleLawyers } from "./helpers";
 const logger = debug("app:handlers:listeners:response-events");
+
+import RecipientsService from "../../modules/recipient/services/recipient.services";
+import PayoutsController from "../../modules/payout/controllers/payout.controller";
+
+import { schedule } from "../../jobs/scheduler";
+
+const getAmount = PayoutsController.getAmount;
 
 export const responseEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, async ({ response, decodedToken }) => {
@@ -99,7 +107,7 @@ export const responseEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.CREATED, async ({ response, decodedToken }) => {
     logger(`${EVENT_IDENTIFIERS.RESPONSE.CREATED} event was received`);
     const {
-      dataValues: { id: responseId },
+      dataValues: { id: responseId, ownerId },
     } = response;
     const {
       startingLocation: { coordinates },
@@ -127,6 +135,12 @@ export const responseEvents = (eventEmitter) => {
       response,
       decodedToken,
     });
+
+    await PaymentsService.handleResponse({
+      id: ownerId,
+      modelId: responseId,
+      modelType: "response",
+    });
   });
 
   eventEmitter.on(
@@ -142,6 +156,25 @@ export const responseEvents = (eventEmitter) => {
         "MARK_AS_COMPLETED",
         "ownerId"
       );
+      const {
+        dataValues: { assignedLawyerId, id, ownerId },
+      } = response;
+
+      const lawyerRecipientDetails = await RecipientsService.find(assignedLawyerId);
+
+      const data = {
+        recipient: lawyerRecipientDetails.dataValues.code,
+        reason: JSON.stringify({
+          modelType: "response",
+          modelId: id,
+          text: "payment made from mark as complete",
+          id: ownerId,
+          lawyerId: assignedLawyerId,
+        }),
+        amount: await getAmount("response"),
+      };
+
+      await schedule.createPayout(data);
     }
   );
 };

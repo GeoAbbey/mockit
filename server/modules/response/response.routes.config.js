@@ -43,7 +43,7 @@ export class ResponseRoutes extends CommonRoutesConfig {
       .route(`${this.path}/response/:id`)
       .all([
         Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
+        middleware({ schema: validateUUID("id"), property: "params" }),
         ResponsesController.responseExits(),
       ])
       .post([
@@ -59,7 +59,7 @@ export class ResponseRoutes extends CommonRoutesConfig {
       .route(`${this.path}/response/:id`)
       .all([
         Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
+        middleware({ schema: validateUUID("id"), property: "params" }),
         ResponsesController.responseExits("retrieve"),
       ])
       .get([

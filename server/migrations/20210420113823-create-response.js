@@ -36,6 +36,9 @@ module.exports = {
           as: "assignedLawyerId",
         },
       },
+      paid: {
+        type: Sequelize.BOOLEAN,
+      },
       meetTime: {
         type: Sequelize.DATE,
       },

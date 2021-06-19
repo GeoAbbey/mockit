@@ -5,6 +5,11 @@ const common = {
   googleApplicationCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS,
   dialect: process.env.DIALECT,
   radius: process.env.RADIUS,
+  invitationCost: process.env.INVITATION_COST,
+  costOfSubscriptionUnit: process.env.SUBSCRIPTION_UNIT_COST,
+  payStackSecretKey: process.env.PAYSTACK_SECRET,
+  payStackPublicKey: process.env.PAYSTACK_PUBLIC,
+  lawyerPercentage: process.env.LAWYERS_PERCENTAGE,
 };
 
 module.exports = {
@@ -16,6 +21,7 @@ module.exports = {
     host: process.env.HOST,
     mongoConnect: process.env.MONGO_DB_CONNECTION_LOCAL,
     runNotificationService: true,
+    payoutInterval: process.env.PAYOUT_INTERVAL,
     ...common,
   },
 
@@ -26,6 +32,7 @@ module.exports = {
     database: process.env.PROD_DB_NAME,
     host: process.env.PROD_DB_HOSTNAME,
     mongoConnect: process.env.MONGO_DB_CONNECTION_PROD,
+    payoutInterval: process.env.PAYOUT_INTERVAL,
     runNotificationService: true,
     ...common,
     dialectOptions: {

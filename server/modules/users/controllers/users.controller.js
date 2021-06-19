@@ -6,7 +6,7 @@ import UsersService from "../service/user.service";
 import Authenticate from "../../../utils/handleJwt";
 import { HandlePassword, otp } from "../../../utils";
 import { parseISO } from "date-fns/esm";
-import { schedule } from "../../../jobs/scheduler";
+import { EVENT_IDENTIFIERS } from "../../../constants";
 
 const log = debug("app:users-controller");
 
@@ -20,6 +20,7 @@ class UsersController {
   }
 
   async signUp(req, res) {
+    const eventEmitter = req.app.get("eventEmitter");
     log("creating a user");
 
     const hash = await HandlePassword.getHash(req.body.password);
@@ -30,8 +31,7 @@ class UsersController {
     delete user.dataValues.password;
     const token = await Authenticate.signToken(user.dataValues);
 
-    const { email, otp } = user.dataValues;
-    await schedule.sendWelcomeEmail({ email, otp });
+    eventEmitter.emit(EVENT_IDENTIFIERS.USER.CREATED, { user });
 
     return res.status(201).send({
       success: true,

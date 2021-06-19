@@ -2,6 +2,7 @@ import debug from "debug";
 import { QueryTypes } from "sequelize";
 import models from "../../../models";
 import { rawQueries } from "../../../utils/rawQueriers";
+import { handleFalsy } from "../../../utils";
 
 const debugLog = debug("app:small-claims-service");
 
@@ -19,34 +20,45 @@ class SmallClaimsService {
     return models.SmallClaim.create(SmallClaimDTO);
   }
 
-  async find(id, context) {
+  async find(id, context, t = undefined) {
     debugLog(`looking for an small claim with id ${id}`);
     if (context) {
       console.log("I was called using context");
-      return models.SmallClaim.findByPk(id, {
-        include: [
-          {
-            model: models.Review,
-            as: "reviews",
-            where: { modelType: "SmallClaim", modelId: id },
-            required: false,
-          },
-          {
-            model: models.InterestedLawyer,
-            as: "interestedLawyers",
-            where: { modelType: "SmallClaim", modelId: id },
-            attributes: ["baseCharge", "serviceCharge"],
-            required: false,
-            include: [
-              {
-                model: models.User,
-                as: "profile",
-                attributes: ["firstName", "lastName", "email", "profilePic", "id", "firebaseToken"],
-              },
-            ],
-          },
-        ],
-      });
+      return models.SmallClaim.findByPk(
+        id,
+        {
+          include: [
+            {
+              model: models.Review,
+              as: "reviews",
+              where: { modelType: "SmallClaim", modelId: id },
+              required: false,
+            },
+            {
+              model: models.InterestedLawyer,
+              as: "interestedLawyers",
+              where: { modelType: "SmallClaim", modelId: id },
+              attributes: ["baseCharge", "serviceCharge", "lawyerId"],
+              required: false,
+              include: [
+                {
+                  model: models.User,
+                  as: "profile",
+                  attributes: [
+                    "firstName",
+                    "lastName",
+                    "email",
+                    "profilePic",
+                    "id",
+                    "firebaseToken",
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        t
+      );
     }
     return models.SmallClaim.findByPk(id);
   }
@@ -71,8 +83,7 @@ class SmallClaimsService {
       filter = `WHERE "SmallClaims"."assignedLawyerId" IS NULL`;
     }
     return models.sequelize.query(
-      `SELECT "SmallClaims".claim, "SmallClaims"."createdAt", "SmallClaims"."status","SmallClaims"."venue","SmallClaims"."updatedAt", "SmallClaims".amount, "SmallClaims"."assignedLawyerId", "SmallClaims".attachments, "SmallClaims".id, "SmallClaims"."ownerId", "lawyerProfile"."lastName" AS "lawyerProfile.lastName", "lawyerProfile"."firstName" AS "lawyerProfile.firstName", "lawyerProfile"."profilePic" AS "lawyerProfile.profilePic", "lawyerProfile".email AS "lawyerProfile.email","lawyerProfile".phone AS "lawyerProfile.phone", "lawyerProfile"."firebaseToken" AS "lawyerProfile.firebaseToken", (SELECT AVG("Reviews".rating) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.averageRating" , (SELECT COUNT(id) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.noOfReviews" FROM "SmallClaims" LEFT OUTER JOIN "Users" AS "lawyerProfile" ON "SmallClaims"."assignedLawyerId" = "lawyerProfile".id ${filter} ORDER BY "SmallClaims"."createdAt" DESC;
-      `,
+      `SELECT "SmallClaims".claim, "SmallClaims"."createdAt", "SmallClaims"."status","SmallClaims"."venue","SmallClaims"."updatedAt", "SmallClaims".amount, "SmallClaims"."assignedLawyerId", "SmallClaims".attachments, "SmallClaims".id, "SmallClaims"."ownerId", "lawyerProfile"."lastName" AS "lawyerProfile.lastName", "lawyerProfile"."firstName" AS "lawyerProfile.firstName", "lawyerProfile"."profilePic" AS "lawyerProfile.profilePic", "lawyerProfile".email AS "lawyerProfile.email","lawyerProfile".phone AS "lawyerProfile.phone", "lawyerProfile"."firebaseToken" AS "lawyerProfile.firebaseToken", (SELECT AVG("Reviews".rating) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.averageRating", (SELECT COUNT(id) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.noOfReviews" FROM "SmallClaims" LEFT OUTER JOIN "Users" AS "lawyerProfile" ON "SmallClaims"."assignedLawyerId" = "lawyerProfile".id ${filter} ORDER BY "SmallClaims"."createdAt" DESC;`,
       {
         nest: true,
         type: QueryTypes.SELECT,
@@ -81,8 +92,8 @@ class SmallClaimsService {
     );
   }
 
-  async update(id, smallClaimDTO, oldSmallClaim, filter) {
-    const { status, claim, venue, attachments, amount, assignedLawyerId } = oldSmallClaim;
+  async update(id, smallClaimDTO, oldSmallClaim, t = undefined) {
+    const { status, claim, venue, attachments, amount, assignedLawyerId, paid } = oldSmallClaim;
     const handleAttachments = () => {
       if (typeof smallClaimDTO.attachments === "number") {
         attachments.splice(smallClaimDTO.attachments, 1);
@@ -102,8 +113,9 @@ class SmallClaimsService {
         amount: smallClaimDTO.amount || amount,
         assignedLawyerId: smallClaimDTO.assignedLawyerId || assignedLawyerId,
         attachments: handleAttachments(),
+        paid: handleFalsy(smallClaimDTO.paid, paid),
       },
-      { where: { id }, returning: true }
+      { where: { id }, returning: true, ...t }
     );
   }
 
