@@ -10,6 +10,7 @@ class Authenticate {
     if (!Authenticate.instance) {
       Authenticate.instance = new Authenticate();
     }
+    
     return Authenticate.instance;
   }
 
