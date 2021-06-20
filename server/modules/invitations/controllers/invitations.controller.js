@@ -15,6 +15,7 @@ class InvitationsController {
   }
 
   async makeInvite(req, res) {
+    const eventEmitter = req.app.get("eventEmitter");
     const { body, attachments = [] } = req;
     const ownerId = req.decodedToken.id;
     log(`creating a new invitation for user with id ${ownerId}`);
