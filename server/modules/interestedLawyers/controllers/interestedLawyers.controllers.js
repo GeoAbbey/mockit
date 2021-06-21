@@ -36,7 +36,7 @@ class InterestedLawyersController {
 
     if (!interest) return next(createError(400, `The ${modelType} with id ${id} cannot be found`));
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, interest);
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, interest, req.decodedToken);
 
     return res.status(200).send({
       success: true,

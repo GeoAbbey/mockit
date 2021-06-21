@@ -163,7 +163,7 @@ class SmallClaimsController {
       oldSmallClaim
     );
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, updatedSmallClaim);
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, { data: updatedSmallClaim, decodedToken: req.decodedToken});
 
     return res.status(200).send({
       success: true,
