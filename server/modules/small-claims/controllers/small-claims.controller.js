@@ -17,12 +17,12 @@ class SmallClaimsController {
   async makeClaim(req, res) {
     const eventEmitter = req.app.get("eventEmitter");
 
-    const { body, attachments = [] } = req;
+    const { body, decodedToken,attachments = [] } = req;
     const ownerId = req.decodedToken.id;
     log(`creating a new small claim for user with id ${ownerId}`);
     const smallClaim = await SmallClaimsService.create({ ...body, attachments, ownerId });
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, smallClaim, "SMALL_CLAIM");
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, smallClaim, decodedToken);
 
     return res.status(201).send({
       success: true,
@@ -38,7 +38,7 @@ class SmallClaimsController {
       const smallClaim = await SmallClaimsService.find(id, context);
       if (!smallClaim) return next(createError(404, "The small claim can not be found"));
       req.oldSmallClaim = smallClaim;
-      next();
+      return next();
     };
   }
 
@@ -106,6 +106,7 @@ class SmallClaimsController {
 
     const {
       params: { id },
+      decodedToken,
       oldSmallClaim,
     } = req;
 
@@ -114,7 +115,7 @@ class SmallClaimsController {
       { status: "completed" },
       oldSmallClaim
     );
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED, updatedSmallClaim);
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED, updatedSmallClaim, decodedToken);
 
     return res.status(200).send({
       success: true,
@@ -128,6 +129,7 @@ class SmallClaimsController {
 
     const {
       params: { id },
+      decodedToken,
       oldSmallClaim,
     } = req;
 
@@ -136,7 +138,7 @@ class SmallClaimsController {
       { status: "in-progress" },
       oldSmallClaim
     );
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS, updatedSmallClaim);
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS, updatedSmallClaim, decodedToken);
 
     return res.status(200).send({
       success: true,
@@ -176,6 +178,7 @@ class SmallClaimsController {
     const {
       params: { id },
       body: { assignedLawyerId },
+      decodedToken,
       oldSmallClaim,
     } = req;
 
@@ -185,7 +188,7 @@ class SmallClaimsController {
       oldSmallClaim
     );
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.ASSIGNED, updatedSmallClaim);
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.ASSIGNED, updatedSmallClaim, decodedToken);
 
     return res.status(200).send({
       success: true,

@@ -29,9 +29,9 @@ export const smallClaimEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, async (data, decodedToken) => {
     layerMarkInterestOrUpdateStatusForClaim(
       EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST,
-      "MARK_INTEREST",
       data,
-      decodedToken
+      decodedToken,
+      "MARK_INTEREST",
     );
   });
 
@@ -78,11 +78,13 @@ export const smallClaimEvents = (eventEmitter) => {
   });
 
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS, async (data, decodedToken) => {
-    layerMarkInterestOrUpdateStatusForClaim(
+    sendNotificationToUserOrLawyer(
       EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS,
-      "MARK_AS_IN_PROGRESS",
       data,
-      decodedToken
+      decodedToken,
+      "SMALL_CLAIM",
+      "MARK_AS_IN_PROGRESS",
+      "ownerId"
     );
   });
 

@@ -15,17 +15,12 @@ class InvitationsController {
   }
 
   async makeInvite(req, res) {
-    const eventEmitter = req.app.get("eventEmitter");
     const { body, attachments = [] } = req;
     const ownerId = req.decodedToken.id;
+
     log(`creating a new invitation for user with id ${ownerId}`);
     const invitation = await InvitationsService.create({ attachments, ...body, ownerId });
-
-    eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
-      invitation,
-      decodedToken: req.decodedToken,
-    });
-
+   
     return res.status(201).send({
       success: true,
       message: "invitation successfully created",
@@ -95,12 +90,12 @@ class InvitationsController {
 
   async getUnAssignedInvites(req, res, next) {
     log("getting all unassigned invitations");
-    const data = { where: { assignedLawyerId: null } };
+    const data = { where: { assignedLawyerId: null, paid: true } };
 
     const invitations = await InvitationsService.findMany(data, true);
     return res.status(200).send({
       success: true,
-      message: " unassigned invitations successfully retrieved",
+      message: "unassigned invitations successfully retrieved",
       invitations,
     });
   }
@@ -132,6 +127,7 @@ class InvitationsController {
 
     const {
       params: { id },
+      decodedToken,
       oldInvitation,
     } = req;
 
@@ -143,6 +139,7 @@ class InvitationsController {
 
     eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.MARK_AS_COMPLETED, {
       invitation: updatedInvitation,
+      decodedToken
     });
 
     return res.status(200).send({

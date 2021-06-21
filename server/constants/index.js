@@ -193,6 +193,19 @@ export const NOTIFICATION_DATA = {
         status: "small_claim",
         click_action: "user_choose_me_for_claim",
       }),
+    MARK_AS_IN_PROGRESS: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
+      generic({
+        title: "Claim Started",
+        body: "Claim has have been started by assigned lawyer",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "lawyer",
+        view: "lawyer_small_claim_detail_screen",
+        status: "small_claim",
+        click_action: "user_choose_me_for_claim",
+      }),
   },
 
   REVIEW: ({ context, action, id }) => ({

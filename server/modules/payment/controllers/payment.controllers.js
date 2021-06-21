@@ -49,8 +49,11 @@ class PaymentsController {
   }
 
   processPayment = async (req, res, next) => {
+    const eventEmitter = req.app.get("eventEmitter");
+
     const {
       params: { ref },
+      decodedToken
     } = req;
     const result = await payment.verifyPayment(ref);
     const {
@@ -62,6 +65,8 @@ class PaymentsController {
 
     const paymentResult = await PaymentsService.processPayIn({
       data,
+      eventEmitter,
+      decodedToken
     });
 
     return res.status(200).send(paymentResult);

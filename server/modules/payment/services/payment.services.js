@@ -41,7 +41,7 @@ class PaymentsService {
     return mapper[PaymentDTO.modelType](PaymentDTO, eventEmitter, decodedToken);
   }
 
-  async processPayIn({ data }) {
+  async processPayIn({ data, eventEmitter, decodedToken }) {
     const mapper = {
       subscription: this.handleSubscriptionPayIn,
       singleSmallClaim: this.handleSingleSmallClaim,
@@ -50,10 +50,10 @@ class PaymentsService {
       cooperate: this.handleCooperatePayIn,
     };
 
-    return mapper[data.metadata.type]({ data });
+    return mapper[data.metadata.type]({ data, eventEmitter, decodedToken });
   }
 
-  async handleSingleInvitation({ data }) {
+  async handleSingleInvitation({ data, eventEmitter, decodedToken }) {
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
       const { metadata, amount, reference } = data;
@@ -109,6 +109,12 @@ class PaymentsService {
         },
         transaction: t,
       });
+
+      eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
+        invitation: paidInvitation,
+        decodedToken,
+      });
+
       return { success: true, service: paidInvitation };
     });
 
@@ -556,7 +562,11 @@ class PaymentsService {
           { transaction: t }
         );
 
-        emitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, paidInvitation, decodedToken);
+        emitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
+          invitation: paidInvitation,
+          decodedToken,
+        });
+
         return { success: true, service: paidInvitation };
       });
 
@@ -566,7 +576,7 @@ class PaymentsService {
     }
   }
 
-  async handleSmallClaim(args, emitter) {
+  async handleSmallClaim(args, emitter, decodedToken) {
     debugLog("handling payment for small claim", args);
     try {
       let result = await models.sequelize.transaction(async (t) => {
@@ -600,7 +610,7 @@ class PaymentsService {
           {
             info: "wallet",
             operation: "deduct",
-            walletAmount: totalCostOfService * 100,
+            walletAmount: totalCostOfService,
           },
           oldAccountInfo,
           { transaction: t }
@@ -624,7 +634,7 @@ class PaymentsService {
           { transaction: t }
         );
 
-        emitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim);
+        emitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken);
 
         return { success: true, service: paidSmallClaim };
       });

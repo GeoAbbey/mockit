@@ -108,7 +108,7 @@ export const sendNotificationToUserOrLawyer = async (
   );
 };
 
-export const layerMarkInterestOrUpdateStatusForClaim = async (events, data, decodedToken) => {
+export const layerMarkInterestOrUpdateStatusForClaim = async (events, data, decodedToken, action) => {
   logger(`${events} events has been received`);
 
   const caseOfInterest = await models[data.modelType].findByPk(data.modelId, {
@@ -135,7 +135,7 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (events, data, deco
       for: EVENT_IDENTIFIERS.SMALL_CLAIM[action],
       ownerId: ownerProfile.id,
       content: JSON.stringify(
-        NOTIFICATION_DATA.SMALL_CLAIM.MARK_INTEREST({
+        NOTIFICATION_DATA.SMALL_CLAIM[action]({
           sender_id: data.dataValues.ownerId,
           status_id: data.dataValues.id,
           sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
@@ -149,7 +149,7 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (events, data, deco
   config.runNotificationService &&
     sendNotificationToClient({
       tokens: [ownerProfile.firebaseToken],
-      data: NOTIFICATION_DATA.SMALL_CLAIM.MARK_INTEREST({
+      data: NOTIFICATION_DATA.SMALL_CLAIM[action]({
         sender_id: data.dataValues.ownerId,
         status_id: data.dataValues.id,
         sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
@@ -160,7 +160,7 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (events, data, deco
   logger("saving notification sent to the user in the database");
   await models.Notification.bulkCreate(
     notice,
-    NOTIFICATION_DATA.SMALL_CLAIM.MARK_INTEREST({
+    NOTIFICATION_DATA.SMALL_CLAIM[action]({
       sender_id: data.dataValues.ownerId,
       status_id: data.dataValues.id,
       sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
