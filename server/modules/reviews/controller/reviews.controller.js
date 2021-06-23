@@ -130,6 +130,16 @@ class ReviewsController {
     });
   }
 
+  async allStats(req, res, next){
+   const result =  await ReviewsService.getReviewStats()
+
+   return res.status(200).send({
+    success: true,
+    message: "stats successfully retrieved",
+    result,
+  });
+  }
+
   async getAllReviewStats(req, res, next) {
     const {
       params: { id },
@@ -150,12 +160,22 @@ class ReviewsController {
         decodedToken: { role, id },
         oldReview: { reviewerId },
       } = req;
-      if (role === "admin" || role === "super-admin") next();
+      if (role === "admin" || role === "super-admin") return next();
       if (role === "user" && id !== reviewerId) {
         return next(createError(401, `You do not have access to ${context} this review`));
       }
-      next();
+      return next();
     };
+  }
+
+  checkAccessUserAdmin(){
+    return async (req, res, next) => {
+      const {
+        decodedToken: { role, id },
+      } = req;
+      if (role === "admin" || role === "super-admin") return next();
+      else return next(createError(400, `You do not have access use this route`));
+    }
   }
 
   queryContext(req, res, next) {

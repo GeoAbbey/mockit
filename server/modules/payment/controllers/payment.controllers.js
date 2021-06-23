@@ -20,6 +20,18 @@ class PaymentsController {
     return PaymentsController.instance;
   }
 
+
+  async payInHistory(req, res, next){
+    const {decodedToken: { id}} = req;
+    const history =  await PaymentsService.payInHistory(id);
+
+    return res.status(201).send({
+      success: true,
+      message: "history successfully retrieved",
+      history,
+    });
+  }
+
   async walletOrSubPayment(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
 

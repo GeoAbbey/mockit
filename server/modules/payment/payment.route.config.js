@@ -52,6 +52,13 @@ export class PaymentRoutes extends CommonRoutesConfig {
         wrapCatch(PaymentsController.payInPayment),
       ]);
 
+      this.app
+      .route(`${this.path}/payin/history`)
+      .get([
+        Authenticate.verifyToken,
+        wrapCatch(PaymentsController.payInHistory),
+      ]);
+
     return this.app;
   }
 }

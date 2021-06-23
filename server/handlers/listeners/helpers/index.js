@@ -108,7 +108,12 @@ export const sendNotificationToUserOrLawyer = async (
   );
 };
 
-export const layerMarkInterestOrUpdateStatusForClaim = async (events, data, decodedToken, action) => {
+export const layerMarkInterestOrUpdateStatusForClaim = async (
+  events,
+  data,
+  decodedToken,
+  action
+) => {
   logger(`${events} events has been received`);
 
   const caseOfInterest = await models[data.modelType].findByPk(data.modelId, {
@@ -173,6 +178,7 @@ export const sendNotificationToEligibleLawyers = async ({
   events,
   lawyersToNotify,
   response,
+  startingLocation,
   decodedToken,
 }) => {
   logger(`${events} events has been received`);
@@ -191,6 +197,7 @@ export const sendNotificationToEligibleLawyers = async ({
           status_id: response.dataValues.id,
           sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
           sender_firebase_token: decodedToken.firebaseToken,
+          startingLocation,
         })
       ),
     });
@@ -205,6 +212,7 @@ export const sendNotificationToEligibleLawyers = async ({
         status_id: response.dataValues.id,
         sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
         sender_firebase_token: decodedToken.firebaseToken,
+        startingLocation,
       }),
     });
 
@@ -216,6 +224,7 @@ export const sendNotificationToEligibleLawyers = async ({
       status_id: response.dataValues.id,
       sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
       sender_firebase_token: decodedToken.firebaseToken,
+      startingLocation,
     })
   );
 };

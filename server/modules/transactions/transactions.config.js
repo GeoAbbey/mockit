@@ -16,7 +16,6 @@ export class TransactionRoutes extends CommonRoutesConfig {
         TransactionsController.checkAccessAdmin(),
         middleware({ schema: validateUUID("ownerId"), property: "params" }),
       ])
-      .get([wrapCatch(TransactionsController.getAllTransactions)])
       .post([
         middleware({ schema: TransactionSchema, property: "body" }),
         wrapCatch(TransactionsController.createTransaction),
@@ -32,12 +31,11 @@ export class TransactionRoutes extends CommonRoutesConfig {
       .delete([
         TransactionsController.checkAccessAdmin(),
         wrapCatch(TransactionsController.deleteTransaction),
-      ])
-      .put([
-        middleware({ schema: TransactionSchema, property: "body" }),
-        TransactionsController.checkAccessAdmin(),
-        wrapCatch(TransactionsController.modifyTransaction),
       ]);
+
+    this.app
+      .route(`${this.path}/transaction`)
+      .get([Authenticate.verifyToken, wrapCatch(TransactionsController.getAllTransactions)]);
 
     return this.app;
   }

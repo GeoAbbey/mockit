@@ -22,7 +22,9 @@ class PayInsService {
     return models.PayIn.findOne({ where: { reference, ownerId } }, t);
   }
 
-  async findMany() {}
+  async findMany(id) {
+    return models.PayIn.findAll({ where: { ownerId: id }, order: [['createdAt', 'DESC']] });
+  }
 
   async remove(id) {
     debugLog(`deleting a review with ${id}`);

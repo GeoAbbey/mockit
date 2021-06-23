@@ -9,6 +9,7 @@ const generic = ({
   view,
   status,
   click_action,
+  ...rest
 }) => ({
   notification: {
     title,
@@ -24,6 +25,7 @@ const generic = ({
     view,
     click_action,
     google_sent_time: new Date().toISOString(),
+    ...rest,
   },
 });
 
@@ -97,7 +99,7 @@ export const NOTIFICATION_DATA = {
         status: "emergency_response",
         click_action: "meet_with_lawyer",
       }),
-    CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+    CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token, ...rest }) =>
       generic({
         title: "Emergency Response Created",
         body: "Kindly Indicate Interest to get assigned to the case",
@@ -109,6 +111,7 @@ export const NOTIFICATION_DATA = {
         view: "lawyer_emergency_response_screen",
         status: "emergency_response",
         click_action: "create_emergency_response",
+        ...rest,
       }),
     MARK_AS_COMPLETED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
       generic({

@@ -10,14 +10,22 @@ export class AuthCodeRoutes extends CommonRoutesConfig {
 
   configureRoutes() {
     this.app
-      .route(`${this.path}/authCodes/:id`)
+      .route(`${this.path}/auth-codes/:id`)
       .all([
         Authenticate.verifyToken,
         middleware({ schema: validateUUID("id"), property: "params" }),
       ])
       .delete([
         wrapCatch(AuthCodesController.authCodeExists),
+        wrapCatch(AuthCodesController.checkAccessUser()),
         wrapCatch(AuthCodesController.deleteAuthCode),
+      ]);
+
+      this.app
+      .route(`${this.path}/auth-codes`)
+      .get([
+        Authenticate.verifyToken,
+        wrapCatch(AuthCodesController.getAuthCodes),
       ]);
 
     return this.app;

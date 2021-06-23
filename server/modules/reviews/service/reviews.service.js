@@ -54,12 +54,12 @@ class ReviewsService {
 
     return models.Review.findAll({
       where: { modelId, modelType },
-      order: [[createdAt, DESC]],
+      order: [['createdAt', 'DESC']],
       include: [
         {
           model: models.User,
-          as: reviewerProfile,
-          attributes: [firstName, lastName, email, profilePic],
+          as: 'reviewerProfile',
+          attributes: ['firstName', 'lastName', 'email', 'profilePic', 'phone'],
           required: false,
         },
       ],
@@ -69,13 +69,13 @@ class ReviewsService {
   async findMany(context) {
     debugLog(`finding all review with the query context ${JSON.stringify(context)}`);
     return models.Review.findAll({
-      context,
-      order: [[createdAt, DESC]],
+      ...context,
+      order: [['createdAt', 'DESC']],
       include: [
         {
           model: models.User,
-          as: reviewerProfile,
-          attributes: [firstName, lastName, email, profilePic],
+          as: 'reviewerProfile',
+          attributes: ['firstName', 'lastName', 'email', 'profilePic', 'phone'],
           required: false,
         },
       ],
@@ -98,6 +98,16 @@ class ReviewsService {
       `SELECT "Users".email, "Users"."firebaseToken", "Users"."phone", "Users"."lawyer", "Users"."lastName", "Users"."firstName", "Users"."profilePic",(select count(id) from "Reviews" where "reviewerId" = :id) as total_rating,(select avg(rating) from "Reviews" where "reviewerId" = :id) as avg_rating,(select count(id) from "Reviews" where "reviewerId" = :id and rating > 2) as positive_rating FROM "Users" WHERE "Users".id = :id;`,
       {
         replacements: { id },
+        type: QueryTypes.SELECT,
+      }
+    );
+  }
+
+  async getReviewStats(){
+    debugLog(`getting statistics for all reviews on the platform`);
+    return models.sequelize.query(
+      `select count(id) as total_rating, (select count(id) as pst_rating from "Reviews" where rating > 2) from "Reviews";`,
+      {
         type: QueryTypes.SELECT,
       }
     );

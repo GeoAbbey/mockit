@@ -23,6 +23,12 @@ class AuthCodesService {
     return models.AuthCode.findByPk(id, t);
   }
 
+  async findMany(id){
+    debugLog(`looking for an auth code with id ${id}`);
+
+    return models.AuthCode.findAll({where: {ownerId: id}});
+  }
+
   async remove(id, t = undefined) {
     debugLog(`deleting the auth code with id ${id}`);
     return models.AuthCode.destroy({

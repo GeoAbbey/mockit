@@ -42,7 +42,11 @@ class ResponsesController {
 
     const response = await ResponsesService.create({ ownerId, startingLocation });
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.CREATED, { decodedToken, response });
+    eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.CREATED, {
+      decodedToken,
+      response,
+      startingLocation,
+    });
     return res.status(201).send({
       success: true,
       message: "1 subscription has been successfully used in creating this response",

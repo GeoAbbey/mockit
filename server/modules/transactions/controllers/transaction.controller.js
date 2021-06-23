@@ -48,11 +48,15 @@ class TransactionsController {
   }
 
   async getAllTransactions(req, res, next) {
-    const { oldTransaction } = req;
+    const {
+      decodedToken: { id },
+    } = req;
+    const transactions = await TransactionsService.findMany(id);
+
     return res.status(200).send({
       success: true,
-      message: "Transaction successfully retrieved",
-      Transaction: oldTransaction,
+      message: "transaction successfully created",
+      transactions,
     });
   }
 

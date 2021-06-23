@@ -59,6 +59,17 @@ class PayoutsController {
     }
   }
 
+  async getHistory(req, res, next){
+    const {decodedToken: { id}} = req;
+    const history = await PayoutsService.getHistory(id);
+
+    return res.status(201).send({
+      success: true,
+      message: "Payout successfully created",
+      history,
+  })
+}
+
   checkAccessAdmin(context) {
     return async (req, res, next) => {
       const {
@@ -68,6 +79,18 @@ class PayoutsController {
       if (role === "admin" || role === "super-admin") return next();
 
       return next(createError(401, "You do not have access to perform this operation"));
+    };
+  }
+
+  checkAccessLawyer(context) {
+    return async (req, res, next) => {
+      const {
+        decodedToken: { role },
+      } = req;
+
+      if (role !== "lawyer") return next(createError(401, "You do not have access to perform this operation"));
+
+      return next();
     };
   }
 }

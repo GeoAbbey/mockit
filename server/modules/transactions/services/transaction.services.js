@@ -22,7 +22,10 @@ class TransactionsService {
     return models.Transaction.findByPk(id);
   }
 
-  async findMany() {}
+  async findMany(id) {
+    debugLog(`getting a list of transaction with for user with id ${id}`);
+    return models.Transaction.findAll({ where: { ownerId: id } });
+  }
 
   async remove(id) {
     debugLog(`deleting a review with ${id}`);

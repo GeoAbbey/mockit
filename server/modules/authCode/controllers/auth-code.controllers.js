@@ -15,12 +15,25 @@ class AuthCodesController {
 
   async deleteAuthCode(req, res, next) {
     const { id } = req.params;
-    log(`deleting a AuthCode with id ${id}`);
+    log(`deleting a auth code with id ${id}`);
     const deletedAuthCode = await AuthCodesService.remove(id);
     return res.status(200).send({
       success: true,
       message: "credit successfully deleted",
       authCode: deletedAuthCode,
+    });
+  }
+
+  async getAuthCodes(req, res, next) {
+    const { decodedToken: { id }} = req;
+    log(`retrieving all auth code with for user with id ${id}`);
+
+    const cards = await AuthCodesService.findMany(id);
+
+    return res.status(200).send({
+      success: true,
+      message: "credit successfully deleted",
+      cards,
     });
   }
 

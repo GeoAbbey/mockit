@@ -21,6 +21,16 @@ export class PayoutRoutes extends CommonRoutesConfig {
         wrapCatch(PayoutsController.createPayout),
       ]);
 
+      this.app
+      .route(`${this.path}/payout/getHistory`)
+      .all([
+        Authenticate.verifyToken,
+      ])
+      .get([
+        PayoutsController.checkAccessLawyer(),
+        wrapCatch(PayoutsController.getHistory),
+      ]);
+      
     return this.app;
   }
 }

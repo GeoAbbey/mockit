@@ -43,6 +43,10 @@ class PayoutsService {
       return models.Payout.create(dataFromPayStack);
     }
   }
+
+  async getHistory(id){
+    return  models.Payout.findAll({where:{ lawyerId: id},order: [['createdAt', 'DESC']]})
+  }
 }
 
 export default PayoutsService.getInstance();

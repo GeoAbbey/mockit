@@ -29,6 +29,11 @@ class PaymentsService {
     return PaymentsService.instance;
   }
 
+  async payInHistory(id){
+    return PayInServices.findMany(id);
+  }
+
+
   async create(PaymentDTO, eventEmitter, decodedToken) {
     debugLog("creating a payment");
     const mapper = {

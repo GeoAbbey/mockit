@@ -102,44 +102,48 @@ export const responseEvents = (eventEmitter) => {
     );
   });
 
-  eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.CREATED, async ({ response, decodedToken }) => {
-    logger(`${EVENT_IDENTIFIERS.RESPONSE.CREATED} event was received`);
-    const {
-      dataValues: { id: responseId, ownerId },
-    } = response;
-    const {
-      startingLocation: { coordinates },
-    } = response;
+  eventEmitter.on(
+    EVENT_IDENTIFIERS.RESPONSE.CREATED,
+    async ({ response, decodedToken, startingLocation }) => {
+      logger(`${EVENT_IDENTIFIERS.RESPONSE.CREATED} event was received`);
+      const {
+        dataValues: { id: responseId, ownerId },
+      } = response;
+      const {
+        startingLocation: { coordinates },
+      } = response;
 
-    //return all the lawyers that are online within the given radius
-    const results = await LocationServices.findLawyersWithinRadius({
-      longitude: coordinates[0],
-      latitude: coordinates[1],
-      radius: parseInt(config.radius),
-    });
+      //return all the lawyers that are online within the given radius
+      const results = await LocationServices.findLawyersWithinRadius({
+        longitude: coordinates[0],
+        latitude: coordinates[1],
+        radius: parseInt(config.radius),
+      });
 
-    console.log({ results });
-    const lawyerModifiedWithResponseId = [];
+      console.log({ results });
+      const lawyerModifiedWithResponseId = [];
 
-    results.forEach((result) => {
-      lawyerModifiedWithResponseId.push({ lawyerId: result.id, responseId });
-    });
+      results.forEach((result) => {
+        lawyerModifiedWithResponseId.push({ lawyerId: result.id, responseId });
+      });
 
-    const answer = await EligibleLawyersService.bulkCreate(lawyerModifiedWithResponseId);
+      const answer = await EligibleLawyersService.bulkCreate(lawyerModifiedWithResponseId);
 
-    await sendNotificationToEligibleLawyers({
-      events: EVENT_IDENTIFIERS.RESPONSE.CREATED,
-      lawyersToNotify: results,
-      response,
-      decodedToken,
-    });
+      await sendNotificationToEligibleLawyers({
+        events: EVENT_IDENTIFIERS.RESPONSE.CREATED,
+        lawyersToNotify: results,
+        startingLocation,
+        response,
+        decodedToken,
+      });
 
-    await PaymentsService.handleResponse({
-      id: ownerId,
-      modelId: responseId,
-      modelType: "response",
-    });
-  });
+      await PaymentsService.handleResponse({
+        id: ownerId,
+        modelId: responseId,
+        modelType: "response",
+      });
+    }
+  );
 
   eventEmitter.on(
     EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED,
