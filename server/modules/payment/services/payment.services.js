@@ -29,10 +29,16 @@ class PaymentsService {
     return PaymentsService.instance;
   }
 
-  async payInHistory(id){
+  async payInHistory(id) {
     return PayInServices.findMany(id);
   }
 
+  async priceList() {
+    return {
+      invitationCost: config.invitationCost,
+      costOfSubscriptionUnit: config.costOfSubscriptionUnit,
+    };
+  }
 
   async create(PaymentDTO, eventEmitter, decodedToken) {
     debugLog("creating a payment");
