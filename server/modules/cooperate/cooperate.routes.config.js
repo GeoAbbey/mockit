@@ -1,8 +1,8 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import CooperatesController from "./controller/cooperate.controllers";
-import { createCooperateSchema } from "./schema/cooperate.schema";
+import { createCooperateSchema, editCooperateSchema } from "./schema/cooperate.schema";
 
-import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
+import { wrapCatch, middleware, Authenticate } from "../../utils";
 
 export class CooperateRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {
@@ -16,6 +16,15 @@ export class CooperateRoutes extends CommonRoutesConfig {
       .post([
         middleware({ schema: createCooperateSchema, property: "body" }),
         wrapCatch(CooperatesController.createCooperate),
+      ])
+      .patch([
+        middleware({ schema: editCooperateSchema, property: "body" }),
+        wrapCatch(CooperatesController.cooperateExists()),
+        wrapCatch(CooperatesController.editCooperate),
+      ])
+      .get([
+        middleware({ schema: editCooperateSchema, property: "body" }),
+        wrapCatch(CooperatesController.cooperateExists("retrieve")),
       ]);
 
     return this.app;

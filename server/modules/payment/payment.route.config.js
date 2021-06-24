@@ -52,12 +52,13 @@ export class PaymentRoutes extends CommonRoutesConfig {
         wrapCatch(PaymentsController.payInPayment),
       ]);
 
-      this.app
+    this.app
       .route(`${this.path}/payin/history`)
-      .get([
-        Authenticate.verifyToken,
-        wrapCatch(PaymentsController.payInHistory),
-      ]);
+      .get([Authenticate.verifyToken, wrapCatch(PaymentsController.payInHistory)]);
+
+    this.app
+      .route(`${this.path}/payment/price-list`)
+      .get([Authenticate.verifyToken, wrapCatch(PaymentsController.priceList)]);
 
     return this.app;
   }

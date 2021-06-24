@@ -29,13 +29,43 @@ class CooperateController {
     });
   }
 
-  cooperateExists(req, res, next) {
-    const { oldCooperate } = req;
+  cooperateExists(context) {
+    return async (req, res, next) => {
+      const {
+        decodedToken: { id },
+      } = req;
+
+      const cooperateInfo = await CooperateService.find(id);
+
+      if (!cooperateInfo)
+        return next(createError(404, `You do not have a cooperate account kindly create one`));
+
+      if (context) {
+        return res.status(200).send({
+          success: true,
+          message: "cooperate info has been successfully retrieved.",
+          cooperateInfo,
+        });
+      }
+
+      req.oldCooperate = cooperateInfo;
+      return next();
+    };
+  }
+
+  async editCooperate(req, res, next) {
+    const {
+      decodedToken: { id },
+      oldCooperate,
+      body,
+    } = req;
+
+    const [, [updatedDetails]] = await CooperateService.update(id, body, oldCooperate);
 
     return res.status(200).send({
       success: true,
-      message: "auth code has been successfully deleted.",
-      Cooperate: oldCooperate,
+      message: "cooperate info has been successfully updated.",
+      updatedDetails,
     });
   }
 

@@ -20,10 +20,21 @@ class PaymentsController {
     return PaymentsController.instance;
   }
 
+  async priceList(req, res, next) {
+    const prices = await PaymentsService.priceList();
 
-  async payInHistory(req, res, next){
-    const {decodedToken: { id}} = req;
-    const history =  await PaymentsService.payInHistory(id);
+    return res.status(200).send({
+      success: true,
+      message: "all prices successfully returned",
+      prices,
+    });
+  }
+
+  async payInHistory(req, res, next) {
+    const {
+      decodedToken: { id },
+    } = req;
+    const history = await PaymentsService.payInHistory(id);
 
     return res.status(201).send({
       success: true,
@@ -65,7 +76,7 @@ class PaymentsController {
 
     const {
       params: { ref },
-      decodedToken
+      decodedToken,
     } = req;
     const result = await payment.verifyPayment(ref);
     const {
@@ -78,7 +89,7 @@ class PaymentsController {
     const paymentResult = await PaymentsService.processPayIn({
       data,
       eventEmitter,
-      decodedToken
+      decodedToken,
     });
 
     return res.status(200).send(paymentResult);

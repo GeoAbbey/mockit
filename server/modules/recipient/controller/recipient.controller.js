@@ -37,7 +37,6 @@ class RecipientsController {
     if (!recipient.success) return next(createError(400, recipient.response));
 
     const { response: recipientFromPayStack } = recipient;
-    console.log({ recipientFromPayStack }, "🐥🍅");
 
     const newRecipient = await RecipientsService.create({
       id,
@@ -50,6 +49,53 @@ class RecipientsController {
       success: true,
       message: "recipient successfully created",
       recipient: newRecipient,
+    });
+  }
+
+  recipientExist(context) {
+    return async (req, res, next) => {
+      const {
+        decodedToken: { id },
+      } = req;
+      const recipient = await RecipientsService.find(id);
+      if (!recipient)
+        return next(createError(404, `You don't have a recipient account kindly create one`));
+
+      if (context) {
+        return res.status(200).send({
+          success: true,
+          message: `recipient successfully ${context}`,
+          recipient,
+        });
+      }
+
+      req.oldRecipient = recipient;
+      return next();
+    };
+  }
+
+  async deleteRecipient(req, res, next) {
+    const {
+      decodedToken: { id },
+      oldRecipient,
+    } = req;
+
+    const recipient = await RecipientsService.delete(id, oldRecipient);
+
+    return res.status(200).send({
+      success: true,
+      message: "account successfully deleted",
+      recipient,
+    });
+  }
+
+  async getBankCodes(req, res, next) {
+    const { response } = await RecipientsService.findMany();
+
+    return res.status(200).send({
+      success: true,
+      message: response.message,
+      response: response.data,
     });
   }
 

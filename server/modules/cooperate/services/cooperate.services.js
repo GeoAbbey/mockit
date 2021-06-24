@@ -29,7 +29,14 @@ class CooperateService {
   }
 
   async update(id, CooperateDTO, oldCooperateDInfo, t = undefined) {
-    const { walletAmount } = oldCooperateDInfo;
+    const {
+      walletAmount,
+      companyAddress,
+      companyEmail,
+      companyName,
+      contactPhone,
+      contactName,
+    } = oldCooperateDInfo;
 
     const handleAmount = (newValue, previousValue, operation) => {
       if (operation === "add") {
@@ -39,7 +46,14 @@ class CooperateService {
 
     return models.Cooperate.update(
       {
-        walletAmount: handleAmount(CooperateDTO.walletAmount, walletAmount, CooperateDTO.operation),
+        walletAmount: CooperateDTO.walletAmount
+          ? handleAmount(CooperateDTO.walletAmount, walletAmount, CooperateDTO.operation)
+          : walletAmount,
+        companyName: CooperateDTO.companyName || companyName,
+        companyAddress: CooperateDTO.companyAddress || companyAddress,
+        companyEmail: CooperateDTO.companyEmail || companyEmail,
+        contactName: CooperateDTO.contactName || contactName,
+        contactPhone: CooperateDTO.contactPhone || contactPhone,
       },
       { where: { id }, returning: true, ...t }
     );

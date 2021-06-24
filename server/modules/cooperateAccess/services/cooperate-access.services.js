@@ -13,17 +13,6 @@ class CooperateAccessService {
     return CooperateAccessService.instance;
   }
 
-  async bulkCreate(CooperateAccessDTO, ownerId) {
-    debugLog("adding users to a particular cooperate access");
-    // check if the ownerId has a cooperate Account.
-    const isAccountFound = await CooperateService.find(ownerId);
-    if (isAccountFound)
-      return models.CooperateAccess.bulkCreate(CooperateAccessDTO, {
-        updateOnDuplicate: ["userId", "ownerId"],
-      });
-    else return null;
-  }
-
   async find(id, t = undefined) {
     debugLog(`looking for an auth code with id ${id}`);
 

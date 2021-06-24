@@ -9,7 +9,9 @@ export const payStack = (request) => {
     },
     async verifyPayment(ref) {
       return this.requestBuilder(
-        `https://api.paystack.co/transaction/verify/${encodeURIComponent(ref)}`
+        `https://api.paystack.co/transaction/verify/${encodeURIComponent(ref)}`,
+        null,
+        "GET"
       );
     },
 
@@ -23,6 +25,18 @@ export const payStack = (request) => {
 
     async transfer(data) {
       return this.requestBuilder("https://api.paystack.co/transfer", data, "POST");
+    },
+
+    async getBankCodes() {
+      return this.requestBuilder("https://api.paystack.co/bank", null, "GET");
+    },
+
+    async deleteRecipient(authCode) {
+      return this.requestBuilder(
+        `https://api.paystack.co/transferrecipient/${authCode}`,
+        null,
+        "DELETE"
+      );
     },
 
     async requestBuilder(url, data, method) {
@@ -40,8 +54,10 @@ export const payStack = (request) => {
             data: JSON.stringify(data),
             headers,
           });
-        } else {
+        } else if (method === "GET") {
           response = await request({ url, method: "GET", headers });
+        } else {
+          response = await request({ url, method: "DELETE", headers });
         }
 
         return { success: true, response: response.data };
