@@ -1,7 +1,7 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import LocationDetailsController from "./controllers/locationDetails.controller";
 import { visibilitySchema } from "./schema/locationDetails.schema";
-import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
+import { wrapCatch, middleware, Authenticate } from "../../utils";
 
 export class LocationDetailRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {
@@ -10,15 +10,10 @@ export class LocationDetailRoutes extends CommonRoutesConfig {
 
   configureRoutes() {
     this.app
-      .route(`${this.path}/location/visibility/:id`)
-      .all([
-        Authenticate.verifyToken,
-        middleware({ schema: validateUUID("id"), property: "params" }),
-        wrapCatch(LocationDetailsController.locationDetailExits()),
-      ])
+      .route(`${this.path}/location/visibility`)
+      .all([Authenticate.verifyToken, wrapCatch(LocationDetailsController.locationDetailExits())])
       .put([
         middleware({ schema: visibilitySchema, property: "body" }),
-        LocationDetailsController.checkAccessLawyerAccess("modify"),
         wrapCatch(LocationDetailsController.toggleVisibility),
       ])
       .get([

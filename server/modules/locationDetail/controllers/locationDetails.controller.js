@@ -15,10 +15,19 @@ class LocationDetailsController {
 
   locationDetailExits(context) {
     return async (req, res, next) => {
-      const { id } = req.params;
+      const {
+        decodedToken: { id },
+      } = req;
       log(`verifying that a location details with id ${id} exits`);
-      const locationDetail = await LocationDetailsService.findByPk(id);
-      if (!locationDetail) return next(createError(404, "The locations details can not be found"));
+      const locationDetail = await LocationDetailsService.findOrCreate({
+        where: {
+          id,
+        },
+        defaults: {
+          id,
+          online: false,
+        },
+      });
       req.oldLocationDetail = locationDetail;
       return next();
     };
@@ -28,7 +37,7 @@ class LocationDetailsController {
     const {
       oldLocationDetail,
       body: { online },
-      params: { id },
+      decodedToken: { id },
     } = req;
     const [, [locationDetail]] = await LocationDetailsService.update(
       id,

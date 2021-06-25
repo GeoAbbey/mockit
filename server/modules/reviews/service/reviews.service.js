@@ -19,7 +19,7 @@ class ReviewsService {
     const validModelIdWithOwnerOrLawyer = await models[modelType].findOne({
       where: {
         id: modelId,
-        status: completed,
+        status: "completed",
         [Op.or]: [
           {
             ownerId: reviewerId,
@@ -54,12 +54,12 @@ class ReviewsService {
 
     return models.Review.findAll({
       where: { modelId, modelType },
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: models.User,
-          as: 'reviewerProfile',
-          attributes: ['firstName', 'lastName', 'email', 'profilePic', 'phone'],
+          as: "reviewerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic", "phone"],
           required: false,
         },
       ],
@@ -70,12 +70,12 @@ class ReviewsService {
     debugLog(`finding all review with the query context ${JSON.stringify(context)}`);
     return models.Review.findAll({
       ...context,
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: models.User,
-          as: 'reviewerProfile',
-          attributes: ['firstName', 'lastName', 'email', 'profilePic', 'phone'],
+          as: "reviewerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic", "phone"],
           required: false,
         },
       ],
@@ -103,7 +103,7 @@ class ReviewsService {
     );
   }
 
-  async getReviewStats(){
+  async getReviewStats() {
     debugLog(`getting statistics for all reviews on the platform`);
     return models.sequelize.query(
       `select count(id) as total_rating, (select count(id) as pst_rating from "Reviews" where rating > 2) from "Reviews";`,
