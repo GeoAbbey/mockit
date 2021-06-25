@@ -17,7 +17,7 @@ class SmallClaimsController {
   async makeClaim(req, res) {
     const eventEmitter = req.app.get("eventEmitter");
 
-    const { body, decodedToken,attachments = [] } = req;
+    const { body, decodedToken, attachments = [] } = req;
     const ownerId = req.decodedToken.id;
     log(`creating a new small claim for user with id ${ownerId}`);
     const smallClaim = await SmallClaimsService.create({ ...body, attachments, ownerId });
@@ -115,7 +115,11 @@ class SmallClaimsController {
       { status: "completed" },
       oldSmallClaim
     );
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED, updatedSmallClaim, decodedToken);
+    eventEmitter.emit(
+      EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED,
+      updatedSmallClaim,
+      decodedToken
+    );
 
     return res.status(200).send({
       success: true,
@@ -138,7 +142,11 @@ class SmallClaimsController {
       { status: "in-progress" },
       oldSmallClaim
     );
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS, updatedSmallClaim, decodedToken);
+    eventEmitter.emit(
+      EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS,
+      updatedSmallClaim,
+      decodedToken
+    );
 
     return res.status(200).send({
       success: true,
@@ -163,7 +171,10 @@ class SmallClaimsController {
       oldSmallClaim
     );
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, { data: updatedSmallClaim, decodedToken: req.decodedToken});
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, {
+      data: updatedSmallClaim,
+      decodedToken: req.decodedToken,
+    });
 
     return res.status(200).send({
       success: true,
@@ -247,16 +258,16 @@ class SmallClaimsController {
     return async (req, res, next) => {
       const {
         decodedToken: { role, id },
-        oldSmallClaim: { assignedLawyerId = null, status, paid },
+        oldSmallClaim,
       } = req;
 
       if (role === "admin" || role === "super-admin") return next();
       if (role !== "lawyer")
         return next(createError(401, "You do not have access to perform this operation"));
       if (context === "markAsComplete") {
-        if (id !== assignedLawyerId)
+        if (id !== oldSmallClaim.assignedLawyerId)
           return next(createError(401, "You do not have access to perform this operation"));
-        if (status !== "in-progress") {
+        if (oldSmallClaim.status !== "in-progress") {
           return next(
             createError(401, "You have to start this claim before marking it as completed")
           );
@@ -264,7 +275,7 @@ class SmallClaimsController {
       }
 
       if (context === "updateStatus") {
-        if (!paid)
+        if (!oldSmallClaim.paid)
           return next(createError(401, "You can not start a claim that hasn't been paid for"));
       }
       return next();

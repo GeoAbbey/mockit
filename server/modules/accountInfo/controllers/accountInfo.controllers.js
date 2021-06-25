@@ -38,7 +38,7 @@ class AccountInfosController {
       log(`creating a account info for user with id ${ownerId}`);
 
       const DTO = { ...body, info, operation: context };
-      console.log({ DTO }, "🍋");
+
       const [, [accountInfo]] = await AccountInfosService.update(ownerId, DTO, oldAccountInfo);
 
       return res.status(201).send({
@@ -62,6 +62,9 @@ class AccountInfosController {
 
   async getAccountInfoBalance(req, res, next) {
     const { oldAccountInfo } = req;
+
+    oldAccountInfo.walletAmount = oldAccountInfo.walletAmount / 100;
+
     return res.status(200).send({
       success: true,
       message: "account info successfully retrieved",
