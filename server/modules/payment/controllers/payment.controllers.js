@@ -194,20 +194,52 @@ class PaymentsController {
 
   payInPayment = async (req, res, next) => {
     const {
-      body: { quantity = undefined, amount = undefined, type, modelId },
+      body: { quantity = undefined, amount = undefined, type, modelId, callback_url = undefined },
       decodedToken: { email, firstName, lastName, id },
     } = req;
 
     const mapper = {
-      subscription: () => this.handleSubscriptionPayIn({ quantity, email, id, type }),
+      subscription: () => this.handleSubscriptionPayIn({ quantity, email, id, type, callback_url }),
       wallet: () =>
-        this.handleWalletOrCooperatePayIn({ amount, email, firstName, lastName, id, type }),
+        this.handleWalletOrCooperatePayIn({
+          amount,
+          email,
+          firstName,
+          lastName,
+          id,
+          type,
+          callback_url,
+        }),
       singleInvitation: () =>
-        this.handleSingleInvitationPayIn({ email, firstName, lastName, id, modelId, type }),
+        this.handleSingleInvitationPayIn({
+          email,
+          firstName,
+          lastName,
+          id,
+          modelId,
+          type,
+          callback_url,
+        }),
       singleSmallClaim: () =>
-        this.handleSingleSmallClaimPayIn({ email, firstName, lastName, id, modelId, type }),
+        this.handleSingleSmallClaimPayIn({
+          email,
+          firstName,
+          lastName,
+          id,
+          modelId,
+          type,
+          callback_url,
+        }),
       cooperate: () =>
-        this.handleWalletOrCooperatePayIn({ email, firstName, lastName, id, amount, type }),
+        this.handleWalletOrCooperatePayIn({
+          email,
+          firstName,
+          lastName,
+          id,
+          amount,
+          type,
+          callback_url,
+        }),
     };
 
     const result = await mapper[type]();

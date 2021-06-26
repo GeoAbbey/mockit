@@ -12,6 +12,7 @@ export const PayInSchema = Joi.object().keys({
   amount: Joi.number().min(1000),
   quantity: Joi.number().min(1).max(20),
   modelId: Joi.string().guid({ version: "uuidv4" }),
+  callback_url: Joi.string(),
 });
 
 export const PaymentAuthCodeSchema = PayInSchema.append({

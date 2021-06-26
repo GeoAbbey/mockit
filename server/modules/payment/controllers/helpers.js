@@ -13,6 +13,7 @@ export const walletPay = (args) => {
   return {
     email: args.email,
     amount: args.amount * 100,
+    callback_url: args.callback_url,
     metadata: { id: args.id, type: args.type },
   };
 };
@@ -23,6 +24,7 @@ export const subscriptionPay = (args) => {
 
   return {
     email: args.email,
+    callback_url: args.callback_url,
     amount: args.quantity * parseInt(config.costOfSubscriptionUnit) * 100,
     metadata: { id: args.id, type: args.type },
   };
@@ -43,6 +45,7 @@ export const singleInvitationPay = async (args) => {
 
   return {
     email: args.email,
+    callback_url: args.callback_url,
     amount: parseInt(config.invitationCost) * 100,
     metadata: { id: args.id, type: args.type, modelId: args.modelId },
   };
@@ -78,6 +81,7 @@ export const singleSmallClaimPay = async (args) => {
 
   return {
     email: args.email,
+    callback_url: args.callback_url,
     amount: totalCostOfService * 100,
     metadata: { id: args.id, type: args.type, modelId: args.modelId },
   };
