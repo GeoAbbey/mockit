@@ -15,27 +15,40 @@ class CooperateAccessController {
 
   async grantCooperateAccess(req, res, next) {
     const {
-      body: { userIds },
+      body: { userEmail },
       decodedToken: { id: ownerId },
     } = req;
-    const DTO = userIds.map((userId) => ({ userId, ownerId }));
 
-    const result = await CooperateAccessService.bulkCreate(DTO, ownerId);
-    if (!result) return next(createError(400, `You do not have a cooperate account`));
+    const result = await CooperateAccessService.findOrCreate({ ownerId, userEmail });
+    if (result.success === false) return next(createError(400, result.message));
 
     return res.status(201).send({
       success: true,
-      message: `users successfully addded`,
-      result,
+      message: result.message,
+      result: result.data,
+    });
+  }
+
+  async allUsersWithAccess(req, res, next) {
+    const {
+      decodedToken: { id: ownerId },
+    } = req;
+
+    const usersWithAccess = await CooperateAccessService.findMany(ownerId);
+
+    return res.status(200).send({
+      success: true,
+      message: "users successfully retrieved",
+      usersWithAccess,
     });
   }
 
   async deleteCooperateAccess(req, res, next) {
     const {
-      params: { id },
+      body: { userEmail },
       decodedToken: { id: ownerId },
     } = req;
-    const found = await CooperateAccessService.remove({ id, ownerId });
+    const found = await CooperateAccessService.remove({ userEmail, ownerId });
 
     res.status(201).send({
       success: true,
@@ -46,15 +59,16 @@ class CooperateAccessController {
 
   async cooperateAccessExists(req, res, next) {
     const {
-      params: { id },
+      body: { userEmail },
       decodedToken: { id: ownerId },
     } = req;
-    const found = await CooperateAccessService.findOne({ id, ownerId });
+    const found = await CooperateAccessService.findOne({ userEmail, ownerId });
     if (!found) return next(createError(404, `The resource can not be found`));
 
     req.oldCooperateAccess = found;
     return next();
   }
+
   checkAccessUser(context) {
     return async (req, res, next) => {
       const {

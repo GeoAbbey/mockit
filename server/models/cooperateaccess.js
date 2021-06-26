@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   CooperateAccess.init(
     {
-      userId: {
+      userEmail: {
         type: DataTypes.UUID,
         allowNull: false,
       },

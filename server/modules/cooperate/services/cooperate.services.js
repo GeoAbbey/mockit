@@ -2,6 +2,7 @@ import debug from "debug";
 import models from "../../../models";
 
 const debugLog = debug("app:cooperate-service");
+import TransactionsService from "../../transactions/services/transaction.services";
 
 class CooperateService {
   static instance;
@@ -21,6 +22,11 @@ class CooperateService {
     debugLog(`looking for an auth code with id ${id}`);
 
     return models.Cooperate.findByPk(id, t);
+  }
+  async usage(code) {
+    debugLog(`looking for transactions where code ${code} was used`);
+
+    return TransactionsService.usageHistory(code);
   }
 
   async findOne(code) {

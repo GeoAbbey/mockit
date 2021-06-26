@@ -27,6 +27,14 @@ export class CooperateRoutes extends CommonRoutesConfig {
         wrapCatch(CooperatesController.cooperateExists("retrieve")),
       ]);
 
+    this.app
+      .route(`${this.path}/cooperate/usage`)
+      .all([Authenticate.verifyToken])
+      .get([
+        wrapCatch(CooperatesController.cooperateExists()),
+        wrapCatch(CooperatesController.usageHistory),
+      ]);
+
     return this.app;
   }
 }

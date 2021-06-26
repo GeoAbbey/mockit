@@ -27,6 +27,11 @@ class TransactionsService {
     return models.Transaction.findAll({ where: { ownerId: id } });
   }
 
+  async usageHistory(code) {
+    debugLog(`getting a list of transaction with for user with code ${code}`);
+    return models.Transaction.findAll({ where: { code } });
+  }
+
   async remove(id) {
     debugLog(`deleting a review with ${id}`);
     return models.Transaction.destroy({ where: { id } });

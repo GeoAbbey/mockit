@@ -17,13 +17,13 @@ module.exports = {
           as: "ownerId",
         },
       },
-      userId: {
-        type: Sequelize.UUID,
+      userEmail: {
+        type: Sequelize.STRING,
         allowNull: false,
         references: {
           model: "Users",
-          key: "id",
-          as: "userId",
+          key: "email",
+          as: "userEmail",
         },
       },
       createdAt: {

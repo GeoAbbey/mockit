@@ -46,14 +46,17 @@ export class ReviewsRoutes extends CommonRoutesConfig {
       .all([Authenticate.verifyToken, middleware({ schema: queryReviewSchema, property: "query" })])
       .get([ReviewsController.queryContext, wrapCatch(ReviewsController.getAllReviews)]);
 
-      this.app
+    this.app
       .route(`${this.path}/reviews/all-stats`)
       .all([Authenticate.verifyToken, ReviewsController.checkAccessUserAdmin()])
       .get([wrapCatch(ReviewsController.allStats)]);
 
     this.app
       .route(`${this.path}/reviews/stats/:id`)
-      .all([Authenticate.verifyToken, middleware({ schema: validateUUID, property: "params" })])
+      .all([
+        Authenticate.verifyToken,
+        middleware({ schema: validateUUID("id"), property: "params" }),
+      ])
       .get([wrapCatch(ReviewsController.getAllReviewStats)]);
   }
 }

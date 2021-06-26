@@ -2,7 +2,7 @@ import { CommonRoutesConfig } from "../common/common.routes.config";
 import CooperateAccessController from "./controllers/cooperate-access.controllers";
 
 import { wrapCatch, middleware, Authenticate } from "../../utils";
-import { CooperateAccessIds } from "./schema/cooperate.schema";
+import { EmailAccess } from "./schema/cooperate.schema";
 
 export class CooperateAccessRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {
@@ -14,17 +14,15 @@ export class CooperateAccessRoutes extends CommonRoutesConfig {
       .route(`${this.path}/cooperate-access`)
       .all([Authenticate.verifyToken])
       .post([
-        middleware({ schema: CooperateAccessIds("userIds"), property: "body" }),
+        middleware({ schema: EmailAccess, property: "body" }),
         wrapCatch(CooperateAccessController.grantCooperateAccess),
-      ]);
-
-    this.app
-      .route(`${this.path}/cooperate-access/:id`)
-      .all([Authenticate.verifyToken])
+      ])
       .delete([
+        middleware({ schema: EmailAccess, property: "body" }),
         wrapCatch(CooperateAccessController.cooperateAccessExists),
         wrapCatch(CooperateAccessController.deleteCooperateAccess),
-      ]);
+      ])
+      .get([wrapCatch(CooperateAccessController.allUsersWithAccess)]);
 
     return this.app;
   }

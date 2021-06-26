@@ -1,6 +1,5 @@
 import Joi from "joi";
 
-export const CooperateAccessIds = (identifier) =>
-  Joi.object().keys({
-    [identifier]: Joi.array().items(Joi.string().guid({ version: "uuidv4" }).required()),
-  });
+export const EmailAccess = Joi.object().keys({
+  userEmail: Joi.string().email({ minDomainSegments: 2 }).required(),
+});

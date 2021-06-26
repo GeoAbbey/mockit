@@ -363,12 +363,11 @@ class PaymentsService {
   }
 
   async handleCooperate(args, emitter, decodedToken) {
-    //get the cooporate account and the check the access.
+    //get the cooperate account and the check the access.
     const oldCooperateInfo = await CooperateService.findOne(args.code);
-    console.log({ oldCooperateInfo });
 
     const hasAccess = await CooperateAccessService.findOne({
-      id: decodedToken.id,
+      userEmail: decodedToken.email,
       ownerId: oldCooperateInfo.dataValues.id,
     });
 

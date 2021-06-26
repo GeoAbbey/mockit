@@ -53,6 +53,18 @@ class CooperateController {
     };
   }
 
+  async usageHistory(req, res, next) {
+    const { oldCooperate } = req;
+
+    const history = await CooperateService.usage(oldCooperate.code);
+
+    return res.status(200).send({
+      success: true,
+      message: "cooperate info has been successfully retrieved.",
+      history,
+    });
+  }
+
   async editCooperate(req, res, next) {
     const {
       decodedToken: { id },
