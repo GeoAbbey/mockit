@@ -1,5 +1,6 @@
 "use strict";
 import { v4 } from "uuid";
+import { nanoid } from "nanoid";
 
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
@@ -28,6 +29,11 @@ module.exports = (sequelize, DataTypes) => {
       modelId: { type: DataTypes.UUID, allowNull: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       reviewerId: { type: DataTypes.UUID, allowNull: false },
+      ticketId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: () => nanoid(10),
+      },
       rating: { type: DataTypes.INTEGER, allowNull: false, min: 1, max: 5 },
       feedback: DataTypes.TEXT,
       id: {

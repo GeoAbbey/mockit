@@ -20,6 +20,9 @@ module.exports = {
       location: {
         type: Sequelize.STRING,
       },
+      ticketId: {
+        type: Sequelize.STRING,
+      },
       reporterId: {
         type: Sequelize.UUID,
         onDelete: "CASCADE",

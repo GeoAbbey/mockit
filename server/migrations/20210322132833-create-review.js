@@ -21,6 +21,9 @@ module.exports = {
       modelId: {
         type: Sequelize.UUID,
       },
+      ticketId: {
+        type: Sequelize.STRING,
+      },
       reviewerId: {
         type: Sequelize.UUID,
         onDelete: "CASCADE",
