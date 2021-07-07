@@ -9,7 +9,7 @@ export const PayInSchema = Joi.object().keys({
   type: Joi.string()
     .valid("singleSmallClaim", "singleInvitation", "wallet", "subscription", "cooperate")
     .required(),
-  amount: Joi.number().min(1000),
+  amount: Joi.number().min(50),
   quantity: Joi.number().min(1).max(20),
   modelId: Joi.string().guid({ version: "uuidv4" }),
   callback_url: Joi.string(),

@@ -49,6 +49,7 @@ class SmallClaimsService {
                     "lastName",
                     "email",
                     "profilePic",
+                    "phone",
                     "id",
                     "firebaseToken",
                   ],

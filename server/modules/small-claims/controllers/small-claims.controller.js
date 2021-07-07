@@ -224,11 +224,14 @@ class SmallClaimsController {
       const {
         decodedToken: { role, id },
         body: { assignedLawyerId },
-        oldSmallClaim: { ownerId, status, interestedLawyers, paid },
+        oldSmallClaim: { ownerId, status, interestedLawyers, assignedLawyerId: lawyerId },
       } = req;
+
       if (role === "admin" || role === "super-admin") return next();
-      if (role === "lawyer")
-        return next(createError(401, `You do not have access to ${context} this small claim`));
+      if (role === "lawyer") {
+        if (lawyerId && lawyerId === id)
+          return next(createError(401, `You do not have access to ${context} this small claim`));
+      }
       if (role === "user" && id !== ownerId) {
         return next(createError(401, `You do not have access to ${context} this small claim`));
       }

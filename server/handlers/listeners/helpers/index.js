@@ -155,7 +155,7 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (
     sendNotificationToClient({
       tokens: [ownerProfile.firebaseToken],
       data: NOTIFICATION_DATA.SMALL_CLAIM[action]({
-        sender_id: data.dataValues.ownerId,
+        sender_id: decodedToken.id,
         status_id: data.dataValues.id,
         sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
         sender_firebase_token: decodedToken.firebaseToken,
