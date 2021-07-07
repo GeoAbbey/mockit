@@ -64,7 +64,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
         wrapCatch(SmallClaimsController.updateToInProgress),
       ]);
 
-      this.app
+    this.app
       .route(`${this.path}/small-claims/:id`)
       .put([
         Authenticate.verifyToken,
@@ -73,8 +73,6 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
         SmallClaimsController.checkAccessUser("assignLawyer"),
         wrapCatch(SmallClaimsController.assignALawyer),
       ]);
-
-      
 
     this.app
       .route(`${this.path}/small-claims/:id`)
@@ -86,10 +84,6 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
       .get([
         SmallClaimsController.checkAccessUser("retrieve"),
         wrapCatch(SmallClaimsController.getASmallClaim),
-      ])
-      .put([
-        SmallClaimsController.checkAccessUser("assignLawyer"),
-        wrapCatch(SmallClaimsController.assignALawyer),
       ]);
 
     return this.app;

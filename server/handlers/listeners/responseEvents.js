@@ -132,7 +132,7 @@ export const responseEvents = (eventEmitter) => {
       await sendNotificationToEligibleLawyers({
         events: EVENT_IDENTIFIERS.RESPONSE.CREATED,
         lawyersToNotify: results,
-        startingLocation,
+        startingLocation: JSON.stringify(response.startingLocation),
         response,
         decodedToken,
       });
