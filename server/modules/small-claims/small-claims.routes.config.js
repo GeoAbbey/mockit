@@ -59,7 +59,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
         SmallClaimsController.checkAccessLawyer("markAsComplete"),
         wrapCatch(SmallClaimsController.marKAsCompleted),
       ])
-      .copy([
+      .head([
         SmallClaimsController.checkAccessLawyer("updateStatus"),
         wrapCatch(SmallClaimsController.updateToInProgress),
       ]);
