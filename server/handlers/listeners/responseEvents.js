@@ -104,7 +104,7 @@ export const responseEvents = (eventEmitter) => {
 
   eventEmitter.on(
     EVENT_IDENTIFIERS.RESPONSE.CREATED,
-    async ({ response, decodedToken, startingLocation }) => {
+    async ({ response, decodedToken, startingLocation, speed }) => {
       logger(`${EVENT_IDENTIFIERS.RESPONSE.CREATED} event was received`);
       const {
         dataValues: { id: responseId, ownerId },
@@ -132,8 +132,9 @@ export const responseEvents = (eventEmitter) => {
       await sendNotificationToEligibleLawyers({
         events: EVENT_IDENTIFIERS.RESPONSE.CREATED,
         lawyersToNotify: results,
-        startingLocation: JSON.stringify(response.startingLocation),
+        startingLocation: JSON.stringify(startingLocation),
         response,
+        speed,
         decodedToken,
       });
 

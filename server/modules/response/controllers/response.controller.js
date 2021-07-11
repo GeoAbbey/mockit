@@ -6,6 +6,11 @@ import ResponsesService from "../services/response.services";
 import AccountInfoServices from "../../accountInfo/services/accountInfo.services";
 const log = debug("app:responses-controller");
 
+const env = process.env.NODE_ENV || "development";
+import configOptions from "../../../config/config";
+
+const config = configOptions[env];
+
 class ResponsesController {
   static instance;
   static getInstance() {
@@ -46,6 +51,7 @@ class ResponsesController {
       decodedToken,
       response,
       startingLocation,
+      speed: config.averageSpeed,
     });
     return res.status(201).send({
       success: true,
