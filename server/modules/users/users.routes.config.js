@@ -93,6 +93,11 @@ export class UserRoutes extends CommonRoutesConfig {
       ]);
 
     this.app
+      .route(`${this.path}/users/stats`)
+      .all([Authenticate.verifyToken])
+      .get([AccessControl.checkPermissionAdminAccess(), UsersController.getNoOfDistinctUsers]);
+
+    this.app
       .route(`${this.path}/users/:id`)
       .all([
         Authenticate.verifyToken,
