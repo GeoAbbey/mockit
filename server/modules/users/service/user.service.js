@@ -4,6 +4,7 @@ import models from "../../../models";
 import { QueryTypes } from "sequelize";
 import { handleFalsy } from "../../../utils";
 import { rawQueries } from "../../../utils/rawQueriers";
+import { paginate } from "../../helpers";
 
 const debugLog = debug("app:users-service");
 
@@ -40,9 +41,9 @@ class UsersService {
     });
   }
 
-  async retrieveAll(filter) {
+  async retrieveAll(filter, page, pageSize) {
     debugLog(`retrieving all user on the platform using ${JSON.stringify(filter)}`);
-    return models.User.findAll({ where: filter });
+    return models.User.findAll({ where: filter }, ...paginate({ page, pageSize }));
   }
 
   async update(id, UserDTO, oldDetails) {

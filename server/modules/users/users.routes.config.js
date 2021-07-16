@@ -7,7 +7,7 @@ import {
   validOTP,
   validOtpAndPassword,
   newOTP,
-  queryUserOrLawyer,
+  queryOptions,
   changePasswordSchema,
 } from "./schema/users.schema";
 import {
@@ -115,7 +115,7 @@ export class UserRoutes extends CommonRoutesConfig {
       .route(`${this.path}/users`)
       .all([Authenticate.verifyToken])
       .get([
-        middleware({ schema: queryUserOrLawyer, property: "query" }),
+        middleware({ schema: queryOptions, property: "query" }),
         AccessControl.checkPermissionAdminAccess(),
         UsersController.getAllUsers,
       ]);

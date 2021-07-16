@@ -239,14 +239,26 @@ class UsersController {
 
   async getAllUsers(req, res, next) {
     log("retrieving all the users on the platform");
-    const { query } = req;
-    if (!query) query = {};
-    const users = await UsersService.retrieveAll(query);
+    const { filter } = req;
+    const users = await UsersService.retrieveAll(filter);
     return res.status(200).send({
       success: true,
       message: "user successfully retrieved",
       users,
     });
+  }
+
+  async queryContext(req, res, next) {
+    log("creating query context from available options");
+    const { query } = req;
+    const filter = {};
+    if (query.role) {
+      filter = { ...filter, role: query.role };
+    }
+
+    if (query.emailPartials) {
+      filter = { ...filter, email: query.emailPartials };
+    }
   }
 }
 
