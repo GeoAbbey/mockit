@@ -60,6 +60,16 @@ class UsersController {
     });
   }
 
+  async getNoOfDistinctUsers(req, res, next) {
+    const result = await UsersService.noOfDistinctUsers();
+
+    return res.status(200).send({
+      success: true,
+      message: "data successfully retrieved",
+      result,
+    });
+  }
+
   async changePassword(req, res, next) {
     let {
       body: { newPassword, password },

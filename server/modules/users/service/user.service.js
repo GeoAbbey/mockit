@@ -1,7 +1,9 @@
 import debug from "debug";
 
 import models from "../../../models";
+import { QueryTypes } from "sequelize";
 import { handleFalsy } from "../../../utils";
+import { rawQueries } from "../../../utils/rawQueriers";
 
 const debugLog = debug("app:users-service");
 
@@ -17,6 +19,13 @@ class UsersService {
   async create(UserDTO) {
     debugLog("creating a user");
     return models.User.create(UserDTO);
+  }
+
+  async noOfDistinctUsers() {
+    debugLog("returning data for different types users");
+    return models.sequelize.query(rawQueries.noOfDistinctUsers(), {
+      type: QueryTypes.SELECT,
+    });
   }
 
   async findByPk(id) {
