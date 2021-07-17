@@ -4,6 +4,7 @@ import { EVENT_IDENTIFIERS } from "../../../constants";
 
 import InvitationsService from "../service/invitations.service";
 const log = debug("app:invitations-controller");
+import { paginate as pagination } from "../../helpers";
 
 class InvitationsController {
   static instance;
@@ -20,7 +21,7 @@ class InvitationsController {
 
     log(`creating a new invitation for user with id ${ownerId}`);
     const invitation = await InvitationsService.create({ attachments, ...body, ownerId });
-   
+
     return res.status(201).send({
       success: true,
       message: "invitation successfully created",
@@ -113,12 +114,22 @@ class InvitationsController {
 
   async getAllInvitations(req, res, next) {
     log("getting all invitations");
-    const { data } = req;
-    const invitations = await InvitationsService.findMany(data);
+    const {
+      filter,
+      query: { paginate = {} },
+    } = req;
+
+    const invitations = await InvitationsService.findMany(filter, paginate);
+    const { offset, limit } = pagination(paginate);
+
     return res.status(200).send({
       success: true,
       message: "invitations successfully retrieved",
-      invitations,
+      invitations: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...invitations,
+      },
     });
   }
 
@@ -139,7 +150,7 @@ class InvitationsController {
 
     eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.MARK_AS_COMPLETED, {
       invitation: updatedInvitation,
-      decodedToken
+      decodedToken,
     });
 
     return res.status(200).send({
@@ -168,7 +179,7 @@ class InvitationsController {
             createError(401, `You can't ${context} an invitation once it has been assigned`)
           );
       }
-      next();
+      return next();
     };
   }
 
@@ -214,21 +225,48 @@ class InvitationsController {
       decodedToken: { role, id },
       query,
     } = req;
-    console.log({ query });
+
+    let filter = {};
+
     if (role === "admin" || role === "super-admin") {
-      req.data = {};
-      if (query) {
-        req.data.where = {
-          ...query,
-        };
+      if (query.search && query.search.ownerId) {
+        filter = { ...filter, ownerId: query.search.ownerId };
+      }
+
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: query.search.ticketId };
+      }
+
+      if (query.search && query.search.paid) {
+        filter = { ...filter, paid: query.search.paid };
+      }
+
+      if (query.search && query.search.status) {
+        filter = { ...filter, status: query.search.status };
+      }
+
+      if (query.search && query.search.assignedLawyerId) {
+        filter = { ...filter, assignedLawyerId: query.search.assignedLawyerId };
       }
     }
+
     if (role === "lawyer") {
-      req.data = { where: { assignedLawyerId: id } };
+      filter = { ...filter, assignedLawyerId: id };
+
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: query.search.ticketId };
+      }
     }
+
     if (role === "user") {
-      req.data = { where: { ownerId: id } };
+      filter = { ...filter, ownerId: id };
+
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: query.search.ticketId };
+      }
     }
+
+    req.filter = filter;
     return next();
   }
 }

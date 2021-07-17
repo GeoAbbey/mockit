@@ -1,6 +1,10 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import InvitationsController from "./controllers/invitations.controller";
-import { createInvitationSchema, updatedInvitationSchema } from "./schema/invitation.schema";
+import {
+  createInvitationSchema,
+  updatedInvitationSchema,
+  queryOptions,
+} from "./schema/invitation.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID, uploadMiddleware } from "../../utils";
 import { queryContextParams } from "../../utils/allPurpose.schema";
 
@@ -19,7 +23,7 @@ export class InvitationRoutes extends CommonRoutesConfig {
         wrapCatch(InvitationsController.makeInvite),
       ])
       .get([
-        middleware({ schema: queryContextParams, property: "query" }),
+        middleware({ schema: queryOptions, property: "query" }),
         InvitationsController.queryContext,
         wrapCatch(InvitationsController.getAllInvitations),
       ]);

@@ -3,6 +3,7 @@ import createError from "http-errors";
 import { EVENT_IDENTIFIERS } from "../../../constants";
 
 import SmallClaimsService from "../services/small-claims.service";
+import { paginate as pagination } from "../../helpers";
 const log = debug("app:small-claims-controller");
 
 class SmallClaimsController {
@@ -80,12 +81,21 @@ class SmallClaimsController {
 
   async getAllSmallClaims(req, res, next) {
     log("getting all small claims");
-    const { data } = req;
-    const smallClaims = await SmallClaimsService.findMany(data);
+    const {
+      filter,
+      query: { paginate = {} },
+    } = req;
+    const smallClaims = await SmallClaimsService.findMany(filter, paginate);
+    const { offset, limit } = pagination(paginate);
+
     return res.status(200).send({
       success: true,
       message: "small claims successfully retrieved",
-      smallClaims,
+      smallClaims: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        rows: smallClaims,
+      },
     });
   }
 
@@ -301,21 +311,58 @@ class SmallClaimsController {
       decodedToken: { role, id },
       query,
     } = req;
+
+    let filter = "";
+
     if (role === "admin" || role === "super-admin") {
-      req.data = {};
-      if (query) {
-        req.data = {
-          ...query,
-        };
+      if (query.search && query.search.ownerId) {
+        filter = filter
+          ? `${filter} AND "SmallClaims"."ownerId" = '${query.search.ownerId}'`
+          : `"SmallClaims"."ownerId" = '${query.search.ownerId}'`;
+      }
+
+      if (query.search && query.search.ticketId) {
+        filter = filter
+          ? `${filter} AND "SmallClaims"."ticketId" = '${query.search.ticketId}'`
+          : `"SmallClaims"."ticketId" = '${query.search.ticketId}'`;
+      }
+
+      if (query.search && query.search.paid) {
+        filter = filter
+          ? `${filter} AND "SmallClaims"."paid" = ${query.search.paid}`
+          : `"SmallClaims"."paid" = ${query.search.paid}`;
+      }
+
+      if (query.search && query.search.status) {
+        filter = filter
+          ? `${filter} AND "SmallClaims"."status" = '${query.search.status}'`
+          : `"SmallClaims"."status" = '${query.search.status}'`;
+      }
+
+      if (query.search && query.search.assignedLawyerId) {
+        filter = filter
+          ? `${filter} AND "SmallClaims"."assignedLawyerId" = '${query.search.assignedLawyerId}'`
+          : `"SmallClaims"."assignedLawyerId" = '${query.search.assignedLawyerId}'`;
       }
     }
+
     if (role === "lawyer") {
-      req.data = { assignedLawyerId: id };
+      filter = `${filter} "SmallClaims"."assignedLawyerId" = '${id}'`;
+
+      if (query.search && query.search.ticketId) {
+        filter = `${filter} AND "SmallClaims"."ticketId" = '${query.search.ticketId}'`;
+      }
     }
+
     if (role === "user") {
-      console.log({ decodedToken: req.decodedToken });
-      req.data = { ownerId: id };
+      filter = `${filter} "SmallClaims"."ownerId" = '${id}'`;
+
+      if (query.search && query.search.ticketId) {
+        filter = `${filter} AND "SmallClaims"."ticketId" = '${query.search.ticketId}'`;
+      }
     }
+
+    req.filter = filter;
     return next();
   }
 }

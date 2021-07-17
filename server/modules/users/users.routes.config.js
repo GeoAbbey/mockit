@@ -117,6 +117,7 @@ export class UserRoutes extends CommonRoutesConfig {
       .get([
         middleware({ schema: queryOptions, property: "query" }),
         AccessControl.checkPermissionAdminAccess(),
+        UsersController.queryContext,
         UsersController.getAllUsers,
       ]);
 

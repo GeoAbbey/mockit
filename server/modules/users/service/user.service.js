@@ -41,9 +41,10 @@ class UsersService {
     });
   }
 
-  async retrieveAll(filter, page, pageSize) {
+  async retrieveAll(filter, pageDetails) {
     debugLog(`retrieving all user on the platform using ${JSON.stringify(filter)}`);
-    return models.User.findAll({ where: filter }, ...paginate({ page, pageSize }));
+
+    return models.User.findAndCountAll({ where: { ...filter }, ...paginate(pageDetails) });
   }
 
   async update(id, UserDTO, oldDetails) {

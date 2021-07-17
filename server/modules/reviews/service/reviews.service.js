@@ -1,6 +1,7 @@
 import debug from "debug";
 import { Op, QueryTypes } from "sequelize";
 import models from "../../../models";
+import { paginate } from "../../helpers";
 
 const debugLog = debug("app:reviews-service");
 
@@ -29,7 +30,12 @@ class ReviewsService {
       },
     });
     if (validModelIdWithOwnerOrLawyer) {
-      return models.Review.create(ReviewDTO);
+      const forId =
+        validModelIdWithOwnerOrLawyer.ownerId === reviewerId
+          ? validModelIdWithOwnerOrLawyer.assignedLawyerId
+          : validModelIdWithOwnerOrLawyer.ownerId;
+
+      return models.Review.create({ ...ReviewDTO, forId });
     } else return null;
   }
 
@@ -66,15 +72,23 @@ class ReviewsService {
     });
   }
 
-  async findMany(context) {
-    debugLog(`finding all review with the query context ${JSON.stringify(context)}`);
-    return models.Review.findAll({
-      ...context,
+  async findMany(filter, pageDetails) {
+    debugLog(`finding all review with the query context ${JSON.stringify(filter)}`);
+
+    return models.Review.findAndCountAll({
+      where: { ...filter },
+      ...paginate(pageDetails),
       order: [["createdAt", "DESC"]],
       include: [
         {
           model: models.User,
           as: "reviewerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic", "phone"],
+          required: false,
+        },
+        {
+          model: models.User,
+          as: "receiverProfile",
           attributes: ["firstName", "lastName", "email", "profilePic", "phone"],
           required: false,
         },

@@ -80,11 +80,15 @@ export const newOTP = Joi.object().keys({
 });
 
 export const queryOptions = Joi.object().keys({
-  role: Joi.string().valid("user", "lawyer", "admin", "super-admin"),
-  emailPartials: Joi.string(),
-  gender: Joi.string().valid("male", "female"),
-  page: Joi.number().min(1).default(1),
-  pageSize: Joi.number().default(10),
+  search: Joi.object().keys({
+    role: Joi.string().valid("user", "lawyer", "admin", "super-admin"),
+    name: Joi.string(),
+    gender: Joi.string().valid("male", "female"),
+  }),
+  paginate: Joi.object().keys({
+    page: Joi.number().min(1),
+    pageSize: Joi.number().max(20),
+  }),
 });
 
 export const changePasswordSchema = Joi.object().keys({
