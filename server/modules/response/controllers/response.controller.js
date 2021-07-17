@@ -8,6 +8,7 @@ const log = debug("app:responses-controller");
 
 const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
+import { paginate as pagination } from "../../helpers";
 
 const config = configOptions[env];
 
@@ -141,12 +142,22 @@ class ResponsesController {
 
   async getAllResponses(req, res, next) {
     log("getting all Responses");
-    const { data } = req;
-    const responses = await ResponsesService.findMany(data);
+    const {
+      filter,
+      query: { paginate = {} },
+    } = req;
+
+    const { offset, limit } = pagination(paginate);
+
+    const responses = await ResponsesService.findMany(filter, paginate);
     return res.status(200).send({
       success: true,
       message: "responses successfully retrieved",
-      responses,
+      responses: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...responses,
+      },
     });
   }
 
@@ -258,20 +269,48 @@ class ResponsesController {
       decodedToken: { role, id },
       query,
     } = req;
+
+    let filter = {};
+
     if (role === "admin" || role === "super-admin") {
-      req.data = {};
-      if (query) {
-        req.data.where = {
-          ...query,
-        };
+      if (query.search && query.search.ownerId) {
+        filter = { ...filter, ownerId: query.search.ownerId };
+      }
+
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: query.search.ticketId };
+      }
+
+      if (query.search && query.search.paid) {
+        filter = { ...filter, paid: query.search.paid };
+      }
+
+      if (query.search && query.search.status) {
+        filter = { ...filter, status: query.search.status };
+      }
+
+      if (query.search && query.search.assignedLawyerId) {
+        filter = { ...filter, assignedLawyerId: query.search.assignedLawyerId };
       }
     }
+
     if (role === "lawyer") {
-      req.data = { where: { assignedLawyerId: id } };
+      filter = { ...filter, assignedLawyerId: id };
+
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: query.search.ticketId };
+      }
     }
+
     if (role === "user") {
-      req.data = { where: { ownerId: id } };
+      filter = { ...filter, ownerId: id };
+
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: query.search.ticketId };
+      }
     }
+
+    req.filter = filter;
     return next();
   }
 }

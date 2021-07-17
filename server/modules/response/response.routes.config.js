@@ -1,6 +1,6 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import ResponsesController from "./controllers/response.controller";
-import { updateResponseSchema, createResponseSchema } from "./schema/response.schema";
+import { updateResponseSchema, createResponseSchema, queryOptions } from "./schema/response.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
 import { queryContextParams } from "../../utils/allPurpose.schema";
 
@@ -18,7 +18,7 @@ export class ResponseRoutes extends CommonRoutesConfig {
         wrapCatch(ResponsesController.makeResponse),
       ])
       .get([
-        middleware({ schema: queryContextParams, property: "query" }),
+        middleware({ schema: queryOptions, property: "query" }),
         ResponsesController.queryContext,
         wrapCatch(ResponsesController.getAllResponses),
       ]);

@@ -33,6 +33,15 @@ module.exports = {
           as: "reviewerId",
         },
       },
+      forId: {
+        type: Sequelize.UUID,
+        onDelete: "CASCADE",
+        references: {
+          model: "Users",
+          key: "id",
+          as: "forId",
+        },
+      },
       meta: {
         type: Sequelize.JSONB,
       },

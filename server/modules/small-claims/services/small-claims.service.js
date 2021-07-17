@@ -3,6 +3,7 @@ import { QueryTypes } from "sequelize";
 import models from "../../../models";
 import { rawQueries } from "../../../utils/rawQueriers";
 import { handleFalsy } from "../../../utils";
+import { paginate } from "../../helpers";
 
 const debugLog = debug("app:small-claims-service");
 
@@ -64,31 +65,18 @@ class SmallClaimsService {
     return models.SmallClaim.findByPk(id);
   }
 
-  async findMany({ ownerId = "", assignedLawyerId = "" }) {
-    debugLog(
-      `retrieving SmallClaims with the following filter ${JSON.stringify({
-        ownerId,
-        assignedLawyerId,
-      })}`
-    );
-    let filter = "";
-    if (ownerId) {
-      filter = `WHERE "SmallClaims"."ownerId" = :ownerId`;
-    }
+  async findMany(filter, pageDetails) {
+    debugLog(`retrieving SmallClaims with the following filter ${JSON.stringify(filter)}`);
 
-    if (assignedLawyerId) {
-      filter = `WHERE "SmallClaims"."assignedLawyerId" = :assignedLawyerId`;
-    }
+    const { limit, offset } = paginate(pageDetails);
 
-    if (assignedLawyerId === null) {
-      filter = `WHERE "SmallClaims"."assignedLawyerId" IS NULL`;
-    }
+    let params = filter ? `WHERE ${filter}` : "";
+
     return models.sequelize.query(
-      `SELECT "SmallClaims".claim, "SmallClaims"."createdAt", "SmallClaims"."status","SmallClaims"."venue","SmallClaims"."updatedAt", "SmallClaims".amount, "SmallClaims"."assignedLawyerId", "SmallClaims".attachments, "SmallClaims".id, "SmallClaims"."ownerId", "lawyerProfile"."lastName" AS "lawyerProfile.lastName", "lawyerProfile"."firstName" AS "lawyerProfile.firstName", "lawyerProfile"."profilePic" AS "lawyerProfile.profilePic", "lawyerProfile".email AS "lawyerProfile.email","lawyerProfile".phone AS "lawyerProfile.phone", "lawyerProfile"."firebaseToken" AS "lawyerProfile.firebaseToken", (SELECT AVG("Reviews".rating) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.averageRating", (SELECT COUNT(id) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.noOfReviews" FROM "SmallClaims" LEFT OUTER JOIN "Users" AS "lawyerProfile" ON "SmallClaims"."assignedLawyerId" = "lawyerProfile".id ${filter} ORDER BY "SmallClaims"."createdAt" DESC;`,
+      `SELECT "SmallClaims".claim, "SmallClaims"."createdAt","SmallClaims"."paid","SmallClaims"."ticketId","SmallClaims"."status","SmallClaims"."venue","SmallClaims"."updatedAt", "SmallClaims".amount, "SmallClaims"."assignedLawyerId", "SmallClaims".attachments, "SmallClaims".id, "SmallClaims"."ownerId", "lawyerProfile"."lastName" AS "lawyerProfile.lastName", "lawyerProfile"."firstName" AS "lawyerProfile.firstName", "lawyerProfile"."profilePic" AS "lawyerProfile.profilePic", "lawyerProfile".email AS "lawyerProfile.email","lawyerProfile".phone AS "lawyerProfile.phone", "lawyerProfile"."firebaseToken" AS "lawyerProfile.firebaseToken", (SELECT AVG("Reviews".rating) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.averageRating", (SELECT COUNT(id) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.noOfReviews" FROM "SmallClaims" LEFT OUTER JOIN "Users" AS "lawyerProfile" ON "SmallClaims"."assignedLawyerId" = "lawyerProfile".id ${params} ORDER BY "SmallClaims"."createdAt" DESC LIMIT ${limit} OFFSET ${offset};`,
       {
         nest: true,
         type: QueryTypes.SELECT,
-        replacements: { ownerId, assignedLawyerId },
       }
     );
   }

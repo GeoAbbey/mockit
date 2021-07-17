@@ -1,6 +1,10 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import SmallClaimsController from "./controllers/small-claims.controller";
-import { createSmallClaimSchema, updateSmallClaimSchema } from "./schema/small-claim.schema";
+import {
+  createSmallClaimSchema,
+  updateSmallClaimSchema,
+  queryOptions,
+} from "./schema/small-claim.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID, uploadMiddleware } from "../../utils";
 import { queryContextParams } from "../../utils/allPurpose.schema";
 
@@ -18,7 +22,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
         [uploadMiddleware(), wrapCatch(SmallClaimsController.makeClaim)],
       ])
       .get([
-        middleware({ schema: queryContextParams, property: "query" }),
+        middleware({ schema: queryOptions, property: "query" }),
         SmallClaimsController.queryContext,
         wrapCatch(SmallClaimsController.getAllSmallClaims),
       ]);

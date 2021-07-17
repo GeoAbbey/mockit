@@ -11,5 +11,14 @@ export const updateReviewSchema = Joi.object().keys({
 });
 
 export const queryReviewSchema = Joi.object().keys({
-  modelType: Joi.string().valid("Invitation", "SmallClaim", "Responses"),
+  search: Joi.object().keys({
+    modelType: Joi.string().valid("Invitation", "SmallClaim", "Response"),
+    reviewerId: Joi.string().guid({ version: "uuidv4" }),
+    forId: Joi.string().guid({ version: "uuidv4" }),
+    ticketId: Joi.string(),
+  }),
+  paginate: Joi.object().keys({
+    page: Joi.number().min(1),
+    pageSize: Joi.number().max(20),
+  }),
 });
