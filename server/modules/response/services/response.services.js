@@ -3,6 +3,7 @@ import { QueryTypes } from "sequelize";
 import models from "../../../models";
 import { handleFalsy } from "../../../utils";
 import { rawQueries } from "../../../utils/rawQueriers";
+import { paginate } from "../../helpers";
 
 const debugLog = debug("app:Responses-service");
 
@@ -81,11 +82,12 @@ class ResponsesService {
     return models.Response.findByPk(id, t);
   }
 
-  async findMany(data) {
-    debugLog(`retrieving responses with the following filter ${JSON.stringify(data)}`);
-    return models.Response.findAll({
+  async findMany(filter, pageDetails) {
+    debugLog(`retrieving responses with the following filter ${JSON.stringify(filter)}`);
+    return models.Response.findAndCountAll({
       order: [["createdAt", "DESC"]],
-      data,
+      where: { ...filter },
+      ...paginate(pageDetails),
       include: [
         {
           model: models.User,

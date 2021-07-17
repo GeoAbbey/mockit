@@ -79,8 +79,16 @@ export const newOTP = Joi.object().keys({
   for: Joi.string().valid("reset-password", "verify-email"),
 });
 
-export const queryUserOrLawyer = Joi.object().keys({
-  role: Joi.string().valid("user", "lawyer", "admin", "super-admin"),
+export const queryOptions = Joi.object().keys({
+  search: Joi.object().keys({
+    role: Joi.string().valid("user", "lawyer", "admin", "super-admin"),
+    name: Joi.string(),
+    gender: Joi.string().valid("male", "female"),
+  }),
+  paginate: Joi.object().keys({
+    page: Joi.number().min(1),
+    pageSize: Joi.number().max(20),
+  }),
 });
 
 export const changePasswordSchema = Joi.object().keys({

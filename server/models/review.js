@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.belongsTo(models.User, { as: "reviewerProfile", foreignKey: "reviewerId" });
+      this.belongsTo(models.User, { as: "receiverProfile", foreignKey: "forId" });
       this.belongsTo(models.Invitation, { as: "invitation-reviews", foreignKey: "modelId" });
       this.belongsTo(models.SmallClaim, { as: "small-claims-reviews", foreignKey: "modelId" });
     }
@@ -29,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       modelId: { type: DataTypes.UUID, allowNull: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       reviewerId: { type: DataTypes.UUID, allowNull: false },
+      forId: { type: DataTypes.UUID, allowNull: false },
       ticketId: {
         type: DataTypes.STRING,
         allowNull: false,

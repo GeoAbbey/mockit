@@ -3,6 +3,7 @@ import { QueryTypes } from "sequelize";
 import models from "../../../models";
 import { handleFalsy } from "../../../utils";
 import { rawQueries } from "../../../utils/rawQueriers";
+import { paginate } from "../../helpers";
 
 const debugLog = debug("app:invitations-service");
 
@@ -50,11 +51,12 @@ class InvitationsService {
     return models.Invitation.findByPk(id, t);
   }
 
-  async findMany(data) {
-    debugLog(`retrieving invitations with the following filter ${JSON.stringify(data)}`);
-    return models.Invitation.findAll({
+  async findMany(filter, pageDetails) {
+    debugLog(`retrieving invitations with the following filter ${JSON.stringify(filter)}`);
+    return models.Invitation.findAndCountAll({
       order: [["createdAt", "DESC"]],
-      ...data,
+      where: { ...filter },
+      ...paginate(pageDetails),
       include: [
         {
           model: models.User,

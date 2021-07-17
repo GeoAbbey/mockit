@@ -3,6 +3,7 @@ import createError from "http-errors";
 import { EVENT_IDENTIFIERS } from "../../../constants";
 
 import ReviewsService from "../service/reviews.service";
+import { paginate as pagination } from "../../helpers";
 const log = debug("app:reviews-controller");
 
 class ReviewsController {
@@ -23,7 +24,9 @@ class ReviewsController {
       params: { id, modelType },
       decodedToken: { id: reviewerId },
     } = req;
+
     log(`creating a new invitation for user with id ${reviewerId}`);
+
     const review = await ReviewsService.create({ ...body, reviewerId, modelId: id, modelType });
     if (!review) return next(createError(403, "You are not authorized to perform this operation"));
 
@@ -40,6 +43,7 @@ class ReviewsController {
       params: { id },
     } = req;
     log(`deleting a review for id ${id}`);
+
     const deletedReview = await ReviewsService.remove(id);
 
     return res.status(200).send({
@@ -75,11 +79,12 @@ class ReviewsController {
         params: { id: modelId, modelType },
         decodedToken: { id: reviewerId },
       } = req;
+
       if (context !== "create") {
         const review = await ReviewsService.find(req.params.id);
         if (!review) return next(createError(404, "The review can not be found"));
         req.oldReview = review;
-        next();
+        return next();
       } else {
         const review = await ReviewsService.findOne({ modelId, modelType, reviewerId });
         if (review)
@@ -113,31 +118,33 @@ class ReviewsController {
   }
 
   async getAllReviews(req, res, next) {
-    let context = {};
-    if (req.query.modelType) {
-      const { modelType } = req.query;
-      context = { modelType };
-      req.data = {
-        ...req.data.where,
-        ...context,
-      };
-    }
-    const reviews = await ReviewsService.findMany(req.data);
+    const {
+      filter,
+      query: { paginate = {} },
+    } = req;
+
+    const reviews = await ReviewsService.findMany(filter, paginate);
+    const { offset, limit } = pagination(paginate);
+
     return res.status(200).send({
       success: true,
       message: "review successfully retrieved",
-      reviews,
+      reviews: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...reviews,
+      },
     });
   }
 
-  async allStats(req, res, next){
-   const result =  await ReviewsService.getReviewStats()
+  async allStats(req, res, next) {
+    const result = await ReviewsService.getReviewStats();
 
-   return res.status(200).send({
-    success: true,
-    message: "stats successfully retrieved",
-    result,
-  });
+    return res.status(200).send({
+      success: true,
+      message: "stats successfully retrieved",
+      result,
+    });
   }
 
   async getAllReviewStats(req, res, next) {
@@ -168,24 +175,75 @@ class ReviewsController {
     };
   }
 
-  checkAccessUserAdmin(){
+  checkAccessUserAdmin() {
     return async (req, res, next) => {
       const {
         decodedToken: { role, id },
       } = req;
       if (role === "admin" || role === "super-admin") return next();
       else return next(createError(400, `You do not have access use this route`));
-    }
+    };
   }
 
   queryContext(req, res, next) {
-    const { role, id } = req.decodedToken;
+    const {
+      decodedToken: { role, id },
+      query,
+    } = req;
+
+    let filter = {};
+
     if (role === "admin" || role === "super-admin") {
-      req.data = { where: {} };
+      if (query.search && query.search.reviewerId) {
+        filter = { ...filter, reviewerId: query.search.reviewerId };
+      }
+
+      if (query.search && query.search.forId) {
+        filter = { ...filter, forId: query.search.forId };
+      }
+
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: query.search.ticketId };
+      }
+
+      if (query.search && query.search.modelType) {
+        filter = { ...filter, modelType: query.search.modelType };
+      }
     }
-    if (role === "lawyer" || role === "user") {
-      req.data = { where: { reviewerId: id } };
+
+    if (role === "lawyer") {
+      filter = { ...filter, assignedLawyerId: id };
+
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: query.search.ticketId };
+      }
+
+      if (query.search && query.search.forId) {
+        filter = { ...filter, forId: query.search.forId };
+      }
+
+      if (query.search && query.search.reviewerId) {
+        filter = { ...filter, reviewerId: query.search.reviewerId };
+      }
     }
+
+    if (role === "user") {
+      filter = { ...filter, ownerId: id };
+
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: query.search.ticketId };
+      }
+
+      if (query.search && query.search.forId) {
+        filter = { ...filter, forId: query.search.forId };
+      }
+
+      if (query.search && query.search.reviewerId) {
+        filter = { ...filter, reviewerId: query.search.reviewerId };
+      }
+    }
+
+    req.filter = filter;
     return next();
   }
 }

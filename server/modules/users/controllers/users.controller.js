@@ -8,6 +8,10 @@ import { HandlePassword, otp } from "../../../utils";
 import { parseISO } from "date-fns/esm";
 import { EVENT_IDENTIFIERS } from "../../../constants";
 
+import { Op } from "sequelize";
+import { process } from "../../../utils/processInput";
+import { paginate as pagination } from "../../helpers";
+
 const log = debug("app:users-controller");
 
 class UsersController {
@@ -25,7 +29,12 @@ class UsersController {
 
     const hash = await HandlePassword.getHash(req.body.password);
     req.body.password = hash;
-    req.body.email = req.body.email.trim().toLowerCase();
+
+    req.body.email = process(req.body.email);
+    req.body.firstName = process(req.body.firstName);
+    req.body.lastName = process(req.body.lastName);
+    req.body.gender = process(req.body.gender);
+    req.body.phone = process(req.body.phone);
 
     const user = await UsersService.create(req.body);
     delete user.dataValues.password;
@@ -239,14 +248,59 @@ class UsersController {
 
   async getAllUsers(req, res, next) {
     log("retrieving all the users on the platform");
-    const { query } = req;
-    if (!query) query = {};
-    const users = await UsersService.retrieveAll(query);
+    const {
+      filter,
+      query: { paginate = {} },
+    } = req;
+    const users = await UsersService.retrieveAll(filter, paginate);
+
+    const { offset, limit } = pagination(paginate);
+
     return res.status(200).send({
       success: true,
       message: "user successfully retrieved",
-      users,
+      users: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...users,
+      },
     });
+  }
+
+  async queryContext(req, res, next) {
+    log("creating query context from available options");
+    const { query } = req;
+
+    let filter = {};
+
+    if (query.search && query.search.role) {
+      filter = { ...filter, role: query.search.role };
+    }
+
+    if (query.search && query.search.name) {
+      filter = {
+        ...filter,
+        [Op.or]: [
+          {
+            firstName: {
+              [Op.substring]: query.search.name,
+            },
+          },
+          {
+            lastName: {
+              [Op.substring]: query.search.name,
+            },
+          },
+        ],
+      };
+    }
+
+    if (query.search && query.search.gender) {
+      filter = { ...filter, gender: query.search.gender };
+    }
+
+    req.filter = filter;
+    return next();
   }
 }
 
