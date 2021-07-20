@@ -9,6 +9,7 @@ const log = debug("app:responses-controller");
 const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
 import { paginate as pagination } from "../../helpers";
+import { Op } from "sequelize";
 
 const config = configOptions[env];
 
@@ -278,7 +279,7 @@ class ResponsesController {
       }
 
       if (query.search && query.search.ticketId) {
-        filter = { ...filter, ticketId: query.search.ticketId };
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
       }
 
       if (query.search && query.search.paid) {
@@ -298,7 +299,7 @@ class ResponsesController {
       filter = { ...filter, assignedLawyerId: id };
 
       if (query.search && query.search.ticketId) {
-        filter = { ...filter, ticketId: query.search.ticketId };
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
       }
     }
 
@@ -306,7 +307,7 @@ class ResponsesController {
       filter = { ...filter, ownerId: id };
 
       if (query.search && query.search.ticketId) {
-        filter = { ...filter, ticketId: query.search.ticketId };
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
       }
     }
 

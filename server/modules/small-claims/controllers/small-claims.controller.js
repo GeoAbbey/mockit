@@ -323,8 +323,8 @@ class SmallClaimsController {
 
       if (query.search && query.search.ticketId) {
         filter = filter
-          ? `${filter} AND "SmallClaims"."ticketId" = '${query.search.ticketId}'`
-          : `"SmallClaims"."ticketId" = '${query.search.ticketId}'`;
+          ? `${filter} AND "SmallClaims"."ticketId" ILIKE '%${query.search.ticketId}%'`
+          : `"SmallClaims"."ticketId" ILIKE '%${query.search.ticketId}%'`;
       }
 
       if (query.search && query.search.paid) {
@@ -350,7 +350,7 @@ class SmallClaimsController {
       filter = `${filter} "SmallClaims"."assignedLawyerId" = '${id}'`;
 
       if (query.search && query.search.ticketId) {
-        filter = `${filter} AND "SmallClaims"."ticketId" = '${query.search.ticketId}'`;
+        filter = `${filter} AND "SmallClaims"."ticketId" ILIKE '%${query.search.ticketId}%'`;
       }
     }
 
@@ -358,7 +358,7 @@ class SmallClaimsController {
       filter = `${filter} "SmallClaims"."ownerId" = '${id}'`;
 
       if (query.search && query.search.ticketId) {
-        filter = `${filter} AND "SmallClaims"."ticketId" = '${query.search.ticketId}'`;
+        filter = `${filter} AND "SmallClaims"."ticketId" ILIKE '%${query.search.ticketId}%'`;
       }
     }
 
