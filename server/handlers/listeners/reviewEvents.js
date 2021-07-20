@@ -3,11 +3,6 @@ import models from "../../models";
 import { EVENT_IDENTIFIERS, NOTIFICATION_DATA } from "../../constants";
 import { sendNotificationToClient } from "../../utils/sendNotificationToClient";
 
-const env = process.env.NODE_ENV || "development";
-const configOptions = require("../../config/config");
-
-const config = configOptions[env];
-
 const logger = debug("app:handlers:listeners:review-events");
 
 export const reviewEvents = (eventEmitter) => {
@@ -71,16 +66,15 @@ const notifyForReviews = async (events, review, action) => {
   ];
 
   logger("sending notification to the user");
-  config.runNotificationService &&
-    sendNotificationToClient({
-      tokens: [detailsToNotify.firebaseToken],
-      data: NOTIFICATION_DATA.REVIEW({
-        context: mapper[review.modelType],
-        action,
-        to: notificationFrom.firebaseToken,
-        id: notificationFrom.id,
-      }),
-    });
+  sendNotificationToClient({
+    tokens: [detailsToNotify.firebaseToken],
+    data: NOTIFICATION_DATA.REVIEW({
+      context: mapper[review.modelType],
+      action,
+      to: notificationFrom.firebaseToken,
+      id: notificationFrom.id,
+    }),
+  });
 
   logger("saving notification sent to the user in the database");
   await models.Notification.bulkCreate(

@@ -5,6 +5,7 @@ import { EVENT_IDENTIFIERS } from "../../../constants";
 import InvitationsService from "../service/invitations.service";
 const log = debug("app:invitations-controller");
 import { paginate as pagination } from "../../helpers";
+import { Op } from "sequelize";
 
 class InvitationsController {
   static instance;
@@ -234,7 +235,7 @@ class InvitationsController {
       }
 
       if (query.search && query.search.ticketId) {
-        filter = { ...filter, ticketId: query.search.ticketId };
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
       }
 
       if (query.search && query.search.paid) {
@@ -254,7 +255,7 @@ class InvitationsController {
       filter = { ...filter, assignedLawyerId: id };
 
       if (query.search && query.search.ticketId) {
-        filter = { ...filter, ticketId: query.search.ticketId };
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
       }
     }
 
@@ -262,7 +263,7 @@ class InvitationsController {
       filter = { ...filter, ownerId: id };
 
       if (query.search && query.search.ticketId) {
-        filter = { ...filter, ticketId: query.search.ticketId };
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
       }
     }
 

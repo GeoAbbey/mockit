@@ -65,7 +65,7 @@ class ReviewsService {
         {
           model: models.User,
           as: "reviewerProfile",
-          attributes: ["firstName", "lastName", "email", "profilePic", "phone"],
+          attributes: ["firstName", "lastName", "email", "profilePic", "phone", "role"],
           required: false,
         },
       ],
@@ -83,13 +83,13 @@ class ReviewsService {
         {
           model: models.User,
           as: "reviewerProfile",
-          attributes: ["firstName", "lastName", "email", "profilePic", "phone"],
+          attributes: ["firstName", "lastName", "email", "profilePic", "phone", "role"],
           required: false,
         },
         {
           model: models.User,
           as: "receiverProfile",
-          attributes: ["firstName", "lastName", "email", "profilePic", "phone"],
+          attributes: ["firstName", "lastName", "email", "profilePic", "phone", "role"],
           required: false,
         },
       ],
