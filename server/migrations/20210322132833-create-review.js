@@ -26,7 +26,7 @@ module.exports = {
       },
       reviewerId: {
         type: Sequelize.UUID,
-        onDelete: "CASCADE",
+        onDelete: "NO ACTION",
         references: {
           model: "Users",
           key: "id",
@@ -35,7 +35,7 @@ module.exports = {
       },
       forId: {
         type: Sequelize.UUID,
-        onDelete: "CASCADE",
+        onDelete: "NO ACTION",
         references: {
           model: "Users",
           key: "id",

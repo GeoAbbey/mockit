@@ -30,9 +30,11 @@ module.exports = (sequelize, DataTypes) => {
       },
       modelId: {
         type: DataTypes.UUID,
-        allowNull: false,
       },
       code: {
+        type: DataTypes.STRING,
+      },
+      notes: {
         type: DataTypes.STRING,
       },
       amount: {

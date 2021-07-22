@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       online: { type: DataTypes.BOOLEAN, defaultValue: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       location: { type: DataTypes.GEOMETRY("POINT") },
-      assigneeId: { type: DataTypes.UUID },
+      assigningId: { type: DataTypes.UUID },
     },
     {
       sequelize,

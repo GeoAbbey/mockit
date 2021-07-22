@@ -44,7 +44,7 @@ module.exports = {
       },
       assignedLawyerId: {
         type: Sequelize.UUID,
-        onDelete: "CASCADE",
+        onDelete: "NO ACTION",
         references: {
           model: "Users",
           key: "id",

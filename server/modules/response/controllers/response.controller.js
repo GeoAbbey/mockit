@@ -111,12 +111,23 @@ class ResponsesController {
   }
 
   async deleteResponse(req, res, next) {
-    const { id } = req.params;
-    log(`deleting an Response with id ${id}`);
+    const eventEmitter = req.app.get("eventEmitter");
+
+    const {
+      params: { id },
+      decodedToken,
+    } = req;
+
+    log(`deleting an response with id ${id}`);
     const deletedResponse = await ResponsesService.remove(id);
+
+    eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.DELETED, {
+      decodedToken,
+    });
+
     return res.status(200).send({
       success: true,
-      message: "response successfully deleted",
+      message: "response successfully deleted and subscription used has been returned",
       response: deletedResponse,
     });
   }

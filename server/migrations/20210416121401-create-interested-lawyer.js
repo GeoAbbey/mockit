@@ -16,7 +16,6 @@ module.exports = {
       },
       lawyerId: {
         type: Sequelize.UUID,
-        onDelete: "CASCADE",
         references: {
           model: "Users",
           key: "id",
@@ -28,6 +27,12 @@ module.exports = {
       },
       modelId: {
         type: Sequelize.UUID,
+        onDelete: "CASCADE",
+        references: {
+          model: "SmallClaims",
+          key: "id",
+          as: "modelId",
+        },
       },
       modelType: {
         type: Sequelize.STRING,

@@ -451,6 +451,7 @@ class PaymentsService {
 
       return result;
     } catch (error) {
+      console.log({ error }, "🐒");
       return error;
     }
   }
@@ -515,6 +516,7 @@ class PaymentsService {
 
       return result;
     } catch (error) {
+      console.log({ error }, "🐒");
       return error;
     }
   }
@@ -582,6 +584,7 @@ class PaymentsService {
 
       return result;
     } catch (error) {
+      console.log({ error }, "🐒");
       return error;
     }
   }
@@ -651,6 +654,45 @@ class PaymentsService {
 
       return result;
     } catch (error) {
+      console.log({ error }, "🐒");
+      return error;
+    }
+  }
+
+  async returnSubscriptionCount(args) {
+    debugLog(`returning subscriptionCount for emergency response to ownerId ${args.id}`, args);
+    try {
+      let result = await models.sequelize.transaction(async (t) => {
+        const oldAccountInfo = await AccountInfosService.find(args.id, { transaction: t });
+
+        const newAccountInfo = await AccountInfosService.update(
+          args.id,
+          {
+            info: "subscription",
+            operation: "add",
+            subscriptionCount: 1,
+          },
+          oldAccountInfo,
+          { transaction: t }
+        );
+
+        const receipt = await TransactionService.create(
+          {
+            ownerId: args.id,
+            performedBy: args.id,
+            modelType: "response",
+            notes: "return",
+            amount: parseInt(config.costOfSubscriptionUnit),
+          },
+          { transaction: t }
+        );
+
+        return { success: true, service: newAccountInfo };
+      });
+
+      return result;
+    } catch (error) {
+      console.log({ error }, "🐒");
       return error;
     }
   }
@@ -712,6 +754,7 @@ class PaymentsService {
 
       return result;
     } catch (error) {
+      console.log({ error }, "🐒");
       return error;
     }
   }

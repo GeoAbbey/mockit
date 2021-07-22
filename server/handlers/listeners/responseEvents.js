@@ -35,14 +35,14 @@ export const responseEvents = (eventEmitter) => {
       LocationServices.update(
         userLocationDetails.dataValues.id,
         {
-          assigneeId: assignedLawyerId,
+          assigningId: assignedLawyerId,
         },
         userLocationDetails
       ),
       LocationServices.update(
         lawyerLocationDetails.dataValues.id,
         {
-          assigneeId: ownerId,
+          assigningId: ownerId,
         },
         lawyerLocationDetails
       ),
@@ -73,7 +73,7 @@ export const responseEvents = (eventEmitter) => {
       LocationServices.update(
         userLocationDetails.id,
         {
-          assigneeId: null,
+          assigningId: null,
           online: false,
         },
         userLocationDetails
@@ -81,7 +81,7 @@ export const responseEvents = (eventEmitter) => {
       LocationServices.update(
         lawyerLocationDetails.id,
         {
-          assigneeId: null,
+          assigningId: null,
         },
         lawyerLocationDetails
       ),
@@ -108,12 +108,10 @@ export const responseEvents = (eventEmitter) => {
       logger(`${EVENT_IDENTIFIERS.RESPONSE.CREATED} event was received`);
       const {
         dataValues: { id: responseId, ownerId },
-      } = response;
-      const {
         startingLocation: { coordinates },
       } = response;
 
-      //return all the lawyers that are online within the given radius
+      //return all the lawyers that are online and aren't busy within the given radius
       const results = await LocationServices.findLawyersWithinRadius({
         longitude: coordinates[0],
         latitude: coordinates[1],
@@ -180,4 +178,12 @@ export const responseEvents = (eventEmitter) => {
       await schedule.createPayout(data);
     }
   );
+
+  eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.DELETED, async ({ decodedToken }) => {
+    logger(`${EVENT_IDENTIFIERS.RESPONSE.DELETED} event was received`);
+
+    await PaymentsService.returnSubscriptionCount({
+      id: decodedToken.id,
+    });
+  });
 };

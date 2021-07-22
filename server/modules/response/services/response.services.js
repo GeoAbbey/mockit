@@ -122,8 +122,7 @@ class ResponsesService {
         paid: handleFalsy(ResponseDTO.paid, paid),
         assignedLawyerId: ResponseDTO.assignedLawyerId || assignedLawyerId,
       },
-      { where: { id }, returning: true },
-      t
+      { where: { id }, returning: true, ...t }
     );
   }
 
