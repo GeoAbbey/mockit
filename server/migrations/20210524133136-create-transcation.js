@@ -10,7 +10,7 @@ module.exports = {
       },
       ownerId: {
         type: Sequelize.UUID,
-        onDelete: "CASCADE",
+        onDelete: "NO ACTION",
         references: {
           model: "Users",
           key: "id",
@@ -23,16 +23,18 @@ module.exports = {
       code: {
         type: Sequelize.STRING,
       },
+      notes: {
+        type: Sequelize.STRING,
+      },
       modelId: {
         type: Sequelize.UUID,
-        allowNull: false,
       },
       amount: {
         type: Sequelize.INTEGER,
       },
       performedBy: {
         type: Sequelize.UUID,
-        onDelete: "CASCADE",
+        onDelete: "NO ACTION",
         references: {
           model: "Users",
           key: "id",

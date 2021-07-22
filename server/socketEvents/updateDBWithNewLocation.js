@@ -40,5 +40,5 @@ export const updateDbWithNewLocation = async (payload, io) => {
     io.recipient = newDetails.dataValues;
   }
 
-  debugLog({ realRecipient: io.recipient.assigneeId }, "🔥🙏🏻");
+  debugLog({ realRecipient: io.recipient.assigningId }, "🔥🙏🏻");
 };

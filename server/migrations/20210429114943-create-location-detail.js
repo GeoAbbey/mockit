@@ -28,12 +28,12 @@ module.exports = {
       speed: {
         type: Sequelize.STRING,
       },
-      assigneeId: {
+      assigningId: {
         type: Sequelize.UUID,
         references: {
           model: "Users",
           key: "id",
-          as: "assigneeId",
+          as: "assigningId",
         },
       },
       createdAt: {

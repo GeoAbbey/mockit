@@ -11,9 +11,9 @@ const hoistedIOLawyer = (io) => {
     logger(`lawyer:online:location I have received this payload ${payload} 🐥🥶`);
     await updateDbWithNewLocation(payload, io);
     const { recipient } = io;
-    if (recipient.assigneeId) {
-      logger({ assignedId: recipient.assigneeId }, "lawyer:online");
-      const deliverTo = await LocationServices.find({ where: { id: recipient.assigneeId } });
+    if (recipient.assigningId) {
+      logger({ assigningId: recipient.assigningId }, "lawyer:online");
+      const deliverTo = await LocationServices.find({ where: { id: recipient.assigningId } });
       const { socketId, location } = deliverTo.dataValues;
 
       io.to(socketId).emit("on:move", {

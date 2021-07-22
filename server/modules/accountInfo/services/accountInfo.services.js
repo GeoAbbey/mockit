@@ -30,7 +30,12 @@ class AccountInfosService {
     const handleAmount = (newValue, previousValue, operation) => {
       if (operation === "add") {
         return newValue + previousValue;
-      } else return previousValue - newValue;
+      } else {
+        console.log("I was called 🥜");
+        const result = previousValue - newValue;
+        console.log({ result, previousValue, newValue }, "🌰");
+        return result;
+      }
     };
 
     return models.AccountInfo.update(

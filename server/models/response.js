@@ -19,13 +19,11 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.User, {
         foreignKey: "assignedLawyerId",
         as: "lawyerProfile",
-        onDelete: "CASCADE",
       });
 
       this.hasMany(models.EligibleLawyer, {
         as: "eligibleLawyers",
         foreignKey: "responseId",
-        onDelete: "CASCADE",
       });
     }
   }
