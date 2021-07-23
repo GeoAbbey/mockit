@@ -1,6 +1,9 @@
 import debug from "debug";
+import { paginate as pagination } from "../../helpers";
 
 import NotificationsService from "../services/notification.services";
+import { Op } from "sequelize";
+
 const log = debug("app:notifications-controller");
 
 class NotificationsController {
@@ -28,14 +31,55 @@ class NotificationsController {
   async getAllNotifications(req, res, next) {
     log("getting all Notifications");
     const {
-      decodedToken: { id: ownerId },
+      filter,
+      query: { paginate = {} },
     } = req;
-    const notifications = await NotificationsService.findMany(ownerId);
+
+    const notifications = await NotificationsService.findMany(filter, paginate);
+
+    const { offset, limit } = pagination(paginate);
+
     return res.status(200).send({
       success: true,
       message: "notifications successfully retrieved",
-      notifications,
+      notifications: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...notifications,
+      },
     });
+  }
+
+  queryContext(req, res, next) {
+    const {
+      decodedToken: { role, id },
+      query,
+    } = req;
+
+    let filter = {};
+
+    const commonOptions = () => {
+      if (query.search && query.search.for) {
+        filter = { ...filter, for: { [Op.iLike]: `%${query.search.for}%` } };
+      }
+    };
+
+    if (role === "admin" || role === "super-admin") {
+      if (query.search && query.search.ownerId) {
+        filter = { ...filter, ownerId: query.search.ownerId };
+      }
+
+      commonOptions();
+    }
+
+    if (role === "user" || role === "lawyer") {
+      filter = { ...filter, ownerId: id };
+
+      commonOptions();
+    }
+
+    req.filter = filter;
+    return next();
   }
 }
 

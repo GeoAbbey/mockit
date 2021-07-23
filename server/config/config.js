@@ -21,7 +21,7 @@ module.exports = {
     database: process.env.LOCAL_DATABASE,
     host: process.env.HOST,
     mongoConnect: process.env.MONGO_DB_CONNECTION_LOCAL,
-    runNotificationService: true,
+    runNotificationService: false,
     payoutInterval: process.env.PAYOUT_INTERVAL,
     ...common,
   },

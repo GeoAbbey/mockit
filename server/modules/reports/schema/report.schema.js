@@ -11,3 +11,14 @@ export const updateReportSchema = Joi.object().keys({
   location: Joi.string(),
   attachments: [Joi.array().items(Joi.string()), Joi.number()],
 });
+
+export const queryOptions = Joi.object().keys({
+  search: Joi.object().keys({
+    reporterId: Joi.string().guid({ version: "uuidv4" }),
+    ticketId: Joi.string(),
+  }),
+  paginate: Joi.object().keys({
+    page: Joi.number().min(1),
+    pageSize: Joi.number().max(20),
+  }),
+});

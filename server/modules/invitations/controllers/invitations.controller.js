@@ -229,11 +229,7 @@ class InvitationsController {
 
     let filter = {};
 
-    if (role === "admin" || role === "super-admin") {
-      if (query.search && query.search.ownerId) {
-        filter = { ...filter, ownerId: query.search.ownerId };
-      }
-
+    const commonOptions = () => {
       if (query.search && query.search.ticketId) {
         filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
       }
@@ -245,6 +241,14 @@ class InvitationsController {
       if (query.search && query.search.status) {
         filter = { ...filter, status: query.search.status };
       }
+    };
+
+    if (role === "admin" || role === "super-admin") {
+      if (query.search && query.search.ownerId) {
+        filter = { ...filter, ownerId: query.search.ownerId };
+      }
+
+      commonOptions();
 
       if (query.search && query.search.assignedLawyerId) {
         filter = { ...filter, assignedLawyerId: query.search.assignedLawyerId };
@@ -254,17 +258,13 @@ class InvitationsController {
     if (role === "lawyer") {
       filter = { ...filter, assignedLawyerId: id };
 
-      if (query.search && query.search.ticketId) {
-        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
-      }
+      commonOptions();
     }
 
     if (role === "user") {
       filter = { ...filter, ownerId: id };
 
-      if (query.search && query.search.ticketId) {
-        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
-      }
+      commonOptions();
     }
 
     req.filter = filter;

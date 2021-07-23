@@ -84,6 +84,7 @@ class ResponsesService {
 
   async findMany(filter, pageDetails) {
     debugLog(`retrieving responses with the following filter ${JSON.stringify(filter)}`);
+
     return models.Response.findAndCountAll({
       order: [["createdAt", "DESC"]],
       where: { ...filter },
@@ -130,6 +131,12 @@ class ResponsesService {
     debugLog(`deleting the response with id ${id}`);
     return models.Response.destroy({
       where: { id, assignedLawyerId: null },
+    });
+  }
+
+  async findInProgress(id) {
+    return models.Response.findOne({
+      where: { ownerId: id, status: "in-progress" },
     });
   }
 
