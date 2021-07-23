@@ -94,7 +94,7 @@ class SmallClaimsController {
       smallClaims: {
         currentPage: offset / limit + 1,
         pageSize: limit,
-        rows: smallClaims,
+        ...smallClaims,
       },
     });
   }

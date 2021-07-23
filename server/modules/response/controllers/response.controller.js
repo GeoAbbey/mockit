@@ -73,6 +73,18 @@ class ResponsesController {
     };
   }
 
+  async onGoingResponse(req, res, next) {
+    const {
+      decodedToken: { id },
+    } = req;
+    log(`checking that user with id ${id} doesn't have an ongoing emergency response`);
+
+    const response = await ResponsesService.findInProgress(id);
+    if (response) return next(createError(400, "You already have a response in progress"));
+
+    return next();
+  }
+
   async modifyResponse(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
     const io = req.app.get("io");
@@ -284,22 +296,25 @@ class ResponsesController {
 
     let filter = {};
 
-    if (role === "admin" || role === "super-admin") {
-      if (query.search && query.search.ownerId) {
-        filter = { ...filter, ownerId: query.search.ownerId };
-      }
-
-      if (query.search && query.search.ticketId) {
-        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
+    const commonOptions = () => {
+      if (query.search && query.search.status) {
+        filter = { ...filter, status: query.search.status };
       }
 
       if (query.search && query.search.paid) {
         filter = { ...filter, paid: query.search.paid };
       }
 
-      if (query.search && query.search.status) {
-        filter = { ...filter, status: query.search.status };
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
       }
+    };
+
+    if (role === "admin" || role === "super-admin") {
+      if (query.search && query.search.ownerId) {
+        filter = { ...filter, ownerId: query.search.ownerId };
+      }
+      commonOptions();
 
       if (query.search && query.search.assignedLawyerId) {
         filter = { ...filter, assignedLawyerId: query.search.assignedLawyerId };
@@ -308,18 +323,12 @@ class ResponsesController {
 
     if (role === "lawyer") {
       filter = { ...filter, assignedLawyerId: id };
-
-      if (query.search && query.search.ticketId) {
-        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
-      }
+      commonOptions();
     }
 
     if (role === "user") {
       filter = { ...filter, ownerId: id };
-
-      if (query.search && query.search.ticketId) {
-        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
-      }
+      commonOptions();
     }
 
     req.filter = filter;

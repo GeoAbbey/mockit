@@ -1,7 +1,7 @@
 import debug from "debug";
 import { QueryTypes } from "sequelize";
 import models from "../../../models";
-
+import { paginate } from "../../helpers";
 const debugLog = debug("app:reports-service");
 
 class ReportsService {
@@ -34,17 +34,48 @@ class ReportsService {
     return models.Report.findByPk(id);
   }
 
-  async findMany(ownerId, pageDetails) {
-    debugLog(`retrieving reports}`);
+  async findManyAdmin(filter, pageDetails) {
+    debugLog(`retrieving reports for by an admin user`);
+    return models.Report.findAndCountAll({
+      order: [["createdAt", "DESC"]],
+      where: {
+        ...filter,
+      },
+      ...paginate(pageDetails),
+      include: [
+        {
+          model: models.User,
+          as: "ownerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
+          required: false,
+        },
+      ],
+    });
+  }
+
+  async findMany(filter, replacements, pageDetails) {
+    debugLog(`retrieving reports`);
     const { limit, offset } = paginate(pageDetails);
 
-    return models.sequelize.query(
-      `select "Reports".id, "Reports".attachments,"Reports".content, "Reports"."ticketId", "Reports".location, "Reports"."createdAt", "Reports"."updatedAt", "Reports".meta, "Reports"."reporterId", "Users"."profilePic", "Users".email, "Users"."firebaseToken", "Users"."firstName", "Users"."lastName", (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'repost') as reposts, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like') as likes, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like' and "ownerId" =:ownerId) as has_liked, (select count(id) from "Reactions" where "modelId" = "Reports".id and "reactionType" = 'repost' and "modelType" = 'Report' and "ownerId" = :ownerId) as has_reposted, (select count (id) from "Comments" where "reportId" = "Reports".id) as comments from "Reports" INNER JOIN "Users" ON "Reports"."reporterId" = "Users"."id" ORDER BY "Reports"."createdAt" DESC LIMIT ${limit} OFFSET ${offset};;`,
+    let params = filter ? `WHERE ${filter}` : "";
+
+    const [data] = await models.sequelize.query(
+      `SELECT count("Reports"."id") AS "count" FROM "Reports" AS "Reports" LEFT OUTER JOIN "Users" AS "ownerProfile" ON "Reports"."reporterId" = "ownerProfile"."id" AND ("ownerProfile"."deletedAt" IS NULL) ${params}`,
       {
+        nest: true,
         type: QueryTypes.SELECT,
-        replacements: { ownerId },
       }
     );
+
+    const rows = await models.sequelize.query(
+      `select "Reports".id, "Reports".attachments,"Reports".content, "Reports"."ticketId", "Reports".location, "Reports"."createdAt", "Reports"."updatedAt", "Reports".meta, "Reports"."reporterId", "Users"."profilePic", "Users".email, "Users"."firebaseToken", "Users"."firstName", "Users"."lastName", (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'repost') as reposts, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like') as likes, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like' and "ownerId" =:reporterId) as has_liked, (select count(id) from "Reactions" where "modelId" = "Reports".id and "reactionType" = 'repost' and "modelType" = 'Report' and "ownerId" = :reporterId) as has_reposted, (select count (id) from "Comments" where "reportId" = "Reports".id) as comments from "Reports" INNER JOIN "Users" ON "Reports"."reporterId" = "Users"."id" ${params} ORDER BY "Reports"."createdAt" DESC LIMIT ${limit} OFFSET ${offset};`,
+      {
+        type: QueryTypes.SELECT,
+        replacements,
+      }
+    );
+
+    return { count: parseInt(data.count), rows };
   }
 
   async update(id, ReportDTO, oldReport) {

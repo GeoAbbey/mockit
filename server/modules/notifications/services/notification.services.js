@@ -1,5 +1,6 @@
 import debug from "debug";
 import models from "../../../models";
+import { paginate } from "../../helpers";
 
 const debugLog = debug("app:notifications-service");
 
@@ -17,15 +18,16 @@ class NotificationsService {
     return models.Notification.bulkCreate(NotificationDTO);
   }
 
-  async findMany(id) {
-    debugLog(`retrieving notifications with the following filter id ${id}`);
-    return models.Notification.findAll({
+  async findMany(filter, pageDetails) {
+    debugLog(`retrieving notifications with the following filter ${JSON.stringify(filter)}`);
+    return models.Notification.findAndCountAll({
+      where: { ...filter },
+      ...paginate(pageDetails),
       include: [
         {
           model: models.User,
           as: "profile",
-          attributes: ["firstName", "lastName", "email", "profilePic"],
-          where: { id },
+          attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken"],
         },
       ],
     });

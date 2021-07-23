@@ -15,6 +15,7 @@ export class ResponseRoutes extends CommonRoutesConfig {
       .all([Authenticate.verifyToken])
       .post([
         middleware({ schema: createResponseSchema, property: "body" }),
+        wrapCatch(ResponsesController.onGoingResponse),
         wrapCatch(ResponsesController.makeResponse),
       ])
       .get([
