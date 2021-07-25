@@ -175,7 +175,7 @@ class ResponsesController {
   }
 
   async getAllResponses(req, res, next) {
-    log("getting all Responses");
+    log("getting all responses");
     const {
       filter,
       query: { paginate = {} },
