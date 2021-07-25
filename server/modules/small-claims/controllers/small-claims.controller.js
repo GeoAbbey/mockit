@@ -102,12 +102,23 @@ class SmallClaimsController {
   async getUnassignedClaims(req, res, next) {
     log("getting all unassigned small claims");
 
-    const data = { assignedLawyerId: null };
-    const smallClaims = await SmallClaimsService.findMany(data, true);
+    const {
+      query: { paginate = {} },
+    } = req;
+
+    const filter = `"SmallClaims"."assignedLawyerId" IS NULL`;
+
+    const smallClaims = await SmallClaimsService.findMany(filter, paginate);
+    const { offset, limit } = pagination(paginate);
+
     return res.status(200).send({
       success: true,
       message: "small claims successfully retrieved",
-      smallClaims,
+      smallClaims: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...smallClaims,
+      },
     });
   }
 

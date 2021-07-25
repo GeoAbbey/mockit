@@ -92,13 +92,23 @@ class InvitationsController {
 
   async getUnAssignedInvites(req, res, next) {
     log("getting all unassigned invitations");
-    const data = { where: { assignedLawyerId: null, paid: true } };
+    const {
+      query: { paginate = {} },
+    } = req;
 
-    const invitations = await InvitationsService.findMany(data, true);
+    const data = { assignedLawyerId: null, paid: true };
+
+    const invitations = await InvitationsService.findMany(data, paginate);
+    const { offset, limit } = pagination(paginate);
+
     return res.status(200).send({
       success: true,
       message: "unassigned invitations successfully retrieved",
-      invitations,
+      invitations: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...invitations,
+      },
     });
   }
 
