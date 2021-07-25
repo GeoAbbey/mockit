@@ -1,7 +1,9 @@
 import AWS from "aws-sdk";
 import dotenv from "dotenv";
+import debug from "debug";
 
 dotenv.config();
+const logger = debug("app:utils:mail-service:index");
 
 export const AWS_CONFIG = {
   accessKeyId: process.env.ACCESSKEYID,
@@ -12,6 +14,8 @@ export const AWS_CONFIG = {
 const AWS_SES = new AWS.SES(AWS_CONFIG);
 
 const sendMail = ({ email, otp }) => {
+  logger("sending a personalized mail");
+
   let params = {
     Destination: {
       ToAddresses: [email],
@@ -36,10 +40,20 @@ const sendMail = ({ email, otp }) => {
     ReplyToAddresses: ["support@zapplawyerbeta.com.ng"],
   };
 
-  return AWS_SES.sendEmail(params).promise();
+  const sendPromise = AWS_SES.sendEmail(params).promise();
+
+  sendPromise
+    .then(function (data) {
+      console.log(data);
+    })
+    .catch(function (err) {
+      console.error(err, err.stack);
+    });
 };
 
-const sendTemplateEmail = (recipientEmail) => {
+const sendTemplateEmail = (recipientEmail, templateName) => {
+  logger("sending a personalized mail using a template");
+
   // Create sendTemplatedEmail params
   const params = {
     Destination: {
@@ -50,13 +64,52 @@ const sendTemplateEmail = (recipientEmail) => {
       ],
       ToAddresses: [recipientEmail],
     },
-    Source: "EMAIL_ADDRESS" /* required */,
-    Template: "TEMPLATE_NAME" /* required */,
+    Source: "info@zapplawyerbeta.com.ng" /* required */,
+    Template: templateName /* required */,
     TemplateData: '{ "REPLACEMENT_TAG_NAME":"REPLACEMENT_VALUE" }' /* required */,
-    ReplyToAddresses: ["EMAIL_ADDRESS"],
+    ReplyToAddresses: ["support@zapplawyerbeta.com.ng"],
   };
 
-  return AWS_SES.sendTemplatedEmail(params).promise();
+  const sendPromise = AWS_SES.sendTemplatedEmail(params).promise();
+  sendPromise
+    .then(function (data) {
+      console.log(data);
+    })
+    .catch(function (err) {
+      console.error(err, err.stack);
+    });
 };
 
-export { sendMail, sendTemplateEmail };
+const sendBulkTemplatedEmail = (destinations, templateName) => {
+  logger("sending a personalized mail using a template to multiple destinations");
+
+  const params = {
+    Source: "info@zapplawyerbeta.com.ng",
+    Template: templateName,
+    Destinations: makeDestinations(destinations),
+    DefaultTemplateData: '{ "name":"friend", "favoriteanimal":"unknown" }',
+  };
+
+  const sendPromise = AWS_SES.sendBulkTemplatedEmail(params).promise();
+
+  sendPromise
+    .then(function (data) {
+      console.log(data);
+    })
+    .catch(function (err) {
+      console.error(err, err.stack);
+    });
+};
+
+const makeDestinations = (destinations) => {
+  return destinations.map((destination) => {
+    return {
+      Destination: {
+        ToAddresses: [destination.email],
+      },
+      ReplacementTemplateData: `{ "firstName":${destination.firstName} }`,
+    };
+  });
+};
+
+export { sendMail, sendTemplateEmail, sendBulkTemplatedEmail };
