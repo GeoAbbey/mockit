@@ -104,40 +104,88 @@ class UsersController {
     });
   }
 
-  async updateUser(req, res) {
-    const {
-      params: { id = req.decodedToken.id },
-      user,
-      body,
-    } = req;
+  handleUploads(req) {
+    const { body } = req;
+    const newBody = {
+      ...body,
+      guarantors: {
+        nextOfKin: {},
+        surety: {},
+      },
+      lawyer: {
+        documents: {},
+      },
+    };
 
     if (req.files) {
       var {
-        files: { profilePic, nextOfKinProfilePic, suretyProfilePic },
+        files: {
+          profilePic,
+          nextOfKinProfilePic,
+          suretyProfilePic,
+          lawSchoolCertificate,
+          universityCertificate,
+          votersCard,
+          nationalIDCard,
+          driversLicence,
+          internationalPassport,
+          others,
+        },
       } = req;
     }
-    log(`updating the details of user with id ${id}`);
 
     if (profilePic && profilePic[0]) {
       body.profilePic = profilePic[0].location;
     }
+
     if (nextOfKinProfilePic && nextOfKinProfilePic[0]) {
-      body.guarantors = {
-        ...body.guarantors,
-        nextOfKin: {
-          profilePic: nextOfKinProfilePic[0].location,
-        },
-      };
+      newBody.guarantors.nextOfKin.profilePic = nextOfKinProfilePic[0].location;
     }
+
+    if (others && others[0]) {
+      newBody.lawyer.documents.others = others[0].location;
+    }
+
+    if (internationalPassport && internationalPassport[0]) {
+      newBody.lawyer.documents.internationalPassport = internationalPassport[0].location;
+    }
+
+    if (driversLicence && driversLicence[0]) {
+      newBody.lawyer.documents.driversLicence = driversLicence[0].location;
+    }
+
+    if (nationalIDCard && nationalIDCard[0]) {
+      newBody.lawyer.documents.nationalIDCard = nationalIDCard[0].location;
+    }
+
+    if (lawSchoolCertificate && lawSchoolCertificate[0]) {
+      newBody.lawyer.documents.lawSchoolCertificate = lawSchoolCertificate[0].location;
+    }
+
+    if (universityCertificate && universityCertificate[0]) {
+      newBody.lawyer.documents.universityCertificate = universityCertificate[0].location;
+    }
+
+    if (votersCard && votersCard[0]) {
+      newBody.lawyer.documents.votersCard = votersCard[0].location;
+    }
+
     if (suretyProfilePic && suretyProfilePic[0]) {
-      body.guarantors = {
-        ...body.guarantors,
-        surety: {
-          profilePic: suretyProfilePic[0].location,
-        },
-      };
+      newBody.guarantors.surety.profilePic = suretyProfilePic[0].location;
     }
-    const [, [User]] = await UsersService.update(id, body, user);
+
+    console.log({ newBody }, "🌰");
+    return newBody;
+  }
+
+  updateUser = async (req, res) => {
+    const {
+      params: { id = req.decodedToken.id },
+      user,
+    } = req;
+    log(`updating the details of user with id ${id}`);
+
+    const [, [User]] = await UsersService.update(id, this.handleUploads(req), user);
     delete User.dataValues.password;
     const token = await Authenticate.signToken(User.dataValues);
     return res.status(200).send({
@@ -145,7 +193,7 @@ class UsersController {
       message: "user successfully updated",
       token,
     });
-  }
+  };
 
   async verifyEmail(req, res, next) {
     const {

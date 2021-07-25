@@ -32,6 +32,10 @@ module.exports = {
       amount: {
         type: Sequelize.INTEGER,
       },
+      ticketId: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       performedBy: {
         type: Sequelize.UUID,
         onDelete: "NO ACTION",

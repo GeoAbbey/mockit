@@ -5,10 +5,11 @@ import { payStack } from "../../../utils/paymentService";
 
 import PaymentsService from "../services/payment.services";
 import { walletPay, subscriptionPay, singleInvitationPay, singleSmallClaimPay } from "./helpers";
+import { paginate as pagination } from "../../helpers";
+import { Op } from "sequelize";
 
 const log = debug("app:payments-controller");
 
-// const { initializePayment, verifyPayment, payment.chargeCard } =
 const payment = payStack(axios);
 class PaymentsController {
   static instance;
@@ -32,15 +33,57 @@ class PaymentsController {
 
   async payInHistory(req, res, next) {
     const {
-      decodedToken: { id },
+      filter,
+      query: { paginate = {} },
     } = req;
-    const history = await PaymentsService.payInHistory(id);
+    const history = await PaymentsService.payInHistory(filter, paginate);
 
+    const { offset, limit } = pagination(paginate);
     return res.status(201).send({
       success: true,
       message: "history successfully retrieved",
-      history,
+      history: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...history,
+      },
     });
+  }
+
+  queryContext(req, res, next) {
+    const {
+      decodedToken: { role, id },
+      query,
+    } = req;
+
+    let filter = {};
+
+    const commonOptions = () => {
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
+      }
+
+      if (query.search && query.search.for) {
+        filter = { ...filter, for: query.search.for };
+      }
+    };
+
+    if (role === "admin" || role === "super-admin") {
+      if (query.search && query.search.ownerId) {
+        filter = { ...filter, ownerId: query.search.ownerId };
+      }
+
+      commonOptions();
+    }
+
+    if (role === "user" || role === "lawyer") {
+      filter = { ...filter, ownerId: id };
+
+      commonOptions();
+    }
+
+    req.filter = filter;
+    return next();
   }
 
   async walletOrSubPayment(req, res, next) {

@@ -62,8 +62,16 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
       .post([
         SmallClaimsController.checkAccessLawyer("markAsComplete"),
         wrapCatch(SmallClaimsController.marKAsCompleted),
+      ]);
+
+    this.app
+      .route(`${this.path}/small-claims/start/:id`)
+      .all([
+        Authenticate.verifyToken,
+        middleware({ schema: validateUUID("id"), property: "params" }),
+        SmallClaimsController.smallClaimExits(),
       ])
-      .head([
+      .put([
         SmallClaimsController.checkAccessLawyer("updateStatus"),
         wrapCatch(SmallClaimsController.updateToInProgress),
       ]);

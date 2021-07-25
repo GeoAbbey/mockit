@@ -3,10 +3,10 @@ import createError from "http-errors";
 import { EVENT_IDENTIFIERS } from "../../../constants";
 
 import InvitationsService from "../service/invitations.service";
-const log = debug("app:invitations-controller");
 import { paginate as pagination } from "../../helpers";
 import { Op } from "sequelize";
 
+const log = debug("app:invitations-controller");
 class InvitationsController {
   static instance;
   static getInstance() {
@@ -205,6 +205,8 @@ class InvitationsController {
       if (role !== "lawyer")
         return next(createError(401, "You do not have access to perform this operation"));
       if (context === "markAsComplete") {
+        if (oldInvitation.status === "completed")
+          return next(createError(401, "This invitation is already completed"));
         if (id !== oldInvitation.assignedLawyerId)
           return next(createError(401, "You do not have access to perform this operation"));
       }

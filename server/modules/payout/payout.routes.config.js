@@ -1,6 +1,6 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import PayoutsController from "./controllers/payout.controller";
-import { createPayoutSchema, recipientCodeSchema } from "./schema/payout.schema";
+import { createPayoutSchema, recipientCodeSchema, queryOptions } from "./schema/payout.schema";
 import { wrapCatch, middleware, Authenticate } from "../../utils";
 
 export class PayoutRoutes extends CommonRoutesConfig {
@@ -21,16 +21,15 @@ export class PayoutRoutes extends CommonRoutesConfig {
         wrapCatch(PayoutsController.createPayout),
       ]);
 
-      this.app
+    this.app
       .route(`${this.path}/payout/getHistory`)
-      .all([
-        Authenticate.verifyToken,
-      ])
+      .all([Authenticate.verifyToken])
       .get([
         PayoutsController.checkAccessLawyer(),
+        middleware({ schema: queryOptions, property: "query" }),
         wrapCatch(PayoutsController.getHistory),
       ]);
-      
+
     return this.app;
   }
 }

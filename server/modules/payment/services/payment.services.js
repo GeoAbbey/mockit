@@ -15,6 +15,7 @@ const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
 import { EVENT_IDENTIFIERS } from "../../../constants";
 import { toKobo } from "../../../utils/toKobo";
+import { paginate } from "../../helpers";
 
 const config = configOptions[env];
 
@@ -29,11 +30,13 @@ class PaymentsService {
     return PaymentsService.instance;
   }
 
-  async payInHistory(id) {
-    return PayInServices.findMany(id);
+  async payInHistory(filter, pageDetails) {
+    debugLog("retrieving the payIn history with the following filter", JSON.stringify(filter));
+    return PayInServices.findMany(filter, pageDetails);
   }
 
   async priceList() {
+    debugLog("getting the price of all services on the platform");
     return {
       invitationCost: config.invitationCost,
       costOfSubscriptionUnit: config.costOfSubscriptionUnit,
@@ -682,7 +685,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "response",
             notes: "return",
-            amount: parseInt(config.costOfSubscriptionUnit),
+            amount: toKobo(parseInt(config.costOfSubscriptionUnit)),
           },
           { transaction: t }
         );
@@ -744,7 +747,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "response",
             modelId: args.modelId,
-            amount: parseInt(config.costOfSubscriptionUnit),
+            amount: toKobo(parseInt(config.costOfSubscriptionUnit)),
           },
           { transaction: t }
         );

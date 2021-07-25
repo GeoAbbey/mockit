@@ -1,5 +1,6 @@
 import debug from "debug";
 import models from "../../../models";
+import { paginate } from "../../helpers";
 
 const debugLog = debug("app:transaction-service");
 
@@ -22,15 +23,34 @@ class TransactionsService {
     return models.Transaction.findByPk(id);
   }
 
-  async findMany(id) {
-    debugLog(`getting a list of transaction with for user with id ${id}`);
-    return models.Transaction.findAll({ where: { ownerId: id } });
+  async findMany(filter, pageDetails) {
+    debugLog(`getting a list of transaction with for user with id ${JSON.stringify(filter)}`);
+
+    return models.Transaction.findAndCountAll({
+      where: { ...filter },
+      ...paginate(pageDetails),
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: models.User,
+          as: "ownerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
+          required: false,
+        },
+        {
+          model: models.User,
+          as: "ownerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
+          required: false,
+        },
+      ],
+    });
   }
 
-  async usageHistory(code) {
-    debugLog(`getting a list of transaction with for user with code ${code}`);
-    return models.Transaction.findAll({ where: { code } });
-  }
+  // async usageHistory(code) {
+  //   debugLog(`getting a list of transaction with for user with code ${code}`);
+  //   return models.Transaction.findAndCountAll({ where: { code } });
+  // }
 
   async remove(id) {
     debugLog(`deleting a review with ${id}`);

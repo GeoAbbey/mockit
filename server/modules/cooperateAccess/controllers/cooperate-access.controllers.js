@@ -1,7 +1,9 @@
 import debug from "debug";
 import createError from "http-errors";
+import { paginate as pagination } from "../../helpers";
 
 import CooperateAccessService from "../services/cooperate-access.services";
+import { Op } from "sequelize";
 const logger = debug("app:cooperate-access-controller");
 
 class CooperateAccessController {
@@ -19,6 +21,8 @@ class CooperateAccessController {
       decodedToken: { id: ownerId },
     } = req;
 
+    logger(`granting access to a user with email ${userEmail} by user with id ${ownerId}`);
+
     const result = await CooperateAccessService.findOrCreate({ ownerId, userEmail });
     if (result.success === false) return next(createError(400, result.message));
 
@@ -31,15 +35,21 @@ class CooperateAccessController {
 
   async allUsersWithAccess(req, res, next) {
     const {
-      decodedToken: { id: ownerId },
+      filter,
+      query: { paginate = {} },
     } = req;
 
-    const usersWithAccess = await CooperateAccessService.findMany(ownerId);
+    const { offset, limit } = pagination(paginate);
+    const usersWithAccess = await CooperateAccessService.findMany(filter, paginate);
 
     return res.status(200).send({
       success: true,
       message: "users successfully retrieved",
-      usersWithAccess,
+      usersWithAccess: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...usersWithAccess,
+      },
     });
   }
 
@@ -81,6 +91,38 @@ class CooperateAccessController {
       }
       return next();
     };
+  }
+
+  queryContext(req, res, next) {
+    const {
+      decodedToken: { role, id },
+      query,
+    } = req;
+
+    let filter = {};
+
+    const commonOptions = () => {
+      if (query.search && query.search.userEmail) {
+        filter = { ...filter, userEmail: { [Op.iLike]: `%${query.search.userEmail}%` } };
+      }
+    };
+
+    if (role === "admin" || role === "super-admin") {
+      if (query.search && query.search.ownerId) {
+        filter = { ...filter, ownerId: query.search.ownerId };
+      }
+
+      commonOptions();
+    }
+
+    if (role === "user" || role === "lawyer") {
+      filter = { ...filter, ownerId: id };
+
+      commonOptions();
+    }
+
+    req.filter = filter;
+    return next();
   }
 }
 

@@ -5,6 +5,7 @@ import {
   PayInSchema,
   PaymentAuthCodeSchema,
   CooperateCode,
+  queryOptions,
 } from "./schema/payment.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
 
@@ -54,7 +55,12 @@ export class PaymentRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/payin/history`)
-      .get([Authenticate.verifyToken, wrapCatch(PaymentsController.payInHistory)]);
+      .get([
+        Authenticate.verifyToken,
+        middleware({ schema: queryOptions, property: "query" }),
+        wrapCatch(PaymentsController.queryContext),
+        wrapCatch(PaymentsController.payInHistory),
+      ]);
 
     this.app
       .route(`${this.path}/payment/price-list`)

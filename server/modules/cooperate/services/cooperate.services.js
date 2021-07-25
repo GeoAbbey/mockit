@@ -23,10 +23,11 @@ class CooperateService {
 
     return models.Cooperate.findByPk(id, t);
   }
-  async usage(code) {
+
+  async usage(code, pageDetails) {
     debugLog(`looking for transactions where code ${code} was used`);
 
-    return TransactionsService.usageHistory(code);
+    return TransactionsService.findMany({ code }, pageDetails);
   }
 
   async findOne(code) {

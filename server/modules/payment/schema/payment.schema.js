@@ -22,3 +22,24 @@ export const PaymentAuthCodeSchema = PayInSchema.append({
 export const CooperateCode = Joi.object().keys({
   code: Joi.string().required(),
 });
+
+export const queryOptions = Joi.object().keys({
+  search: Joi.object().keys({
+    ownerId: Joi.string().guid({ version: "uuidv4" }),
+    ticketId: Joi.string(),
+    for: Joi.string().valid(
+      "response",
+      "smallClaim",
+      "invitation",
+      "cooperate",
+      "singleSmallClaim",
+      "singleInvitation",
+      "wallet",
+      "subscription"
+    ),
+  }),
+  paginate: Joi.object().keys({
+    page: Joi.number().min(1),
+    pageSize: Joi.number().max(20),
+  }),
+});

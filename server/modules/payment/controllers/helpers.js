@@ -82,7 +82,7 @@ export const singleSmallClaimPay = async (args) => {
   return {
     email: args.email,
     callback_url: args.callback_url,
-    amount: totalCostOfService * 100,
+    amount: totalCostOfService,
     metadata: { id: args.id, type: args.type, modelId: args.modelId },
   };
 };

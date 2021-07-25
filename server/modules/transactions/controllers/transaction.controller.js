@@ -1,5 +1,7 @@
 import debug from "debug";
 import createError from "http-errors";
+import { paginate as pagination } from "../../helpers";
+import { Op } from "sequelize";
 
 import TransactionsService from "../services/transaction.services";
 const log = debug("app:transactions-controller");
@@ -49,14 +51,21 @@ class TransactionsController {
 
   async getAllTransactions(req, res, next) {
     const {
-      decodedToken: { id },
+      filter,
+      query: { paginate = {} },
     } = req;
-    const transactions = await TransactionsService.findMany(id);
+
+    const transactions = await TransactionsService.findMany(filter, paginate);
+    const { offset, limit } = pagination(paginate);
 
     return res.status(200).send({
       success: true,
       message: "transaction successfully created",
-      transactions,
+      transactions: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...transactions,
+      },
     });
   }
 
@@ -81,6 +90,50 @@ class TransactionsController {
       if (role === "admin" || role === "super-admin") return next();
       else return next(createError(401, "You are not permitted to access this route"));
     };
+  }
+
+  queryContext(req, res, next) {
+    const {
+      decodedToken: { role, id },
+      query,
+    } = req;
+
+    let filter = {};
+
+    const commonOptions = () => {
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
+      }
+
+      if (query.search && query.search.code) {
+        filter = { ...filter, code: { [Op.iLike]: `%${query.search.code}%` } };
+      }
+
+      if (query.search && query.search.notes) {
+        filter = { ...filter, notes: { [Op.iLike]: `%${query.search.notes}%` } };
+      }
+
+      if (query.search && query.search.modelType) {
+        filter = { ...filter, modelType: query.search.modelType };
+      }
+    };
+
+    if (role === "admin" || role === "super-admin") {
+      if (query.search && query.search.ownerId) {
+        filter = { ...filter, ownerId: query.search.ownerId };
+      }
+
+      commonOptions();
+    }
+
+    if (role === "user" || role === "lawyer") {
+      filter = { ...filter, ownerId: id };
+
+      commonOptions();
+    }
+
+    req.filter = filter;
+    return next();
   }
 }
 

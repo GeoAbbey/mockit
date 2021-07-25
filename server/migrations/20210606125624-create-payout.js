@@ -17,6 +17,10 @@ module.exports = {
           as: "lawyerId",
         },
       },
+      ticketId: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       code: {
         allowNull: false,
         type: Sequelize.STRING,

@@ -10,3 +10,15 @@ export const createPayoutSchema = Joi.object().keys({
 export const recipientCodeSchema = Joi.object().keys({
   code: Joi.string().required(),
 });
+
+export const queryOptions = Joi.object().keys({
+  search: Joi.object().keys({
+    ticketId: Joi.string(),
+    lawyerId: Joi.string().guid({ version: "uuidv4" }),
+    modelType: Joi.string().valid("response", "invitation", "smallClaim"),
+  }),
+  paginate: Joi.object().keys({
+    page: Joi.number().min(1),
+    pageSize: Joi.number().max(20),
+  }),
+});
