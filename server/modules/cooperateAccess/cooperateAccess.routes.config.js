@@ -2,7 +2,7 @@ import { CommonRoutesConfig } from "../common/common.routes.config";
 import CooperateAccessController from "./controllers/cooperate-access.controllers";
 
 import { wrapCatch, middleware, Authenticate } from "../../utils";
-import { EmailAccess } from "./schema/cooperate.schema";
+import { EmailAccess, queryOptions } from "./schema/cooperate.schema";
 
 export class CooperateAccessRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {
@@ -22,7 +22,11 @@ export class CooperateAccessRoutes extends CommonRoutesConfig {
         wrapCatch(CooperateAccessController.cooperateAccessExists),
         wrapCatch(CooperateAccessController.deleteCooperateAccess),
       ])
-      .get([wrapCatch(CooperateAccessController.allUsersWithAccess)]);
+      .get([
+        middleware({ schema: queryOptions, property: "query" }),
+        wrapCatch(CooperateAccessController.queryContext),
+        wrapCatch(CooperateAccessController.allUsersWithAccess),
+      ]);
 
     return this.app;
   }

@@ -50,10 +50,17 @@ class UsersService {
   async update(id, UserDTO, oldDetails) {
     debugLog(`updating a user with id ${id}`);
     const { address, guarantors, lawyer, profilePic } = oldDetails;
-    const handleDocuments = () => {
-      if (UserDTO.lawyer && UserDTO.lawyer.documents) {
-        return { ...lawyer.documents, ...UserDTO.lawyer.documents };
-      } else lawyer.documents;
+    const handleDocuments = (recent, old) => {
+      console.log({ recent, old }, "🥶");
+      return {
+        lawSchoolCertificate: recent.lawSchoolCertificate || old.lawSchoolCertificate,
+        universityCertificate: recent.universityCertificate || old.universityCertificate,
+        votersCard: recent.votersCard || old.votersCard,
+        nationalIDCard: recent.nationalIDCard || old.nationalIDCard,
+        driversLicence: recent.driversLicence || old.driversLicence,
+        internationalPassport: recent.internationalPassport || old.internationalPassport,
+        others: recent.others || old.others,
+      };
     };
 
     return models.User.update(
@@ -190,7 +197,10 @@ class UsersService {
         lawyer: {
           isVerified: UserDTO.lawyer && handleFalsy(UserDTO.lawyer.isVerified, lawyer.isVerified),
           description: (UserDTO.lawyer && UserDTO.lawyer.description) || lawyer.description,
-          documents: handleDocuments(),
+          documents:
+            UserDTO.lawyer && UserDTO.lawyer.documents
+              ? handleDocuments(UserDTO.lawyer.documents, lawyer.documents)
+              : lawyer.documents,
         },
         hasAgreedToTerms: handleFalsy(UserDTO.hasAgreedToTerms, oldDetails.hasAgreedToTerms),
       },

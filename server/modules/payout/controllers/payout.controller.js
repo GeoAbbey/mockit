@@ -3,9 +3,12 @@ import createError from "http-errors";
 
 import PayoutsService from "../services/payout.services";
 import SmallClaimsService from "../../small-claims/services/small-claims.service";
-const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
+import { paginate as pagination } from "../../helpers";
+import { Op } from "sequelize";
+import { toKobo } from "../../../utils/toKobo";
 
+const env = process.env.NODE_ENV || "development";
 const config = configOptions[env];
 
 const log = debug("app:Payouts-controller");
@@ -44,9 +47,9 @@ class PayoutsController {
 
   async getAmount(modelType, modelId) {
     if (modelType === "invitation")
-      return config.invitationCost * (config.lawyerPercentage / 100) * 100;
+      return toKobo(config.invitationCost * (config.lawyerPercentage / 100));
     if (modelType === "response")
-      return config.costOfSubscriptionUnit * (config.lawyerPercentage / 100) * 100;
+      return toKobo(config.costOfSubscriptionUnit * (config.lawyerPercentage / 100));
     if (modelType === "smallClaim") {
       const oldClaim = await SmallClaimsService.find(modelId, true);
       const lawyerId = oldClaim.dataValues.assignedLawyerId;
@@ -55,20 +58,29 @@ class PayoutsController {
       } = oldClaim.dataValues.interestedLawyers.find((lawyer) => lawyer.lawyerId === lawyerId);
 
       const totalCost = baseCharge + serviceCharge;
-      return totalCost * (config.lawyerPercentage / 100) * 100;
+      return totalCost * (config.lawyerPercentage / 100);
     }
   }
 
-  async getHistory(req, res, next){
-    const {decodedToken: { id}} = req;
-    const history = await PayoutsService.getHistory(id);
+  async getHistory(req, res, next) {
+    const {
+      filter,
+      query: { paginate = {} },
+    } = req;
+
+    const history = await PayoutsService.getHistory(filter, paginate);
+    const { offset, limit } = pagination(paginate);
 
     return res.status(201).send({
       success: true,
       message: "Payout successfully created",
-      history,
-  })
-}
+      history: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...history,
+      },
+    });
+  }
 
   checkAccessAdmin(context) {
     return async (req, res, next) => {
@@ -88,10 +100,47 @@ class PayoutsController {
         decodedToken: { role },
       } = req;
 
-      if (role !== "lawyer") return next(createError(401, "You do not have access to perform this operation"));
+      if (role === "admin" || role === "super-admin") return next();
+
+      if (role !== "lawyer")
+        return next(createError(401, "You do not have access to perform this operation"));
 
       return next();
     };
+  }
+
+  queryContext(req, res, next) {
+    const {
+      decodedToken: { role, id },
+      query,
+    } = req;
+
+    let filter = {};
+
+    const commonOptions = () => {
+      if (query.search && query.search.modelType) {
+        filter = { ...filter, modelType: query.search.modelType };
+      }
+
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
+      }
+    };
+
+    if (role === "admin" || role === "super-admin") {
+      if (query.search && query.search.lawyerId) {
+        filter = { ...filter, lawyerId: query.search.lawyerId };
+      }
+      commonOptions();
+    }
+
+    if (role === "lawyer") {
+      filter = { ...filter, lawyerId: id };
+      commonOptions();
+    }
+
+    req.filter = filter;
+    return next();
   }
 }
 

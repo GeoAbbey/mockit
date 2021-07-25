@@ -1,5 +1,6 @@
 "use strict";
 import { v4 } from "uuid";
+import { nanoid } from "nanoid";
 
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
@@ -11,7 +12,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.User, { foreignKey: "ownerId" });
+      this.belongsTo(models.User, { foreignKey: "ownerId", as: "ownerProfile" });
+      this.belongsTo(models.User, { foreignKey: "performedBy", as: "performedProfile" });
     }
   }
   Transaction.init(
@@ -27,6 +29,11 @@ module.exports = (sequelize, DataTypes) => {
       modelType: {
         type: DataTypes.STRING,
         allowNull: false,
+      },
+      ticketId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: () => nanoid(10),
       },
       modelId: {
         type: DataTypes.UUID,

@@ -3,6 +3,7 @@ import axios from "axios";
 
 import models from "../../../models";
 import { payStack } from "../../../utils/paymentService";
+import { paginate } from "../../helpers";
 
 const payment = payStack(axios);
 
@@ -24,6 +25,7 @@ class PayoutsService {
 
     const isAlreadyPaid = await models.Payout.findOne({ where: { lawyerId, modelId, modelType } });
     if (isAlreadyPaid) {
+      debugLog(`Lawyer with ID ${lawyerId} has already been paid for ${modelType} with ${modelId}`);
       return {
         success: false,
         response: `Lawyer with ID ${lawyerId} has already been paid for ${modelType} with ${modelId}`,
@@ -44,8 +46,20 @@ class PayoutsService {
     }
   }
 
-  async getHistory(id){
-    return  models.Payout.findAll({where:{ lawyerId: id},order: [['createdAt', 'DESC']]})
+  async getHistory(filter, pageDetails) {
+    return models.Payout.findAndCountAll({
+      where: { ...filter },
+      ...paginate(pageDetails),
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: models.User,
+          as: "lawyerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
+          required: false,
+        },
+      ],
+    });
   }
 }
 

@@ -70,7 +70,15 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: {
           isVerified: false,
           description: "",
-          documents: {},
+          documents: {
+            lawSchoolCertificate: "",
+            universityCertificate: "",
+            votersCard: "",
+            nationalIDCard: "",
+            driversLicence: "",
+            internationalPassport: "",
+            others: "",
+          },
         },
       },
       firebaseToken: { type: DataTypes.STRING },

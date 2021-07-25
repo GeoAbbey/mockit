@@ -1,6 +1,7 @@
 import debug from "debug";
 import models from "../../../models";
 import CooperateService from "../../cooperate/services/cooperate.services";
+import { paginate } from "../../helpers";
 import UsersService from "../../users/service/user.service";
 
 const debugLog = debug("app:cooperate-access-service");
@@ -43,17 +44,23 @@ class CooperateAccessService {
     return models.CooperateAccess.findOne({ where: { userEmail, ownerId } });
   }
 
-  async findMany(ownerId) {
-    debugLog(`looking for all users with access under the ${ownerId}`);
+  async findMany(filter, pageDetails) {
+    debugLog(
+      `looking for all users with access with cooperate account of users with filter ${filter}`
+    );
 
-    return models.CooperateAccess.findAll({ where: { ownerId } });
+    return models.CooperateAccess.findAndCountAll({
+      where: { ...filter },
+      ...paginate(pageDetails),
+      order: [["createdAt", "DESC"]],
+    });
   }
 
   async remove({ userEmail, ownerId }, t = undefined) {
     debugLog(`deleting access for user with email ${userEmail}`);
     return models.CooperateAccess.destroy({
       where: { userEmail, ownerId },
-      t,
+      ...t,
     });
   }
 }

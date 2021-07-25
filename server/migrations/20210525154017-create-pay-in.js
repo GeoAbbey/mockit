@@ -20,6 +20,10 @@ module.exports = {
           as: "ownerId",
         },
       },
+      ticketId: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       amount: {
         type: Sequelize.INTEGER,
       },

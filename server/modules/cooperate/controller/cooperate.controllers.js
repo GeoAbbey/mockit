@@ -1,5 +1,6 @@
 import debug from "debug";
 import createError from "http-errors";
+import { paginate as pagination } from "../../helpers";
 
 import CooperateService from "../services/cooperate.services";
 const log = debug("app:cooperate-controller");
@@ -54,14 +55,23 @@ class CooperateController {
   }
 
   async usageHistory(req, res, next) {
-    const { oldCooperate } = req;
+    const {
+      oldCooperate,
+      query: { paginate = {} },
+    } = req;
 
-    const history = await CooperateService.usage(oldCooperate.code);
+    const { offset, limit } = pagination(paginate);
+
+    const history = await CooperateService.usage(oldCooperate.code, paginate);
 
     return res.status(200).send({
       success: true,
       message: "cooperate info has been successfully retrieved.",
-      history,
+      history: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...history,
+      },
     });
   }
 

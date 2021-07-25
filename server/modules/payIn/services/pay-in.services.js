@@ -1,5 +1,6 @@
 import debug from "debug";
 import models from "../../../models";
+import { paginate } from "../../helpers";
 
 const debugLog = debug("app:pay-in-service");
 
@@ -22,8 +23,22 @@ class PayInsService {
     return models.PayIn.findOne({ where: { reference, ownerId } }, t);
   }
 
-  async findMany(id) {
-    return models.PayIn.findAll({ where: { ownerId: id }, order: [['createdAt', 'DESC']] });
+  async findMany(filter, pageDetails) {
+    debugLog("retrieving the payIn history with the following filter", JSON.stringify(filter));
+
+    return models.PayIn.findAndCountAll({
+      where: { ...filter },
+      order: [["createdAt", "DESC"]],
+      ...paginate(pageDetails),
+      include: [
+        {
+          model: models.User,
+          as: "ownerProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
+          required: false,
+        },
+      ],
+    });
   }
 
   async remove(id) {

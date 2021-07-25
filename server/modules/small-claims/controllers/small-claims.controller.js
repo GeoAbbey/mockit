@@ -288,6 +288,8 @@ class SmallClaimsController {
       }
 
       if (context === "updateStatus") {
+        if (id !== oldSmallClaim.assignedLawyerId)
+          return next(createError(401, "You do not have access to perform this operation"));
         if (!oldSmallClaim.paid)
           return next(createError(401, "You can not start a claim that hasn't been paid for"));
       }
