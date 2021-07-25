@@ -155,12 +155,22 @@ class ResponsesController {
 
   async getUnassignedResponses(req, res, next) {
     log("getting all unassigned responses");
-    const data = { where: { assignedLawyerId: null } };
-    const responses = await ResponsesService.findMany(data, true);
+    const {
+      query: { paginate = {} },
+    } = req;
+
+    const data = { assignedLawyerId: null };
+    const { offset, limit } = pagination(paginate);
+
+    const responses = await ResponsesService.findMany(data, paginate);
     return res.status(200).send({
       success: true,
       message: "responses successfully retrieved",
-      responses,
+      responses: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...responses,
+      },
     });
   }
 
