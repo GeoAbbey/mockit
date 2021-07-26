@@ -143,31 +143,59 @@ class UsersController {
     }
 
     if (others && others[0]) {
-      newBody.lawyer.documents.others = others[0].location;
+      newBody.lawyer.documents.others = {
+        url: others[0].location,
+        name: others[0].originalname,
+        type: others[0].mimetype,
+      };
     }
 
     if (internationalPassport && internationalPassport[0]) {
-      newBody.lawyer.documents.internationalPassport = internationalPassport[0].location;
+      newBody.lawyer.documents.internationalPassport = {
+        url: internationalPassport[0].location,
+        name: internationalPassport[0].originalname,
+        type: internationalPassport[0].mimetype,
+      };
     }
 
     if (driversLicence && driversLicence[0]) {
-      newBody.lawyer.documents.driversLicence = driversLicence[0].location;
+      newBody.lawyer.documents.driversLicence = {
+        url: driversLicence[0].location,
+        name: driversLicence[0].originalname,
+        type: driversLicence[0].mimetype,
+      };
     }
 
     if (nationalIDCard && nationalIDCard[0]) {
-      newBody.lawyer.documents.nationalIDCard = nationalIDCard[0].location;
+      newBody.lawyer.documents.nationalIDCard = {
+        url: nationalIDCard[0].location,
+        name: nationalIDCard[0].originalname,
+        type: nationalIDCard[0].mimetype,
+      };
     }
 
     if (lawSchoolCertificate && lawSchoolCertificate[0]) {
-      newBody.lawyer.documents.lawSchoolCertificate = lawSchoolCertificate[0].location;
+      newBody.lawyer.documents.lawSchoolCertificate = {
+        url: lawSchoolCertificate[0].location,
+        name: lawSchoolCertificate[0].originalname,
+        type: lawSchoolCertificate[0].mimetype,
+      };
     }
 
     if (universityCertificate && universityCertificate[0]) {
-      newBody.lawyer.documents.universityCertificate = universityCertificate[0].location;
+      newBody.lawyer.documents.universityCertificate = {
+        url: universityCertificate[0].location,
+        name: universityCertificate[0].originalname,
+        type: universityCertificate[0].mimetype,
+      };
     }
 
     if (votersCard && votersCard[0]) {
-      newBody.lawyer.documents.votersCard = votersCard[0].location;
+      newBody.lawyer.documents.votersCard = {
+        url: votersCard[0].location,
+        name: votersCard[0].originalname,
+        type: votersCard[0].mimetype,
+      };
     }
 
     if (suretyProfilePic && suretyProfilePic[0]) {

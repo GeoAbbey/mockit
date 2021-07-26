@@ -43,6 +43,8 @@ export class UserRoutes extends CommonRoutesConfig {
       .route(`${this.path}/users/profile`)
       .all([Authenticate.verifyToken])
       .patch([
+        UsersController.userExistMiddleware(),
+        AccessControl.checkPermissionUserOrLawyerAccess(),
         uploadMiddleware([
           { name: "profilePic", maxCount: 1 },
           { name: "nextOfKinProfilePic", maxCount: 1 },
@@ -55,8 +57,6 @@ export class UserRoutes extends CommonRoutesConfig {
           { name: "internationalPassport", maxCount: 1 },
           { name: "others", maxCount: 1 },
         ]),
-        UsersController.userExistMiddleware(),
-        AccessControl.checkPermissionUserOrLawyerAccess(),
         wrapCatch(UsersController.updateUser),
       ])
       .get([
