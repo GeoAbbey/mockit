@@ -30,6 +30,32 @@ class SmallClaimsService {
         {
           include: [
             {
+              model: models.User,
+              as: "ownerProfile",
+              attributes: [
+                "firstName",
+                "lastName",
+                "email",
+                "profilePic",
+                "firebaseToken",
+                "phone",
+              ],
+              required: false,
+            },
+            {
+              model: models.User,
+              as: "lawyerProfile",
+              attributes: [
+                "firstName",
+                "lastName",
+                "email",
+                "profilePic",
+                "firebaseToken",
+                "phone",
+              ],
+              required: false,
+            },
+            {
               model: models.Review,
               as: "reviews",
               where: { modelType: "SmallClaim", modelId: id },
