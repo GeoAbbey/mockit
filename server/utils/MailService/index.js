@@ -40,15 +40,8 @@ const sendMail = ({ email, otp }) => {
     ReplyToAddresses: ["support@zapplawyerbeta.com.ng"],
   };
 
-  const sendPromise = AWS_SES.sendEmail(params).promise();
-
-  sendPromise
-    .then(function (data) {
-      console.log(data);
-    })
-    .catch(function (err) {
-      console.error(err, err.stack);
-    });
+  const sendPromise = () => AWS_SES.sendEmail(params).promise();
+  sendTheMail(sendPromise);
 };
 
 const sendTemplateEmail = (recipientEmail, templateName) => {
@@ -70,14 +63,8 @@ const sendTemplateEmail = (recipientEmail, templateName) => {
     ReplyToAddresses: ["support@zapplawyerbeta.com.ng"],
   };
 
-  const sendPromise = AWS_SES.sendTemplatedEmail(params).promise();
-  sendPromise
-    .then(function (data) {
-      console.log(data);
-    })
-    .catch(function (err) {
-      console.error(err, err.stack);
-    });
+  const sendPromise = () => AWS_SES.sendTemplatedEmail(params).promise();
+  sendTheMail(sendPromise);
 };
 
 const sendBulkTemplatedEmail = (destinations, templateName) => {
@@ -90,9 +77,12 @@ const sendBulkTemplatedEmail = (destinations, templateName) => {
     DefaultTemplateData: '{ "name":"friend", "favoriteanimal":"unknown" }',
   };
 
-  const sendPromise = AWS_SES.sendBulkTemplatedEmail(params).promise();
+  const sendPromise = () => AWS_SES.sendBulkTemplatedEmail(params).promise();
+  sendTheMail(sendPromise);
+};
 
-  sendPromise
+const sendTheMail = (the_promise) => {
+  the_promise()
     .then(function (data) {
       console.log(data);
     })
