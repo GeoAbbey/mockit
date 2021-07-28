@@ -48,22 +48,18 @@ const sendMail = ({ email, otp }) => {
   sendTheMail(sendPromise);
 };
 
-const sendTemplateEmail = (recipientEmail, templateName) => {
+const sendTemplateEmail = (recipientEmail, templateName, templateData) => {
   logger("sending a personalized mail using a template");
 
   // Create sendTemplatedEmail params
   const params = {
     Destination: {
       /* required */
-      CcAddresses: [
-        "EMAIL_ADDRESS",
-        /* more CC email addresses */
-      ],
       ToAddresses: [recipientEmail],
     },
     Source: "info@zapplawyerbeta.com.ng" /* required */,
     Template: templateName /* required */,
-    TemplateData: '{ "REPLACEMENT_TAG_NAME":"REPLACEMENT_VALUE" }' /* required */,
+    TemplateData: JSON.stringify(templateData) /* required */,
     ReplyToAddresses: ["support@zapplawyerbeta.com.ng"],
   };
 

@@ -10,8 +10,8 @@ export const userEvents = (eventEmitter) => {
   eventEmitter.on(`${EVENT_IDENTIFIERS.USER.CREATED}`, async ({ user }) => {
     logger(`${EVENT_IDENTIFIERS.USER.CREATED} events has been received`);
 
-    const { email, otp, id } = user.dataValues;
-    await schedule.sendWelcomeEmail({ email, otp });
+    const { email, otp, id, firstName } = user.dataValues;
+    await schedule.sendWelcomeEmail({ email, otp, firstName });
 
     const accountInfo = await AccountInfosService.create({ id });
     logger({ accountInfo });

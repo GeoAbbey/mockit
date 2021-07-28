@@ -274,4 +274,6 @@ export const TEMPLATE = {
   NEW_RATING: "New_Rating",
   POLICE_INVITATION_COMPLETED: "Police_Invitation_Completed",
   INVITATION_LAWYER_ASSIGNMENT: "Invitation_Lawyer_Assigned",
+  LAWYER_SIGNUP: "Lawyer_signup",
+  USER_SIGNUP: "User_signup",
 };
