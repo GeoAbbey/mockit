@@ -1,9 +1,9 @@
 import Joi from "joi";
 
 export const createUserSchema = Joi.object().keys({
-  firstName: Joi.string().required(),
-  lastName: Joi.string().required(),
-  email: Joi.string().email({ minDomainSegments: 2 }).required(),
+  firstName: Joi.string().trim().required(),
+  lastName: Joi.string().trim().required(),
+  email: Joi.string().trim().email({ minDomainSegments: 2 }).required(),
   password: Joi.string().min(6).max(30).required(),
   phone: Joi.string()
     .pattern(/^(0|\+234)\d{10}$/)
@@ -71,8 +71,8 @@ export const validOtpAndPassword = Joi.object().keys({
 });
 
 export const loginUserSchema = Joi.object().keys({
-  email: Joi.string().email({ minDomainSegments: 2 }).required(),
-  password: Joi.string().required(),
+  email: Joi.string().trim().email({ minDomainSegments: 2 }).required(),
+  password: Joi.string().trim().required(),
 });
 
 export const newOTP = Joi.object().keys({

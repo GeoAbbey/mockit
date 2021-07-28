@@ -263,3 +263,15 @@ export const ROLES = {
   ADMIN: "admin",
   SUPER_ADMIN: "super_admin",
 };
+
+export const TEMPLATE = {
+  SMALL_CLAIM_STARTED: "Small_Claims_Started",
+  SMALL_CLAIM_INTEREST: "Small_Claim_Interest",
+  SMALL_CLAIM_COMPLETED: "Small_Claims_Completed",
+  SMALL_CLAIM_CREATED: "Small_Claim_Created",
+  ELIGIBLE_LAWYERS: "Eligible_Lawyers",
+  RESPONSE_LAWYER_ASSIGNED: "Response_Lawyer_Assigned",
+  NEW_RATING: "New_Rating",
+  POLICE_INVITATION_COMPLETED: "Police_Invitation_Completed",
+  INVITATION_LAWYER_ASSIGNMENT: "Invitation_Lawyer_Assigned",
+};
