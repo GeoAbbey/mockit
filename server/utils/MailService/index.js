@@ -1,9 +1,13 @@
 import AWS from "aws-sdk";
 import dotenv from "dotenv";
 import debug from "debug";
+import configOptions from "../../config/config";
 
 dotenv.config();
 const logger = debug("app:utils:mail-service:index");
+const env = process.env.NODE_ENV || "development";
+
+const config = configOptions[env];
 
 export const AWS_CONFIG = {
   accessKeyId: process.env.ACCESSKEYID,
@@ -74,7 +78,7 @@ const sendBulkTemplatedEmail = (destinations, templateName) => {
     Source: "info@zapplawyerbeta.com.ng",
     Template: templateName,
     Destinations: makeDestinations(destinations),
-    DefaultTemplateData: '{ "name":"friend", "favoriteanimal":"unknown" }',
+    DefaultTemplateData: '{ "name":"friend" }',
   };
 
   const sendPromise = () => AWS_SES.sendBulkTemplatedEmail(params).promise();
@@ -82,13 +86,16 @@ const sendBulkTemplatedEmail = (destinations, templateName) => {
 };
 
 const sendTheMail = (the_promise) => {
-  the_promise()
-    .then(function (data) {
-      console.log(data);
-    })
-    .catch(function (err) {
-      console.error(err, err.stack);
-    });
+  logger(`running email notification service: ${config.runEmailNotificationService}`);
+  if (config.runEmailNotificationService) {
+    the_promise()
+      .then(function (data) {
+        console.log(data);
+      })
+      .catch(function (err) {
+        console.error(err, err.stack);
+      });
+  }
 };
 
 const makeDestinations = (destinations) => {
