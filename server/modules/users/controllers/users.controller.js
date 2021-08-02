@@ -202,7 +202,6 @@ class UsersController {
       newBody.guarantors.surety.profilePic = suretyProfilePic[0].location;
     }
 
-    console.log({ newBody }, "🌰");
     return newBody;
   }
 

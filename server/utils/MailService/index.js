@@ -40,7 +40,7 @@ const sendMail = ({ email, otp }) => {
         Data: `Hello ${otp.value}`,
       },
     },
-    Source: "info@zapplawyerbeta.com.ng" /* required */,
+    Source: "Zapp Lawyer <info@zapplawyerbeta.com.ng>" /* required */,
     ReplyToAddresses: ["support@zapplawyerbeta.com.ng"],
   };
 
@@ -57,7 +57,7 @@ const sendTemplateEmail = (recipientEmail, templateName, templateData) => {
       /* required */
       ToAddresses: [recipientEmail],
     },
-    Source: "info@zapplawyerbeta.com.ng" /* required */,
+    Source: "Zapp Lawyer <info@zapplawyerbeta.com.ng>" /* required */,
     Template: templateName /* required */,
     TemplateData: JSON.stringify(templateData) /* required */,
     ReplyToAddresses: ["support@zapplawyerbeta.com.ng"],
@@ -71,7 +71,7 @@ const sendBulkTemplatedEmail = (destinations, templateName) => {
   logger("sending a personalized mail using a template to multiple destinations");
 
   const params = {
-    Source: "info@zapplawyerbeta.com.ng",
+    Source: "Zapp Lawyer <info@zapplawyerbeta.com.ng>",
     Template: templateName,
     Destinations: makeDestinations(destinations),
     DefaultTemplateData: '{ "name":"friend" }',
