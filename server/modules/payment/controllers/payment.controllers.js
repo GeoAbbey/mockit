@@ -90,7 +90,7 @@ class PaymentsController {
     const eventEmitter = req.app.get("eventEmitter");
 
     const {
-      body: { modelId, modelType },
+      body: { modelId, modelType, lawyerId = undefined },
       params: { code = undefined },
       decodedToken,
     } = req;
@@ -99,6 +99,7 @@ class PaymentsController {
       {
         id: decodedToken.id,
         modelId,
+        lawyerId,
         modelType,
         code,
       },
@@ -237,7 +238,14 @@ class PaymentsController {
 
   payInPayment = async (req, res, next) => {
     const {
-      body: { quantity = undefined, amount = undefined, type, modelId, callback_url = undefined },
+      body: {
+        quantity = undefined,
+        amount = undefined,
+        type,
+        modelId,
+        callback_url = undefined,
+        lawyerId = undefined,
+      },
       decodedToken: { email, firstName, lastName, id },
     } = req;
 
@@ -268,6 +276,7 @@ class PaymentsController {
           email,
           firstName,
           lastName,
+          lawyerId,
           id,
           modelId,
           type,

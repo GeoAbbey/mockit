@@ -55,6 +55,9 @@ export const singleSmallClaimPay = async (args) => {
   if (!args.modelId)
     return { success: false, message: "small claim modelId is required to prosecute payment" };
 
+  if (!args.lawyerId)
+    return { success: false, message: "ID of interested lawyer is required to prosecute payment" };
+
   const oldClaim = await SmallClaimsService.find(args.modelId, true);
 
   if (oldClaim.dataValues.paid) {
@@ -64,18 +67,28 @@ export const singleSmallClaimPay = async (args) => {
     };
   }
 
-  const lawyerId = oldClaim.dataValues.assignedLawyerId;
+  // const lawyerId = oldClaim.dataValues.assignedLawyerId;
 
-  if (!lawyerId) {
+  // if (!lawyerId) {
+  //   return {
+  //     message: "a lawyer is yet to be assigned to this claim",
+  //     success: false,
+  //   };
+  // }
+
+  const lawyerOfInterest = oldClaim.dataValues.interestedLawyers.find(
+    (lawyer) => lawyer.lawyerId === args.lawyerId
+  );
+
+  if (!lawyerOfInterest)
     return {
-      message: "a lawyer is yet to be assigned to this claim",
       success: false,
+      message: "The lawyer selected didn't mark interest in this particular small claim",
     };
-  }
 
   const {
     dataValues: { baseCharge, serviceCharge },
-  } = oldClaim.dataValues.interestedLawyers.find((lawyer) => lawyer.lawyerId === lawyerId);
+  } = lawyerOfInterest;
 
   const totalCostOfService = baseCharge + serviceCharge;
 
@@ -83,6 +96,11 @@ export const singleSmallClaimPay = async (args) => {
     email: args.email,
     callback_url: args.callback_url,
     amount: totalCostOfService,
-    metadata: { id: args.id, type: args.type, modelId: args.modelId },
+    metadata: {
+      id: args.id,
+      type: args.type,
+      modelId: args.modelId,
+      assignedLawyerId: args.lawyerId,
+    },
   };
 };
