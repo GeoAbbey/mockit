@@ -1,7 +1,8 @@
 import debug from "debug";
 import { sendNotificationToClient } from "../../../utils/sendNotificationToClient";
-import { EVENT_IDENTIFIERS, NOTIFICATION_DATA, ROLES } from "../../../constants";
+import { EVENT_IDENTIFIERS, NOTIFICATION_DATA, ROLES, TEMPLATE } from "../../../constants";
 import models from "../../../models";
+import { sendBulkTemplatedEmail, sendTemplateEmail } from "../../../utils/MailService";
 const env = process.env.NODE_ENV || "development";
 const configOptions = require("../../../config/config");
 
@@ -42,6 +43,8 @@ export const sendNotificationToLawyers = async (events, data, decodedToken, mode
     }),
   });
 
+  sendBulkTemplatedEmail(allLawyers, TEMPLATE.POLICE_INVITATION_COMPLETED, data.ticketId);
+
   logger("saving notification for qualified lawyers on the database");
   await models.Notification.bulkCreate(
     allNotices,
@@ -65,7 +68,7 @@ export const sendNotificationToUserOrLawyer = async (
   logger(`${events} events has been received`);
   const modelOwner = await models.User.findByPk(data[context]);
 
-  const { firebaseToken, id } = modelOwner.dataValues;
+  const { firebaseToken, id, email, firstName } = modelOwner.dataValues;
 
   const tokens = [firebaseToken];
   const notice = [
@@ -84,6 +87,22 @@ export const sendNotificationToUserOrLawyer = async (
   ];
 
   logger("sending notification to the user");
+
+  action === "ASSIGNED" && modelName === "INVITATION"
+    ? sendTemplateEmail(email, TEMPLATE.INVITATION_LAWYER_ASSIGNED, { firstName }, data.ticketId)
+    : sendTemplateEmail(email, TEMPLATE.POLICE_INVITATION_COMPLETED, { firstName }, data.ticketId);
+
+  if (modelName === "RESPONSE") {
+    if (action === "ASSIGNED")
+      sendTemplateEmail(email, TEMPLATE.RESPONSE_LAWYER_ASSIGNED, { firstName }, data.ticketId);
+
+    if (action === "MARK_AS_COMPLETED")
+      sendTemplateEmail(email, TEMPLATE.RESPONSE_COMPLETED, { firstName }, data.ticketId);
+
+    if (action === "MEET_TIME")
+      sendTemplateEmail(email, TEMPLATE.RESPONSE_MEET_TIME, { firstName }, data.ticketId);
+  }
+
   sendNotificationToClient({
     tokens,
     data: NOTIFICATION_DATA[modelName][action]({
@@ -199,6 +218,8 @@ export const sendNotificationToEligibleLawyers = async ({
       ),
     });
   });
+
+  sendBulkTemplatedEmail(lawyersToNotify, TEMPLATE.ELIGIBLE_LAWYERS, response.ticketId);
 
   logger("sending notification to all eligible lawyers");
   sendNotificationToClient({

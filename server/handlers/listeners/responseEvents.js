@@ -47,6 +47,7 @@ export const responseEvents = (eventEmitter) => {
         lawyerLocationDetails
       ),
     ]);
+
     await sendNotificationToUserOrLawyer(
       EVENT_IDENTIFIERS.RESPONSE.ASSIGNED,
       response,

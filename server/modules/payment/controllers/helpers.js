@@ -67,15 +67,6 @@ export const singleSmallClaimPay = async (args) => {
     };
   }
 
-  // const lawyerId = oldClaim.dataValues.assignedLawyerId;
-
-  // if (!lawyerId) {
-  //   return {
-  //     message: "a lawyer is yet to be assigned to this claim",
-  //     success: false,
-  //   };
-  // }
-
   const lawyerOfInterest = oldClaim.dataValues.interestedLawyers.find(
     (lawyer) => lawyer.lawyerId === args.lawyerId
   );
