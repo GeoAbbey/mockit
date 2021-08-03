@@ -271,6 +271,8 @@ export const TEMPLATE = {
   SMALL_CLAIM_CREATED: "Small_Claim_Created",
   ELIGIBLE_LAWYERS: "Eligible_Lawyers",
   RESPONSE_LAWYER_ASSIGNED: "Response_Lawyer_Assigned",
+  RESPONSE_MEET_TIME: "Response_MeetTime",
+  RESPONSE_COMPLETED: "Response_Completed",
   NEW_RATING: "New_Rating",
   POLICE_INVITATION_COMPLETED: "Police_Invitation_Completed",
   POLICE_INVITATION_CREATED: "Police_Invitation_Created",

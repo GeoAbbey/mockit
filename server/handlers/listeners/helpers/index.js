@@ -98,6 +98,9 @@ export const sendNotificationToUserOrLawyer = async (
 
     if (action === "MARK_AS_COMPLETED")
       sendTemplateEmail(email, TEMPLATE.RESPONSE_COMPLETED, { firstName }, data.ticketId);
+
+    if (action === "MEET_TIME")
+      sendTemplateEmail(email, TEMPLATE.RESPONSE_MEET_TIME, { firstName }, data.ticketId);
   }
 
   sendNotificationToClient({
