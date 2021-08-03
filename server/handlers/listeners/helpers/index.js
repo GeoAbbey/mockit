@@ -68,7 +68,7 @@ export const sendNotificationToUserOrLawyer = async (
   logger(`${events} events has been received`);
   const modelOwner = await models.User.findByPk(data[context]);
 
-  const { firebaseToken, id, email } = modelOwner.dataValues;
+  const { firebaseToken, id, email, firstName } = modelOwner.dataValues;
 
   const tokens = [firebaseToken];
   const notice = [
@@ -88,7 +88,9 @@ export const sendNotificationToUserOrLawyer = async (
 
   logger("sending notification to the user");
 
-  sendTemplateEmail(email, TEMPLATE.INVITATION_LAWYER_ASSIGNED, data.ticketId);
+  action === "ASSIGNED"
+    ? sendTemplateEmail(email, TEMPLATE.INVITATION_LAWYER_ASSIGNED, { firstName }, data.ticketId)
+    : sendTemplateEmail(email, TEMPLATE.POLICE_INVITATION_COMPLETED, { firstName }, data.ticketId);
 
   sendNotificationToClient({
     tokens,
@@ -205,6 +207,8 @@ export const sendNotificationToEligibleLawyers = async ({
       ),
     });
   });
+
+  sendBulkTemplatedEmail(lawyersToNotify, TEMPLATE.ELIGIBLE_LAWYERS, response.ticketId);
 
   logger("sending notification to all eligible lawyers");
   sendNotificationToClient({
