@@ -135,6 +135,8 @@ class PaymentsService {
     return result;
   }
   async handleSingleSmallClaim({ data }) {
+    console.log({ data }, "🐥");
+
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
       const { metadata, amount, reference } = data;
@@ -159,7 +161,7 @@ class PaymentsService {
 
       const [, [paidSmallClaim]] = await SmallClaimsService.update(
         metadata.modelId,
-        { paid: true },
+        { paid: true, assignedLawyerId: metadata.assignedLawyerId },
         oldClaim,
         { transaction: t }
       );
@@ -594,6 +596,13 @@ class PaymentsService {
 
   async handleSmallClaim(args, emitter, decodedToken) {
     debugLog("handling payment for small claim", args);
+
+    if (!args.lawyerId)
+      return {
+        success: false,
+        message: "ID of interested lawyer is required to prosecute payment",
+      };
+
     try {
       let result = await models.sequelize.transaction(async (t) => {
         const oldClaim = await SmallClaimsService.find(args.modelId, true, { transaction: t });
@@ -607,10 +616,26 @@ class PaymentsService {
 
         const oldAccountInfo = await AccountInfosService.find(args.id, { transaction: t });
 
-        const lawyerId = oldClaim.dataValues.assignedLawyerId;
+        // const lawyerId = oldClaim.dataValues.assignedLawyerId;
+        // const {
+        //   dataValues: { baseCharge, serviceCharge },
+        // } = oldClaim.dataValues.interestedLawyers.find(
+        //   (lawyer) => lawyer.lawyerId === args.lawyerId
+        // );
+
+        const lawyerOfInterest = oldClaim.dataValues.interestedLawyers.find(
+          (lawyer) => lawyer.lawyerId === args.lawyerId
+        );
+
+        if (!lawyerOfInterest)
+          return {
+            success: false,
+            message: "The lawyer selected didn't mark interest in this particular small claim",
+          };
+
         const {
           dataValues: { baseCharge, serviceCharge },
-        } = oldClaim.dataValues.interestedLawyers.find((lawyer) => lawyer.lawyerId === lawyerId);
+        } = lawyerOfInterest;
 
         const totalCostOfService = baseCharge + serviceCharge;
 
@@ -634,7 +659,7 @@ class PaymentsService {
 
         const [, [paidSmallClaim]] = await SmallClaimsService.update(
           args.modelId,
-          { paid: true },
+          { paid: true, assignedLawyerId: args.lawyerId },
           oldClaim,
           { transaction: t }
         );

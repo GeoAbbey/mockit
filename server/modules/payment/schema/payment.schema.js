@@ -3,6 +3,7 @@ import Joi from "joi";
 export const PaymentWithSubOrWalletSchema = Joi.object().keys({
   modelType: Joi.string().valid("response", "smallClaim", "invitation").required(),
   modelId: Joi.string().guid({ version: "uuidv4" }).required(),
+  lawyerId: Joi.string(),
 });
 
 export const PayInSchema = Joi.object().keys({
@@ -13,6 +14,7 @@ export const PayInSchema = Joi.object().keys({
   quantity: Joi.number().min(1).max(20),
   modelId: Joi.string().guid({ version: "uuidv4" }),
   callback_url: Joi.string(),
+  lawyerId: Joi.string(),
 });
 
 export const PaymentAuthCodeSchema = PayInSchema.append({
