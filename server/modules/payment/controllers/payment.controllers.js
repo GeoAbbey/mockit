@@ -182,6 +182,7 @@ class PaymentsController {
           firstName,
           lastName,
           id,
+          lawyerId,
           modelId,
           type,
           authCode,
