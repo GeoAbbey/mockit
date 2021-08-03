@@ -88,9 +88,17 @@ export const sendNotificationToUserOrLawyer = async (
 
   logger("sending notification to the user");
 
-  action === "ASSIGNED"
+  action === "ASSIGNED" && modelName === "INVITATION"
     ? sendTemplateEmail(email, TEMPLATE.INVITATION_LAWYER_ASSIGNED, { firstName }, data.ticketId)
     : sendTemplateEmail(email, TEMPLATE.POLICE_INVITATION_COMPLETED, { firstName }, data.ticketId);
+
+  if (modelName === "RESPONSE") {
+    if (action === "ASSIGNED")
+      sendTemplateEmail(email, TEMPLATE.RESPONSE_LAWYER_ASSIGNED, { firstName }, data.ticketId);
+
+    if (action === "MARK_AS_COMPLETED")
+      sendTemplateEmail(email, TEMPLATE.RESPONSE_COMPLETED, { firstName }, data.ticketId);
+  }
 
   sendNotificationToClient({
     tokens,
