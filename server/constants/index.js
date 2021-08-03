@@ -273,7 +273,8 @@ export const TEMPLATE = {
   RESPONSE_LAWYER_ASSIGNED: "Response_Lawyer_Assigned",
   NEW_RATING: "New_Rating",
   POLICE_INVITATION_COMPLETED: "Police_Invitation_Completed",
-  INVITATION_LAWYER_ASSIGNMENT: "Invitation_Lawyer_Assigned",
+  POLICE_INVITATION_CREATED: "Police_Invitation_Created",
+  INVITATION_LAWYER_ASSIGNED: "Invitation_Lawyer_Assigned",
   LAWYER_SIGNUP: "Lawyer_signup",
   USER_SIGNUP: "User_signup",
 };

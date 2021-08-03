@@ -48,7 +48,7 @@ const sendMail = ({ email, otp }) => {
   sendTheMail(sendPromise);
 };
 
-const sendTemplateEmail = (recipientEmail, templateName, templateData) => {
+const sendTemplateEmail = (recipientEmail, templateName, templateData, ticketId) => {
   logger("sending a personalized mail using a template");
 
   // Create sendTemplatedEmail params
@@ -59,7 +59,7 @@ const sendTemplateEmail = (recipientEmail, templateName, templateData) => {
     },
     Source: "Zapp Lawyer <info@zapplawyerbeta.com.ng>" /* required */,
     Template: templateName /* required */,
-    TemplateData: JSON.stringify(templateData) /* required */,
+    TemplateData: JSON.stringify({ ...templateData, ticketId }) /* required */,
     ReplyToAddresses: ["support@zapplawyerbeta.com.ng"],
   };
 
@@ -67,13 +67,13 @@ const sendTemplateEmail = (recipientEmail, templateName, templateData) => {
   sendTheMail(sendPromise);
 };
 
-const sendBulkTemplatedEmail = (destinations, templateName) => {
+const sendBulkTemplatedEmail = (destinations, templateName, ticketId) => {
   logger("sending a personalized mail using a template to multiple destinations");
 
   const params = {
     Source: "Zapp Lawyer <info@zapplawyerbeta.com.ng>",
     Template: templateName,
-    Destinations: makeDestinations(destinations),
+    Destinations: makeDestinations(destinations, ticketId),
     DefaultTemplateData: '{ "name":"friend" }',
   };
 
@@ -94,13 +94,13 @@ const sendTheMail = (the_promise) => {
   }
 };
 
-const makeDestinations = (destinations) => {
+const makeDestinations = (destinations, ticketId) => {
   return destinations.map((destination) => {
     return {
       Destination: {
         ToAddresses: [destination.email],
       },
-      ReplacementTemplateData: `{ "firstName":${destination.firstName} }`,
+      ReplacementTemplateData: `{ "firstName":${destination.firstName}, "ticketId":${ticketId} }`,
     };
   });
 };

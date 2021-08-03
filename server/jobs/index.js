@@ -6,15 +6,6 @@ agenda
   .on("error", () => console.log("Agenda connection error!"));
 
 agenda.define(
-  "send-welcome-email",
-  {
-    priority: "high",
-    concurrency: 10,
-  },
-  JobHandlers.sendWelcomeMail
-);
-
-agenda.define(
   "create-payout",
   {
     priority: "normal",
