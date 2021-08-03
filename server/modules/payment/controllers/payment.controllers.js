@@ -141,7 +141,14 @@ class PaymentsController {
 
   cardPayment = async (req, res, next) => {
     const {
-      body: { quantity = undefined, amount = undefined, type, modelId = undefined, authCode },
+      body: {
+        quantity = undefined,
+        amount = undefined,
+        type,
+        modelId = undefined,
+        authCode,
+        lawyerId = undefined,
+      },
       decodedToken: { email, firstName, lastName, id },
     } = req;
 
