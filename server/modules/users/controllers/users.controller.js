@@ -135,7 +135,7 @@ class UsersController {
     }
 
     if (profilePic && profilePic[0]) {
-      body.profilePic = profilePic[0].location;
+      newBody.profilePic = profilePic[0].location;
     }
 
     if (nextOfKinProfilePic && nextOfKinProfilePic[0]) {

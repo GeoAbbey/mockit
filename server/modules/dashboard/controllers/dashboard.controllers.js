@@ -26,13 +26,16 @@ class DashboardsController {
   }
 
   async getFulfilled(req, res, next) {
-    log(`retrieving data for histogram`);
+    log(`retrieving data for histogram and fulfilled`);
     const {
-      query: {
-        search: { assignedLawyerId = undefined },
-      },
+      query: { search },
     } = req;
-    const dataSet = await DashboardsService.fulfilledAndPending(assignedLawyerId);
+
+    let dataSet;
+
+    if (search && search.assignedLawyerId)
+      dataSet = await DashboardsService.fulfilledAndPending(assignedLawyerId);
+    else dataSet = await DashboardsService.fulfilledAndPending(null);
 
     return res.status(200).send({
       success: true,
