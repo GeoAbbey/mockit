@@ -3,6 +3,8 @@ import { QueryTypes } from "sequelize";
 import models from "../../../models";
 import { handleFalsy } from "../../../utils";
 
+const env = process.env.NODE_ENV || "development";
+
 const debugLog = debug("app:locations-details-service");
 
 class LocationsService {
@@ -44,13 +46,25 @@ class LocationsService {
   }
 
   async findLawyersWithinRadius({ longitude, latitude, radius }) {
-    return models.sequelize.query(
-      `SELECT "Users"."id", "Users"."firebaseToken", "Users"."firstName", "Users"."email" FROM "LocationDetails" INNER JOIN "Users" ON "LocationDetails"."id" = "Users".id WHERE ST_DWithin(location, ST_SetSRID(ST_MakePoint(:longitude,:latitude)::geography, 4326), 5000) AND "LocationDetails"."assigningId" IS NULL AND "LocationDetails"."online" = true AND "Users"."role" = 'lawyer'`,
-      {
-        type: QueryTypes.SELECT,
-        replacements: { longitude, latitude, radius },
-      }
-    );
+    if (env === "production") {
+      debugLog("using code for production ie set SRID");
+      return models.sequelize.query(
+        `SELECT "Users"."id", "Users"."firebaseToken", "Users"."firstName", "Users"."email" FROM "LocationDetails" INNER JOIN "Users" ON "LocationDetails"."id" = "Users".id WHERE ST_DWithin(location, ST_SetSRID(ST_MakePoint(:longitude,:latitude)::geography, 4326), 5000) AND "LocationDetails"."assigningId" IS NULL AND "LocationDetails"."online" = true AND "Users"."role" = 'lawyer'`,
+        {
+          type: QueryTypes.SELECT,
+          replacements: { longitude, latitude, radius },
+        }
+      );
+    } else {
+      debugLog("using code for development ie doesn`t set SRID");
+      return models.sequelize.query(
+        `SELECT "Users"."id", "Users"."firebaseToken", "Users"."firstName", "Users"."email" FROM "LocationDetails" INNER JOIN "Users" ON "LocationDetails"."id" = "Users".id WHERE ST_DWithin(location,ST_MakePoint(:longitude,:latitude)::geography,5000) AND "LocationDetails"."assigningId" IS NULL AND "LocationDetails"."online" = true AND "Users"."role" = 'lawyer'`,
+        {
+          type: QueryTypes.SELECT,
+          replacements: { longitude, latitude, radius },
+        }
+      );
+    }
   }
 }
 
