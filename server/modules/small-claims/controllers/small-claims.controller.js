@@ -250,7 +250,7 @@ class SmallClaimsController {
 
       if (role === "admin" || role === "super-admin") return next();
       if (role === "lawyer") {
-        if (lawyerId && lawyerId === id)
+        if (lawyerId && lawyerId !== id)
           return next(createError(401, `You do not have access to ${context} this small claim`));
       }
       if (role === "user" && id !== ownerId) {
