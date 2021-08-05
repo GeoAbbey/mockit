@@ -19,6 +19,24 @@ module.exports = (sequelize, DataTypes) => {
     {
       baseCharge: { type: DataTypes.NUMBER, allowNull: false },
       serviceCharge: { type: DataTypes.NUMBER, allowNull: false },
+      baseChargeInNaira: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return this.baseCharge / 100;
+        },
+        set(value) {
+          throw new Error(`Do not try to set the baseChargeInNaira ${value}!`);
+        },
+      },
+      serviceChargeInNaira: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return this.serviceCharge / 100;
+        },
+        set(value) {
+          throw new Error(`Do not try to set the serviceChargeInNaira ${value}!`);
+        },
+      },
       modelType: { type: DataTypes.STRING, allowNull: false },
       lawyerId: { type: DataTypes.UUID, allowNull: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },

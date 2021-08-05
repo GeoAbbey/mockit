@@ -30,9 +30,9 @@ class UsersController {
     const hash = await HandlePassword.getHash(req.body.password);
     req.body.password = hash;
 
-    req.body.email = process(req.body.email);
-    req.body.firstName = process(req.body.firstName);
-    req.body.lastName = process(req.body.lastName);
+    req.body.email = req.body.email.trim();
+    req.body.firstName = req.body.firstName.trim();
+    req.body.lastName = req.body.lastName.trim();
     req.body.gender = process(req.body.gender);
     req.body.phone = process(req.body.phone);
 
@@ -357,14 +357,10 @@ class UsersController {
         ...filter,
         [Op.or]: [
           {
-            firstName: {
-              [Op.substring]: query.search.name,
-            },
+            firstName: { [Op.iLike]: `%${query.search.name}%` },
           },
           {
-            lastName: {
-              [Op.substring]: query.search.name,
-            },
+            lastName: { [Op.iLike]: `%${query.search.name}%` },
           },
         ],
       };
