@@ -130,11 +130,9 @@ class UsersController {
           nextOfKinProfilePic,
           suretyProfilePic,
           photoIDOrNIN,
-          universityCertificate,
-          votersCard,
+          NBAReceipt,
           callToBarCertificate,
           LLBCertificate,
-          internationalPassport,
           others,
         },
       } = req;
@@ -232,10 +230,14 @@ class UsersController {
   }
 
   async generateNewOtp(req, res, next) {
-    const { user, body } = req;
+    const eventEmitter = req.app.get("eventEmitter");
+
+    const { user, body, query } = req;
     log(`Generating new otp for user with email ${body.email}`);
     body.otp = otp();
-    const [, [User]] = await UsersService.update(user.id, body, user);
+    const [, [theUser]] = await UsersService.update(user.id, body, user);
+
+    eventEmitter.emit(EVENT_IDENTIFIERS.USER.GENERATE_NEW_OTP, { user: theUser, query });
 
     res.status(200).send({
       message: "new OTP successfully generated",
