@@ -254,6 +254,7 @@ export const EVENT_IDENTIFIERS = {
   },
   USER: {
     CREATED: "USER_CREATED",
+    GENERATE_NEW_OTP: "USER_GENERATE_NEW_OTP",
   },
 };
 
@@ -278,5 +279,7 @@ export const TEMPLATE = {
   POLICE_INVITATION_CREATED: "Police_Invitation_Created",
   INVITATION_LAWYER_ASSIGNED: "Invitation_Lawyer_Assigned",
   LAWYER_SIGNUP: "Lawyer_signup",
+  USER_SIGNUP: "User_signup",
+  USER_: "User_signup",
   USER_SIGNUP: "User_signup",
 };
