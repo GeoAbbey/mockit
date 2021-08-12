@@ -5,13 +5,21 @@ import { sendTemplateEmail } from "../../utils";
 const logger = debug("app:handlers:listeners:user-events");
 
 export const userEvents = (eventEmitter) => {
-  eventEmitter.on(`${EVENT_IDENTIFIERS.USER.CREATED}`, async ({ user }) => {
+  eventEmitter.on(`${EVENT_IDENTIFIERS.USER.CREATED}`, ({ user }) => {
     logger(`${EVENT_IDENTIFIERS.USER.CREATED} events has been received`);
 
     const { email, otp, id, firstName } = user.dataValues;
-    await sendTemplateEmail(email, TEMPLATE.USER_SIGNUP, { firstName, otp: otp.value, email });
+    sendTemplateEmail(email, TEMPLATE.USER_SIGNUP, { firstName, otp: otp.value, email });
 
-    const accountInfo = await AccountInfosService.create({ id });
-    logger({ accountInfo });
+    AccountInfosService.create({ id });
+  });
+
+  eventEmitter.on(`${EVENT_IDENTIFIERS.USER.GENERATE_NEW_OTP}`, async ({ user, query }) => {
+    logger(`${EVENT_IDENTIFIERS.USER.GENERATE_NEW_OTP} events has been received`);
+    if (query.for === "reset-password") {
+      //send email for reset-password
+    } else {
+      // send email for verify-account due to stale otp
+    }
   });
 };

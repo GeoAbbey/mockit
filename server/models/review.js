@@ -34,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
       ticketId: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
         defaultValue: () => nanoid(10),
       },
       rating: { type: DataTypes.INTEGER, allowNull: false, min: 1, max: 5 },
