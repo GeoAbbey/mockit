@@ -128,12 +128,12 @@ export const responseEvents = (eventEmitter) => {
 
       const answer = await EligibleLawyersService.bulkCreate(lawyerModifiedWithResponseId);
 
-      const userSocketDetails = await LocationServices.find({ where: { id: ownerId } });
+      // const userSocketDetails = await LocationServices.find({ where: { id: ownerId } });
 
-      io.to(userSocketDetails.dataValues.socketId).emit("on:surrounding:lawyers", {
-        results,
-        message: `Lawyers available within the given radius ${config.radius}`,
-      });
+      // io.to(userSocketDetails.dataValues.socketId).emit("on:surrounding:lawyers", {
+      //   results,
+      //   message: `Lawyers available within the given radius ${config.radius}`,
+      // });
 
       await sendNotificationToEligibleLawyers({
         events: EVENT_IDENTIFIERS.RESPONSE.CREATED,
