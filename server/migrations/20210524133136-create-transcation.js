@@ -35,6 +35,7 @@ module.exports = {
       ticketId: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true,
       },
       performedBy: {
         type: Sequelize.UUID,

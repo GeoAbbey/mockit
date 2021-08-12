@@ -12,7 +12,7 @@ export class CooperateRoutes extends CommonRoutesConfig {
   configureRoutes() {
     this.app
       .route(`${this.path}/cooperate`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .post([
         middleware({ schema: createCooperateSchema, property: "body" }),
         wrapCatch(CooperatesController.createCooperate),
@@ -29,7 +29,7 @@ export class CooperateRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/cooperate/usage`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .get([
         wrapCatch(CooperatesController.cooperateExists()),
         wrapCatch(CooperatesController.usageHistory),

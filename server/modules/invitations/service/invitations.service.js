@@ -36,11 +36,29 @@ class InvitationsService {
             model: models.User,
             as: "lawyerProfile",
             attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
+            required: false,
           },
           {
             model: models.User,
             as: "ownerProfile",
             attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
+            required: false,
+            include: [
+              {
+                model: models.PayIn,
+                as: "oneTimePayments",
+                where: { for: "singleInvitation", modelId: id },
+                attributes: ["amount"],
+                required: false,
+              },
+              {
+                model: models.Transaction,
+                as: "paymentFromWallet",
+                where: { modelType: "invitation", modelId: id },
+                attributes: ["amount"],
+                required: false,
+              },
+            ],
           },
         ],
       });

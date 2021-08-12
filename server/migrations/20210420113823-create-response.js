@@ -17,6 +17,7 @@ module.exports = {
       ticketId: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true,
       },
       ownerId: {
         type: Sequelize.UUID,

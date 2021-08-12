@@ -12,7 +12,7 @@ export class ReactionRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/reactions/:modelType/:reactionType/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: allowedReactionSchema, property: "params" }),
       ])
       .post([wrapCatch(ReactionsController.makeReaction)]);
@@ -21,7 +21,7 @@ export class ReactionRoutes extends CommonRoutesConfig {
     // this.app
     //   .route(`${this.path}/reaction/:id`)
     //   .all([
-    //     Authenticate.verifyToken,
+    //     Authenticate.verifyToken(),
     //     middleware({ schema: validateUUID, property: "params" }),
     //     ReactionsController.reactionExits(),
     //   ])

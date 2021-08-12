@@ -13,7 +13,7 @@ export class PayoutRoutes extends CommonRoutesConfig {
       .route(`${this.path}/payout/:code`)
       .all([
         middleware({ schema: recipientCodeSchema, property: "params" }),
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
       ])
       .post([
         PayoutsController.checkAccessAdmin(),
@@ -23,7 +23,7 @@ export class PayoutRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/payout/getHistory`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .get([
         PayoutsController.checkAccessLawyer(),
         middleware({ schema: queryOptions, property: "query" }),

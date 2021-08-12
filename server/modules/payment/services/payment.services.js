@@ -173,6 +173,7 @@ class PaymentsService {
           amount,
           reference,
           ownerId: metadata.id,
+          modelId: metadata.modelId,
         },
         { transaction: t }
       );

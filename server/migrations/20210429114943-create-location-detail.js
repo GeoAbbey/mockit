@@ -15,6 +15,8 @@ module.exports = {
       },
       socketId: {
         type: Sequelize.STRING,
+        unique: true,
+        allowNull: false,
       },
       online: {
         type: Sequelize.BOOLEAN,

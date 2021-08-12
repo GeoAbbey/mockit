@@ -23,7 +23,7 @@ class UsersController {
     return UsersController.instance;
   }
 
-  async signUp(req, res) {
+  signUp = async (req, res) => {
     const eventEmitter = req.app.get("eventEmitter");
     log("creating a user");
 
@@ -47,7 +47,13 @@ class UsersController {
       message: "user successfully created",
       token,
     });
-  }
+  };
+
+  createAnAdmin = async (req, res, next) => {
+    req.body.password = "Zapp101";
+
+    return this.signUp(req, res, next);
+  };
 
   async login(req, res, next) {
     let { email, password } = req.body;
@@ -123,11 +129,11 @@ class UsersController {
           profilePic,
           nextOfKinProfilePic,
           suretyProfilePic,
-          lawSchoolCertificate,
+          photoIDOrNIN,
           universityCertificate,
           votersCard,
-          nationalIDCard,
-          driversLicence,
+          callToBarCertificate,
+          LLBCertificate,
           internationalPassport,
           others,
         },
@@ -135,7 +141,7 @@ class UsersController {
     }
 
     if (profilePic && profilePic[0]) {
-      body.profilePic = profilePic[0].location;
+      newBody.profilePic = profilePic[0].location;
     }
 
     if (nextOfKinProfilePic && nextOfKinProfilePic[0]) {
@@ -150,51 +156,35 @@ class UsersController {
       };
     }
 
-    if (internationalPassport && internationalPassport[0]) {
-      newBody.lawyer.documents.internationalPassport = {
-        url: internationalPassport[0].location,
-        name: internationalPassport[0].originalname,
-        type: internationalPassport[0].mimetype,
+    if (NBAReceipt && NBAReceipt[0]) {
+      newBody.lawyer.documents.NBAReceipt = {
+        url: NBAReceipt[0].location,
+        name: NBAReceipt[0].originalname,
+        type: NBAReceipt[0].mimetype,
       };
     }
 
-    if (driversLicence && driversLicence[0]) {
-      newBody.lawyer.documents.driversLicence = {
-        url: driversLicence[0].location,
-        name: driversLicence[0].originalname,
-        type: driversLicence[0].mimetype,
+    if (LLBCertificate && LLBCertificate[0]) {
+      newBody.lawyer.documents.LLBCertificate = {
+        url: LLBCertificate[0].location,
+        name: LLBCertificate[0].originalname,
+        type: LLBCertificate[0].mimetype,
       };
     }
 
-    if (nationalIDCard && nationalIDCard[0]) {
-      newBody.lawyer.documents.nationalIDCard = {
-        url: nationalIDCard[0].location,
-        name: nationalIDCard[0].originalname,
-        type: nationalIDCard[0].mimetype,
+    if (callToBarCertificate && callToBarCertificate[0]) {
+      newBody.lawyer.documents.callToBarCertificate = {
+        url: callToBarCertificate[0].location,
+        name: callToBarCertificate[0].originalname,
+        type: callToBarCertificate[0].mimetype,
       };
     }
 
-    if (lawSchoolCertificate && lawSchoolCertificate[0]) {
-      newBody.lawyer.documents.lawSchoolCertificate = {
-        url: lawSchoolCertificate[0].location,
-        name: lawSchoolCertificate[0].originalname,
-        type: lawSchoolCertificate[0].mimetype,
-      };
-    }
-
-    if (universityCertificate && universityCertificate[0]) {
-      newBody.lawyer.documents.universityCertificate = {
-        url: universityCertificate[0].location,
-        name: universityCertificate[0].originalname,
-        type: universityCertificate[0].mimetype,
-      };
-    }
-
-    if (votersCard && votersCard[0]) {
-      newBody.lawyer.documents.votersCard = {
-        url: votersCard[0].location,
-        name: votersCard[0].originalname,
-        type: votersCard[0].mimetype,
+    if (photoIDOrNIN && photoIDOrNIN[0]) {
+      newBody.lawyer.documents.photoIDOrNIN = {
+        url: photoIDOrNIN[0].location,
+        name: photoIDOrNIN[0].originalname,
+        type: photoIDOrNIN[0].mimetype,
       };
     }
 
@@ -246,6 +236,7 @@ class UsersController {
     log(`Generating new otp for user with email ${body.email}`);
     body.otp = otp();
     const [, [User]] = await UsersService.update(user.id, body, user);
+
     res.status(200).send({
       message: "new OTP successfully generated",
       success: true,

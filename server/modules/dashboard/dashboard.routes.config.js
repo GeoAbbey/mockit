@@ -12,13 +12,13 @@ export class DashboardRoutes extends CommonRoutesConfig {
   configureRoutes() {
     this.app
       .route(`${this.path}/dashboard/histogram`)
-      .all([Authenticate.verifyToken, wrapCatch(DashboardsController.checkAccessAdmin())])
+      .all([Authenticate.verifyToken(), wrapCatch(DashboardsController.checkAccessAdmin())])
       .get([wrapCatch(DashboardsController.getHistogram)]);
 
     this.app
       .route(`${this.path}/dashboard/fulfilled`)
       .get([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: queryOptions, property: "query" }),
         wrapCatch(DashboardsController.getFulfilled),
       ]);

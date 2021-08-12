@@ -17,7 +17,7 @@ export class InterestedLawyersRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/interested-lawyers/:modelType/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: allowedModelSchema, property: "params" }),
       ])
       .post([
@@ -30,7 +30,7 @@ export class InterestedLawyersRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/interested-lawyers/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
       ])
       .patch([

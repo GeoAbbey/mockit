@@ -105,7 +105,7 @@ export const responseEvents = (eventEmitter) => {
 
   eventEmitter.on(
     EVENT_IDENTIFIERS.RESPONSE.CREATED,
-    async ({ response, decodedToken, startingLocation, speed }) => {
+    async ({ response, decodedToken, startingLocation, speed, io }) => {
       logger(`${EVENT_IDENTIFIERS.RESPONSE.CREATED} event was received`);
       const {
         dataValues: { id: responseId, ownerId },
@@ -116,10 +116,10 @@ export const responseEvents = (eventEmitter) => {
       const results = await LocationServices.findLawyersWithinRadius({
         longitude: coordinates[0],
         latitude: coordinates[1],
-        radius: parseInt(config.radius),
+        radius: config.radius,
       });
 
-      console.log({ results });
+      logger({ results }, "🐥");
       const lawyerModifiedWithResponseId = [];
 
       results.forEach((result) => {
@@ -127,6 +127,13 @@ export const responseEvents = (eventEmitter) => {
       });
 
       const answer = await EligibleLawyersService.bulkCreate(lawyerModifiedWithResponseId);
+
+      const userSocketDetails = await LocationServices.find({ where: { id: ownerId } });
+
+      io.to(userSocketDetails.dataValues.socketId).emit("on:surrounding:lawyers", {
+        results,
+        message: `Lawyers available within the given radius ${config.radius}`,
+      });
 
       await sendNotificationToEligibleLawyers({
         events: EVENT_IDENTIFIERS.RESPONSE.CREATED,

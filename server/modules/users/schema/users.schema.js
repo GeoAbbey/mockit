@@ -12,6 +12,11 @@ export const createUserSchema = Joi.object().keys({
   gender: Joi.string().valid("male", "female").required(),
 });
 
+export const createAnAdminSchema = createUserSchema.append({
+  role: Joi.string().valid("user", "lawyer", "admin"),
+  password: Joi.string().min(6).max(30),
+});
+
 export const updateUserSchema = Joi.object().keys({
   firstName: Joi.string(),
   lastName: Joi.string(),
@@ -61,7 +66,7 @@ export const updateUserSchema = Joi.object().keys({
 });
 
 export const validOTP = Joi.object().keys({
-  otp: Joi.number().required(),
+  otp: Joi.string().required(),
 });
 
 export const validOtpAndPassword = Joi.object().keys({

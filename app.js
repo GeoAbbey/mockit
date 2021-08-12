@@ -2,15 +2,11 @@ import debug from "debug";
 import express from "express";
 import http from "http";
 import socket from "socket.io";
+import jwt from "jsonwebtoken";
 
 import Loaders from "./server/loaders";
 import { onConnection } from "./server/socketEvents";
-
-const env = process.env.NODE_ENV || "development";
-import configOptions from "./server/config/config";
-import jwt from "jsonwebtoken";
-
-const config = configOptions[env];
+import UsersService from "./server/modules/users/service/user.service";
 
 const debugLog = debug("app");
 
@@ -31,8 +27,19 @@ export const startServer = async () => {
   io.use((socket, next) => {
     if (socket.handshake.auth.token) {
       const { token } = socket.handshake.auth;
-      jwt.verify(token, process.env.SECRET_KEY, (err, decodedToken) => {
+      jwt.verify(token, process.env.SECRET_KEY, async (err, decodedToken) => {
         if (err) return next(new Error("Authentication error, Invalid Token supplied"));
+        const theUser = await UsersService.findByPk(decodedToken.id);
+        if (!theUser)
+          return next(
+            new Error(
+              401,
+              "Invalid Email or Password, Kindly contact the admin if this is an anomaly"
+            )
+          );
+
+        if (theUser.dataValues.isAccountSuspended)
+          return next(new Error(401, "You account has been suspended kindly contact the admin"));
         return next();
       });
     } else {

@@ -16,7 +16,7 @@ export class InvitationRoutes extends CommonRoutesConfig {
   configureRoutes() {
     this.app
       .route(`${this.path}/invitations`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .post([
         uploadMiddleware([{ name: "attachments", maxCount: 1 }]),
         // middleware({ schema: createInvitationSchema, property: "body" }),
@@ -31,7 +31,7 @@ export class InvitationRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/invitation/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
         wrapCatch(InvitationsController.invitationExits()),
       ])
@@ -56,7 +56,7 @@ export class InvitationRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/invitation/:id`)
       .get([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
         InvitationsController.invitationExits("retrieve"),
         InvitationsController.checkAccessUser("retrieve"),
@@ -66,7 +66,7 @@ export class InvitationRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/invitations/unassigned`)
       .get([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         InvitationsController.checkAccessLawyer(),
         wrapCatch(InvitationsController.getUnAssignedInvites),
       ]);
@@ -74,7 +74,7 @@ export class InvitationRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/invitations/stats`)
       .get([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         InvitationsController.checkAccessAdmin(),
         wrapCatch(InvitationsController.getStats),
       ]);

@@ -30,13 +30,13 @@ module.exports = (sequelize, DataTypes) => {
       });
       this.hasOne(models.LocationDetail, { foreignKey: "id" });
       this.hasOne(models.AccountInfo, { foreignKey: "id" });
-      this.hasOne(models.Transaction, { foreignKey: "ownerId" });
+      this.hasMany(models.Transaction, { foreignKey: "ownerId", as: "paymentFromWallet" });
       this.hasMany(models.EligibleLawyer, {
         as: "lawyerProfile",
         foreignKey: "lawyerId",
         onDelete: "CASCADE",
       });
-      this.hasMany(models.PayIn, { foreignKey: "ownerId" });
+      this.hasMany(models.PayIn, { foreignKey: "ownerId", as: "oneTimePayments" });
       this.hasMany(models.AuthCode, { foreignKey: "ownerId" });
       this.hasMany(models.Payout, { foreignKey: "lawyerId" });
       this.hasOne(models.Cooperate, { foreignKey: "id" });
@@ -71,12 +71,10 @@ module.exports = (sequelize, DataTypes) => {
           isVerified: false,
           description: "",
           documents: {
-            lawSchoolCertificate: "",
-            universityCertificate: "",
-            votersCard: "",
-            nationalIDCard: "",
-            driversLicence: "",
-            internationalPassport: "",
+            NBAReceipt: "",
+            LLBCertificate: "",
+            callToBarCertificate: "",
+            photoIDOrNIN: "",
             others: "",
           },
         },

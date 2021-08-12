@@ -41,6 +41,22 @@ class SmallClaimsService {
                 "phone",
               ],
               required: false,
+              include: [
+                {
+                  model: models.PayIn,
+                  as: "oneTimePayments",
+                  where: { for: "singleSmallClaim", modelId: id },
+                  attributes: ["amount"],
+                  required: false,
+                },
+                {
+                  model: models.Transaction,
+                  as: "paymentFromWallet",
+                  where: { modelType: "smallClaim", modelId: id },
+                  attributes: ["amount"],
+                  required: false,
+                },
+              ],
             },
             {
               model: models.User,

@@ -12,7 +12,7 @@ export class CooperateAccessRoutes extends CommonRoutesConfig {
   configureRoutes() {
     this.app
       .route(`${this.path}/cooperate-access`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .post([
         middleware({ schema: EmailAccess, property: "body" }),
         wrapCatch(CooperateAccessController.grantCooperateAccess),

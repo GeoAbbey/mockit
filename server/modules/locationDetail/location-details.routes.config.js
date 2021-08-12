@@ -11,7 +11,7 @@ export class LocationDetailRoutes extends CommonRoutesConfig {
   configureRoutes() {
     this.app
       .route(`${this.path}/location/visibility`)
-      .all([Authenticate.verifyToken, wrapCatch(LocationDetailsController.locationDetailExits())])
+      .all([Authenticate.verifyToken(), wrapCatch(LocationDetailsController.locationDetailExits())])
       .put([
         middleware({ schema: visibilitySchema, property: "body" }),
         wrapCatch(LocationDetailsController.toggleVisibility),

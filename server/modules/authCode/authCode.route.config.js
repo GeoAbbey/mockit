@@ -12,7 +12,7 @@ export class AuthCodeRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/auth-codes/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
       ])
       .delete([
@@ -21,12 +21,9 @@ export class AuthCodeRoutes extends CommonRoutesConfig {
         wrapCatch(AuthCodesController.deleteAuthCode),
       ]);
 
-      this.app
+    this.app
       .route(`${this.path}/auth-codes`)
-      .get([
-        Authenticate.verifyToken,
-        wrapCatch(AuthCodesController.getAuthCodes),
-      ]);
+      .get([Authenticate.verifyToken(), wrapCatch(AuthCodesController.getAuthCodes)]);
 
     return this.app;
   }

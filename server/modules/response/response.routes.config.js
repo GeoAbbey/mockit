@@ -12,7 +12,7 @@ export class ResponseRoutes extends CommonRoutesConfig {
   configureRoutes() {
     this.app
       .route(`${this.path}/responses`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .post([
         middleware({ schema: createResponseSchema, property: "body" }),
         wrapCatch(ResponsesController.onGoingResponse),
@@ -27,7 +27,7 @@ export class ResponseRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/responses/unassigned`)
       .get([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         ResponsesController.checkAccessLawyer(),
         wrapCatch(ResponsesController.getUnassignedResponses),
       ]);
@@ -35,7 +35,7 @@ export class ResponseRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/responses/stats`)
       .get([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         ResponsesController.checkAccessAdmin(),
         wrapCatch(ResponsesController.getStats),
       ]);
@@ -43,7 +43,7 @@ export class ResponseRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/response/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
         ResponsesController.responseExits(),
       ])
@@ -59,7 +59,7 @@ export class ResponseRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/response/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
         ResponsesController.responseExits("retrieve"),
       ])

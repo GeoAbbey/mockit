@@ -11,7 +11,7 @@ export class NotificationRoutes extends CommonRoutesConfig {
   configureRoutes() {
     this.app
       .route(`${this.path}/notifications`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .get([
         middleware({ schema: queryOptions, property: "query" }),
         wrapCatch(NotificationsController.queryContext),
