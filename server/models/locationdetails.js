@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
   LocationDetail.init(
     {
       id: { type: DataTypes.UUID, allowNull: false, primaryKey: true, allowNull: false },
-      socketId: { type: DataTypes.STRING },
+      socketId: { type: DataTypes.STRING, unique: true },
       speed: { type: DataTypes.STRING },
       online: { type: DataTypes.BOOLEAN, defaultValue: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },

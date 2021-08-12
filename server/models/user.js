@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       this.hasOne(models.LocationDetail, { foreignKey: "id" });
       this.hasOne(models.AccountInfo, { foreignKey: "id" });
-      this.hasOne(models.Transaction, { foreignKey: "ownerId", as: "paymentFromWallet" });
+      this.hasMany(models.Transaction, { foreignKey: "ownerId", as: "paymentFromWallet" });
       this.hasMany(models.EligibleLawyer, {
         as: "lawyerProfile",
         foreignKey: "lawyerId",
@@ -71,12 +71,10 @@ module.exports = (sequelize, DataTypes) => {
           isVerified: false,
           description: "",
           documents: {
-            lawSchoolCertificate: "",
-            universityCertificate: "",
-            votersCard: "",
-            nationalIDCard: "",
-            driversLicence: "",
-            internationalPassport: "",
+            NBAReceipt: "",
+            LLBCertificate: "",
+            callToBarCertificate: "",
+            photoIDOrNIN: "",
             others: "",
           },
         },

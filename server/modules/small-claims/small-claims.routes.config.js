@@ -16,7 +16,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
   configureRoutes() {
     this.app
       .route(`${this.path}/small-claims`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .post([
         middleware({ schema: createSmallClaimSchema, property: "body" }),
         [uploadMiddleware(), wrapCatch(SmallClaimsController.makeClaim)],
@@ -30,7 +30,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/small-claims/unassigned`)
       .get([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         SmallClaimsController.checkAccessLawyer(),
         wrapCatch(SmallClaimsController.getUnassignedClaims),
       ]);
@@ -38,7 +38,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/small-claims/stats`)
       .get([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         SmallClaimsController.checkAccessAdmin(),
         wrapCatch(SmallClaimsController.getStats),
       ]);
@@ -46,7 +46,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/small-claims/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
         SmallClaimsController.smallClaimExits(),
       ])
@@ -67,7 +67,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/small-claims/start/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
         SmallClaimsController.smallClaimExits(),
       ])
@@ -79,7 +79,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
     // this.app
     //   .route(`${this.path}/small-claims/:id`)
     //   .put([
-    //     Authenticate.verifyToken,
+    //     Authenticate.verifyToken(),
     //     middleware({ schema: validateUUID("id"), property: "params" }),
     //     SmallClaimsController.smallClaimExits(true),
     //     SmallClaimsController.checkAccessUser("assignLawyer"),
@@ -89,7 +89,7 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/small-claims/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
         SmallClaimsController.smallClaimExits("retrieve"),
       ])

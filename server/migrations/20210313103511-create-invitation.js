@@ -28,6 +28,7 @@ module.exports = {
       },
       ticketId: {
         type: Sequelize.STRING,
+        unique: true,
         allowNull: false,
       },
       ownerId: {

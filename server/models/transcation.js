@@ -33,6 +33,7 @@ module.exports = (sequelize, DataTypes) => {
       ticketId: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
         defaultValue: () => nanoid(10),
       },
       modelId: {

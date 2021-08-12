@@ -17,7 +17,7 @@ export class PaymentRoutes extends CommonRoutesConfig {
   configureRoutes() {
     this.app
       .route(`${this.path}/payment-wallet-or-sub`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .post([
         middleware({ schema: PaymentWithSubOrWalletSchema, property: "body" }),
         wrapCatch(PaymentsController.walletOrSubPayment),
@@ -25,7 +25,7 @@ export class PaymentRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/payment-wallet-or-sub/:code`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .post([
         middleware({ schema: CooperateCode, property: "params" }),
         middleware({ schema: PaymentWithSubOrWalletSchema, property: "body" }),
@@ -34,7 +34,7 @@ export class PaymentRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/payment/charge`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .post([
         middleware({ schema: PaymentAuthCodeSchema, property: "body" }),
         wrapCatch(PaymentsController.cardPayment),
@@ -42,12 +42,12 @@ export class PaymentRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/payment/verify/:ref`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .get([wrapCatch(PaymentsController.processPayment)]);
 
     this.app
       .route(`${this.path}/payin-service-or-credit-account`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .post([
         middleware({ schema: PayInSchema, property: "body" }),
         wrapCatch(PaymentsController.payInPayment),
@@ -56,7 +56,7 @@ export class PaymentRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/payin/history`)
       .get([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: queryOptions, property: "query" }),
         wrapCatch(PaymentsController.queryContext),
         wrapCatch(PaymentsController.payInHistory),
@@ -64,7 +64,7 @@ export class PaymentRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/payment/price-list`)
-      .get([Authenticate.verifyToken, wrapCatch(PaymentsController.priceList)]);
+      .get([Authenticate.verifyToken(), wrapCatch(PaymentsController.priceList)]);
 
     return this.app;
   }

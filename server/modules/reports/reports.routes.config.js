@@ -11,7 +11,7 @@ export class ReportRoutes extends CommonRoutesConfig {
   configureRoutes() {
     this.app
       .route(`${this.path}/reports`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .post([
         middleware({ schema: createReportSchema, property: "body" }),
         uploadMiddleware(),
@@ -21,7 +21,7 @@ export class ReportRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/reports/admin`)
-      .all([Authenticate.verifyToken, wrapCatch(ReportsController.checkAccessAdmin())])
+      .all([Authenticate.verifyToken(), wrapCatch(ReportsController.checkAccessAdmin())])
       .get([
         middleware({ schema: queryOptions, property: "query" }),
         wrapCatch(ReportsController.queryContextAdmin),
@@ -31,7 +31,7 @@ export class ReportRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/report/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
         wrapCatch(ReportsController.reportExits()),
       ])
@@ -49,7 +49,7 @@ export class ReportRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/report/:id`)
       .get([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
         ReportsController.reportExits("retrieve"),
         wrapCatch(ReportsController.getAReport),

@@ -60,6 +60,15 @@ class ResponsesService {
                 "phone",
               ],
               required: false,
+              include: [
+                {
+                  model: models.Transaction,
+                  as: "paymentFromWallet",
+                  where: { modelType: "response", modelId: id },
+                  attributes: ["amount"],
+                  required: false,
+                },
+              ],
             },
             {
               model: models.User,

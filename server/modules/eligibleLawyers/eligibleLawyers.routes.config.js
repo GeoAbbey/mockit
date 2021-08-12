@@ -14,7 +14,7 @@ export class EligibleLawyerRoutes extends CommonRoutesConfig {
   configureRoutes() {
     this.app
       .route(`${this.path}/eligible-lawyer`)
-      .all([Authenticate.verifyToken, EligibleLawyersController.checkAccessAdmin()])
+      .all([Authenticate.verifyToken(), EligibleLawyersController.checkAccessAdmin()])
       .post([
         middleware({ schema: createEligibleLawyerSchema, property: "body" }),
         wrapCatch(EligibleLawyersController.makeEligibleLawyer),
@@ -28,7 +28,7 @@ export class EligibleLawyerRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/eligible-lawyer/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
         EligibleLawyersController.checkAccessAdmin(),
       ])

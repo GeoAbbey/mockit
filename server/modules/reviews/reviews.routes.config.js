@@ -13,7 +13,7 @@ export class ReviewsRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/review/:modelType/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: allowedModelSchema, property: "params" }),
       ])
       .post([
@@ -26,7 +26,7 @@ export class ReviewsRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/review/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
         ReviewsController.reviewExits(),
       ])
@@ -43,18 +43,21 @@ export class ReviewsRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/reviews`)
-      .all([Authenticate.verifyToken, middleware({ schema: queryReviewSchema, property: "query" })])
+      .all([
+        Authenticate.verifyToken(),
+        middleware({ schema: queryReviewSchema, property: "query" }),
+      ])
       .get([ReviewsController.queryContext, wrapCatch(ReviewsController.getAllReviews)]);
 
     this.app
       .route(`${this.path}/reviews/all-stats`)
-      .all([Authenticate.verifyToken, ReviewsController.checkAccessUserAdmin()])
+      .all([Authenticate.verifyToken(), ReviewsController.checkAccessUserAdmin()])
       .get([wrapCatch(ReviewsController.allStats)]);
 
     this.app
       .route(`${this.path}/reviews/stats/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
       ])
       .get([wrapCatch(ReviewsController.getAllReviewStats)]);

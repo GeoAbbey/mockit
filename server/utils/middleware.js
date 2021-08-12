@@ -9,9 +9,9 @@ export const middleware = ({ schema, property }) => {
     const { error } = schema.validate(req[property]);
     const valid = error == null;
     if (!valid) {
-      const { details } = error;
-      return next(createError(403, "error in validating your input", { err: details }));
+      const { details: err } = error;
+      return next(createError(403, err[0].message, { err }));
     }
-    next();
+    return next();
   };
 };

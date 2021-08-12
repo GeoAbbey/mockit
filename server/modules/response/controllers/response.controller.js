@@ -24,6 +24,7 @@ class ResponsesController {
 
   async makeResponse(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
     const {
       decodedToken,
       body: { longitude, latitude },
@@ -52,6 +53,7 @@ class ResponsesController {
     eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.CREATED, {
       decodedToken,
       response,
+      io,
       startingLocation,
       speed: config.averageSpeed,
     });

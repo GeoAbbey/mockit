@@ -12,7 +12,7 @@ export class CommentRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/comments/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
       ])
       .post([
@@ -24,7 +24,7 @@ export class CommentRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/comment/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
       ])
       .patch([

@@ -23,6 +23,8 @@ module.exports = {
       },
       ticketId: {
         type: Sequelize.STRING,
+        unique: true,
+        allowNull: false,
       },
       reviewerId: {
         type: Sequelize.UUID,

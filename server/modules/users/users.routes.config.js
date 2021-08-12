@@ -9,6 +9,7 @@ import {
   newOTP,
   queryOptions,
   changePasswordSchema,
+  createAnAdminSchema,
 } from "./schema/users.schema";
 import {
   middleware,
@@ -41,7 +42,7 @@ export class UserRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/users/profile`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .patch([
         UsersController.userExistMiddleware(),
         AccessControl.checkPermissionUserOrLawyerAccess(),
@@ -49,12 +50,10 @@ export class UserRoutes extends CommonRoutesConfig {
           { name: "profilePic", maxCount: 1 },
           { name: "nextOfKinProfilePic", maxCount: 1 },
           { name: "suretyProfilePic", maxCount: 1 },
-          { name: "lawSchoolCertificate", maxCount: 1 },
-          { name: "universityCertificate", maxCount: 1 },
-          { name: "votersCard", maxCount: 1 },
-          { name: "nationalIDCard", maxCount: 1 },
-          { name: "driversLicence", maxCount: 1 },
-          { name: "internationalPassport", maxCount: 1 },
+          { name: "NBAReceipt", maxCount: 1 },
+          { name: "LLBCertificate", maxCount: 1 },
+          { name: "callToBarCertificate", maxCount: 1 },
+          { name: "photoIDOrNIN", maxCount: 1 },
           { name: "others", maxCount: 1 },
         ]),
         wrapCatch(UsersController.updateUser),
@@ -70,11 +69,11 @@ export class UserRoutes extends CommonRoutesConfig {
         middleware({ schema: newOTP, property: "query" }),
         UsersController.userExistMiddleware(),
       ])
-      .post([UsersController.generateNewOtp]);
+      .post([wrapCatch(UsersController.generateNewOtp)]);
 
     this.app
       .route(`${this.path}/users/verify`)
-      .all([Authenticate.verifyToken, UsersController.userExistMiddleware()])
+      .all([Authenticate.verifyToken("verify"), UsersController.userExistMiddleware()])
       .patch([
         middleware({ schema: validOTP, property: "body" }),
         AccessControl.checkPermissionUserOrLawyerAccess(),
@@ -93,7 +92,7 @@ export class UserRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/users/change-password`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .patch([
         middleware({ schema: changePasswordSchema, property: "body" }),
         wrapCatch(UsersController.changePassword),
@@ -101,13 +100,24 @@ export class UserRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/users/stats`)
-      .all([Authenticate.verifyToken])
-      .get([AccessControl.checkPermissionAdminAccess(), UsersController.getNoOfDistinctUsers]);
+      .all([Authenticate.verifyToken()])
+      .get([
+        AccessControl.checkPermissionAdminAccess(),
+        wrapCatch(UsersController.getNoOfDistinctUsers),
+      ]);
+
+    this.app
+      .route(`${this.path}/users/create`)
+      .all([
+        Authenticate.verifyToken(),
+        middleware({ schema: createAnAdminSchema, property: "body" }),
+      ])
+      .post([AccessControl.checkPermissionAdminAccess(), wrapCatch(UsersController.createAnAdmin)]);
 
     this.app
       .route(`${this.path}/users/:id`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
         UsersController.userExistMiddleware(),
       ])
@@ -120,12 +130,12 @@ export class UserRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/users`)
-      .all([Authenticate.verifyToken])
+      .all([Authenticate.verifyToken()])
       .get([
         middleware({ schema: queryOptions, property: "query" }),
         AccessControl.checkPermissionAdminAccess(),
-        UsersController.queryContext,
-        UsersController.getAllUsers,
+        wrapCatch(UsersController.queryContext),
+        wrapCatch(UsersController.getAllUsers),
       ]);
 
     return this.app;

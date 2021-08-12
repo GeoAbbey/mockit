@@ -12,7 +12,7 @@ export class AccountInfoRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/accountInfo/:ownerId`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("ownerId"), property: "params" }),
       ])
       .post([
@@ -28,7 +28,7 @@ export class AccountInfoRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/accountInfo/:info/:ownerId`)
       .all([
-        Authenticate.verifyToken,
+        Authenticate.verifyToken(),
         middleware({ schema: AccountParamsSchema, property: "params" }),
         AccountInfosController.checkAccessAdmin(),
         AccountInfosController.accountInfoExits(),
