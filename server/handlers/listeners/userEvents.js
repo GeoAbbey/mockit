@@ -1,6 +1,7 @@
 import debug from "debug";
 import { EVENT_IDENTIFIERS, TEMPLATE } from "../../constants";
 import AccountInfosService from "../../modules/accountInfo/services/accountInfo.services";
+import LocationService from "../../modules/locationDetail/services/locationDetails.services";
 import { sendTemplateEmail } from "../../utils";
 const logger = debug("app:handlers:listeners:user-events");
 
@@ -12,6 +13,7 @@ export const userEvents = (eventEmitter) => {
     sendTemplateEmail(email, TEMPLATE.USER_SIGNUP, { firstName, otp: otp.value, email });
 
     AccountInfosService.create({ id });
+    LocationService.findOrCreate({ id });
   });
 
   eventEmitter.on(`${EVENT_IDENTIFIERS.USER.GENERATE_NEW_OTP}`, async ({ user, query }) => {
