@@ -112,6 +112,18 @@ export const responseEvents = (eventEmitter) => {
         startingLocation: { coordinates },
       } = response;
 
+      //log user online
+
+      const userDetails = await LocationServices.findByPk(ownerId);
+
+      await LocationServices.update(
+        userDetails.id,
+        {
+          online: true,
+        },
+        userDetails
+      );
+
       //return all the lawyers that are online and aren't busy within the given radius
       const results = await LocationServices.findLawyersWithinRadius({
         longitude: coordinates[0],
@@ -127,13 +139,6 @@ export const responseEvents = (eventEmitter) => {
       });
 
       const answer = await EligibleLawyersService.bulkCreate(lawyerModifiedWithResponseId);
-
-      // const userSocketDetails = await LocationServices.find({ where: { id: ownerId } });
-
-      // io.to(userSocketDetails.dataValues.socketId).emit("on:surrounding:lawyers", {
-      //   results,
-      //   message: `Lawyers available within the given radius ${config.radius}`,
-      // });
 
       await sendNotificationToEligibleLawyers({
         events: EVENT_IDENTIFIERS.RESPONSE.CREATED,

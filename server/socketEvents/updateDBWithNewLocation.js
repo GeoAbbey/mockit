@@ -12,7 +12,6 @@ export const updateDbWithNewLocation = async (payload, io) => {
     defaults: {
       id,
       socketId,
-      online: true,
       speed: payload.coords.speed,
       location: {
         type: "Point",
