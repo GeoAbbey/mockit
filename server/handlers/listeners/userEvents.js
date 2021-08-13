@@ -13,7 +13,7 @@ export const userEvents = (eventEmitter) => {
     sendTemplateEmail(email, TEMPLATE.USER_SIGNUP, { firstName, otp: otp.value, email });
 
     AccountInfosService.create({ id });
-    LocationService.findOrCreate({ id });
+    LocationService.findOrCreate({ where: { id }, defaults: { id } });
   });
 
   eventEmitter.on(`${EVENT_IDENTIFIERS.USER.GENERATE_NEW_OTP}`, async ({ user, query }) => {
