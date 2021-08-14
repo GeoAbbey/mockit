@@ -11,7 +11,7 @@ const hoistedIOLawyer = (io) => {
     logger(`lawyer:online:location I have received this payload ${payload} 🐥🥶`);
     const isOnline = await LocationServices.findByPk(payload.id);
     if (isOnline.dataValues.online) {
-      await updateDbWithNewLocation(payload, io);
+      await updateDbWithNewLocation(payload, io, isOnline);
       const { recipient } = io;
       if (recipient.assigningId) {
         logger({ assigningId: recipient.assigningId }, "lawyer:online");

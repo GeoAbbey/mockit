@@ -32,14 +32,11 @@ export const startServer = async () => {
         const theUser = await UsersService.findByPk(decodedToken.id);
         if (!theUser)
           return next(
-            new Error(
-              401,
-              "Invalid Email or Password, Kindly contact the admin if this is an anomaly"
-            )
+            new Error("Invalid Email or Password, Kindly contact the admin if this is an anomaly")
           );
 
         if (theUser.dataValues.isAccountSuspended)
-          return next(new Error(401, "You account has been suspended kindly contact the admin"));
+          return next(new Error("You account has been suspended kindly contact the admin"));
         return next();
       });
     } else {
