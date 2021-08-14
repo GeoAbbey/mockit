@@ -38,6 +38,8 @@ export default async ({ app }) => {
     })
   );
 
+  app.get("/api/v1/callback", (req, res) => res.status(200).send(""));
+
   app.get("*", (req, res) =>
     res.status(200).send({
       message: "Welcome to the beginning of nothingness.",
