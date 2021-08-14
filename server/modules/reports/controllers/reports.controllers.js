@@ -79,12 +79,11 @@ class ReportsController {
   async getAllReports(req, res, next) {
     log("getting all reports");
     const {
-      filter,
       replacements,
       query: { paginate = {} },
     } = req;
 
-    const reports = await ReportsService.findMany(filter, replacements, paginate);
+    const reports = await ReportsService.findMany(replacements, paginate);
     const { offset, limit } = pagination(paginate);
 
     return res.status(200).send({
@@ -169,19 +168,12 @@ class ReportsController {
   queryContext(req, res, next) {
     const {
       decodedToken: { role, id },
-      query,
     } = req;
 
-    let filter = "";
     let replacements = {};
-
-    filter = filter
-      ? `${filter} AND "Reports"."reporterId" = '${id}'`
-      : `"Reports"."reporterId" = '${id}'`;
 
     replacements.reporterId = id;
 
-    req.filter = filter;
     req.replacements = replacements;
 
     return next();
