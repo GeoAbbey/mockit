@@ -38,6 +38,15 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         defaultValue: () => 0,
       },
+      walletAmountInNaira: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return this.walletAmount / 100;
+        },
+        set(value) {
+          throw new Error(`Do not try to set the walletAmountInNaira ${value}!`);
+        },
+      },
       id: { type: DataTypes.UUID, allowNull: false, primaryKey: true, allowNull: false },
     },
     {

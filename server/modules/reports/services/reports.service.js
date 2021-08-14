@@ -53,22 +53,17 @@ class ReportsService {
     });
   }
 
-  async findMany(filter, replacements, pageDetails) {
+  async findMany(replacements, pageDetails) {
     debugLog(`retrieving reports`);
     const { limit, offset } = paginate(pageDetails);
 
-    let params = filter ? `WHERE ${filter}` : "";
-
-    const [data] = await models.sequelize.query(
-      `SELECT count("Reports"."id") AS "count" FROM "Reports" AS "Reports" LEFT OUTER JOIN "Users" AS "ownerProfile" ON "Reports"."reporterId" = "ownerProfile"."id" AND ("ownerProfile"."deletedAt" IS NULL) ${params}`,
-      {
-        nest: true,
-        type: QueryTypes.SELECT,
-      }
-    );
+    const [data] = await models.sequelize.query(`SELECT count("Reports"."id") from "Reports"`, {
+      nest: true,
+      type: QueryTypes.SELECT,
+    });
 
     const rows = await models.sequelize.query(
-      `select "Reports".id, "Reports".attachments,"Reports".content, "Reports"."ticketId", "Reports".location, "Reports"."createdAt", "Reports"."updatedAt", "Reports".meta, "Reports"."reporterId", "Users"."profilePic", "Users".email, "Users"."firebaseToken", "Users"."firstName", "Users"."lastName", (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'repost') as reposts, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like') as likes, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like' and "ownerId" =:reporterId) as has_liked, (select count(id) from "Reactions" where "modelId" = "Reports".id and "reactionType" = 'repost' and "modelType" = 'Report' and "ownerId" = :reporterId) as has_reposted, (select count (id) from "Comments" where "reportId" = "Reports".id) as comments from "Reports" INNER JOIN "Users" ON "Reports"."reporterId" = "Users"."id" ${params} ORDER BY "Reports"."createdAt" DESC LIMIT ${limit} OFFSET ${offset};`,
+      `select "Reports".id, "Reports".attachments,"Reports".content, "Reports"."ticketId", "Reports".location, "Reports"."createdAt", "Reports"."updatedAt", "Reports".meta, "Reports"."reporterId", "Users"."profilePic", "Users".email, "Users"."firebaseToken", "Users"."firstName", "Users"."lastName", (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'repost') as reposts, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like') as likes, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like' and "ownerId" =:reporterId) as has_liked, (select count(id) from "Reactions" where "modelId" = "Reports".id and "reactionType" = 'repost' and "modelType" = 'Report' and "ownerId" = :reporterId) as has_reposted, (select count (id) from "Comments" where "reportId" = "Reports".id) as comments from "Reports" INNER JOIN "Users" ON "Reports"."reporterId" = "Users"."id" ORDER BY "Reports"."createdAt" DESC LIMIT ${limit} OFFSET ${offset};`,
       {
         type: QueryTypes.SELECT,
         replacements,
