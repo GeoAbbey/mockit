@@ -51,14 +51,11 @@ class UsersService {
     debugLog(`updating a user with id ${id}`);
     const { address, guarantors, lawyer, profilePic } = oldDetails;
     const handleDocuments = (recent, old) => {
-      console.log({ recent, old }, "🥶");
       return {
-        lawSchoolCertificate: recent.lawSchoolCertificate || old.lawSchoolCertificate,
-        universityCertificate: recent.universityCertificate || old.universityCertificate,
-        votersCard: recent.votersCard || old.votersCard,
-        nationalIDCard: recent.nationalIDCard || old.nationalIDCard,
-        driversLicence: recent.driversLicence || old.driversLicence,
-        internationalPassport: recent.internationalPassport || old.internationalPassport,
+        photoIDOrNIN: recent.photoIDOrNIN || old.photoIDOrNIN,
+        LLBCertificate: recent.LLBCertificate || old.LLBCertificate,
+        NBAReceipt: recent.NBAReceipt || old.NBAReceipt,
+        callToBarCertificate: recent.callToBarCertificate || old.callToBarCertificate,
         others: recent.others || old.others,
       };
     };
