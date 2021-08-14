@@ -45,7 +45,7 @@ class Authenticate {
         if (context !== "verify" && !theUser.dataValues.isVerified)
           return next(createError(401, "Kindly verify your email address to continue"));
         req.userToken = token;
-        req.decodedToken = decodedToken;
+        req.decodedToken = theUser.dataValues;
         return next();
       } catch (error) {
         return next(createError(401, "Token is not valid", error));
