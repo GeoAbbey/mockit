@@ -34,7 +34,7 @@ class DashboardsController {
     let dataSet;
 
     if (search && search.assignedLawyerId)
-      dataSet = await DashboardsService.fulfilledAndPending(assignedLawyerId);
+      dataSet = await DashboardsService.fulfilledAndPending(search.assignedLawyerId);
     else dataSet = await DashboardsService.fulfilledAndPending(null);
 
     return res.status(200).send({
