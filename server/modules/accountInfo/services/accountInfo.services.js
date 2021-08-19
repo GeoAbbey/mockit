@@ -22,10 +22,8 @@ class AccountInfosService {
     return models.AccountInfo.findByPk(id, t);
   }
 
-  async findMany() {}
-
   async update(id, AccountInfoDTO, oldAccountInfo, t = undefined) {
-    const { walletAmount, subscriptionCount } = oldAccountInfo;
+    const { walletAmount, subscriptionCount, pendingAmount } = oldAccountInfo;
 
     const handleAmount = (newValue, previousValue, operation) => {
       if (operation === "add") {
@@ -40,16 +38,28 @@ class AccountInfosService {
 
     return models.AccountInfo.update(
       {
+        pendingAmount:
+          AccountInfoDTO.bookBalance && AccountInfoDTO.bookBalance.info
+            ? handleAmount(
+                AccountInfoDTO.pendingAmount,
+                pendingAmount,
+                AccountInfoDTO.bookBalance.operation
+              )
+            : pendingAmount,
         walletAmount:
-          AccountInfoDTO.info === "wallet"
-            ? handleAmount(AccountInfoDTO.walletAmount, walletAmount, AccountInfoDTO.operation)
+          AccountInfoDTO.wallet && AccountInfoDTO.wallet.info
+            ? handleAmount(
+                AccountInfoDTO.walletAmount,
+                walletAmount,
+                AccountInfoDTO.wallet.operation
+              )
             : walletAmount,
         subscriptionCount:
-          AccountInfoDTO.info === "subscription"
+          AccountInfoDTO.subscription && AccountInfoDTO.subscription.info
             ? handleAmount(
                 AccountInfoDTO.subscriptionCount,
                 subscriptionCount,
-                AccountInfoDTO.operation
+                AccountInfoDTO.subscription.operation
               )
             : subscriptionCount,
       },

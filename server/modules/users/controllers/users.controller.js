@@ -51,6 +51,7 @@ class UsersController {
 
   createAnAdmin = async (req, res, next) => {
     req.body.password = "Zapp101";
+    req.body.isVerified = true;
 
     return this.signUp(req, res, next);
   };
@@ -59,7 +60,7 @@ class UsersController {
     let { email, password } = req.body;
     email = email.trim().toLowerCase();
     log(`login in an existing user with email ${email}`);
-    const user = await UsersService.findOne(email);
+    const user = await UsersService.findOne({ email });
     if (!user) return next(createError(404, "User not found"));
 
     const match = await HandlePassword.compareHash(password, user.password);
@@ -91,7 +92,7 @@ class UsersController {
       decodedToken: { email, id },
     } = req;
     log(`changing password for a user with email ${email}`);
-    const user = await UsersService.findOne(email);
+    const user = await UsersService.findOne({ email });
     if (!user) return next(createError(404, "User not found"));
 
     const match = await HandlePassword.compareHash(password, user.password);
@@ -292,7 +293,7 @@ class UsersController {
       if (!identifier) return next(createError(403, "means of identification must be supplied"));
       log(`validating that user with identifier ${identifier} exists`);
       const user = req.body.email
-        ? await UsersService.findOne(identifier)
+        ? await UsersService.findOne({ email: identifier })
         : await UsersService.findByPk(identifier);
 
       if (user && context === "signup")

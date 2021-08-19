@@ -1,4 +1,5 @@
 import debug from "debug";
+import { ROLES } from "../../../constants";
 import models from "../../../models";
 import CooperateService from "../../cooperate/services/cooperate.services";
 import { paginate } from "../../helpers";
@@ -22,14 +23,15 @@ class CooperateAccessService {
   }
 
   async findOrCreate({ ownerId, userEmail }) {
-    const foundUser = await UsersService.findOne(userEmail);
-    if (!foundUser) return { success: false, message: `user doesn't exist on the app` };
+    const foundUser = await UsersService.findOne({ email: userEmail, role: ROLES.USER });
+    if (!foundUser)
+      return { success: false, message: `No with the provided email address ${userEmail} ` };
 
     const [data, isCreated] = await models.CooperateAccess.findOrCreate({
-      where: { ownerId, userEmail },
+      where: { ownerId, userAccessId: foundUser.dataValues.id },
       defaults: {
         ownerId,
-        userEmail,
+        userAccessId: foundUser.dataValues.id,
       },
     });
 
@@ -38,10 +40,10 @@ class CooperateAccessService {
     else return { success: false, message: `user already exists on the account` };
   }
 
-  async findOne({ userEmail, ownerId }, t = undefined) {
-    debugLog(`looking for an access code with email ${userEmail}`);
+  async findOne({ userAccessId, ownerId }, t = undefined) {
+    debugLog(`looking for an access code with email ${userAccessId}`);
 
-    return models.CooperateAccess.findOne({ where: { userEmail, ownerId } });
+    return models.CooperateAccess.findOne({ where: { userAccessId, ownerId } });
   }
 
   async findMany(filter, pageDetails) {
@@ -53,13 +55,21 @@ class CooperateAccessService {
       where: { ...filter },
       ...paginate(pageDetails),
       order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: models.User,
+          as: "userWithAccessProfile",
+          attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
+          required: false,
+        },
+      ],
     });
   }
 
-  async remove({ userEmail, ownerId }, t = undefined) {
-    debugLog(`deleting access for user with email ${userEmail}`);
+  async remove({ userAccessId, ownerId }, t = undefined) {
+    debugLog(`deleting access for user with email ${userAccessId}`);
     return models.CooperateAccess.destroy({
-      where: { userEmail, ownerId },
+      where: { userAccessId, ownerId },
       ...t,
     });
   }

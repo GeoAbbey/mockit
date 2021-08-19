@@ -2,6 +2,7 @@ import debug from "debug";
 import createError from "http-errors";
 
 import AuthCodesService from "../services/auth-code.services";
+import { paginate as pagination } from "../../helpers";
 const log = debug("app:AuthCodes-controller");
 
 class AuthCodesController {
@@ -25,15 +26,22 @@ class AuthCodesController {
   }
 
   async getAuthCodes(req, res, next) {
-    const { decodedToken: { id }} = req;
+    const {
+      decodedToken: { id },
+      query: { paginate = {} },
+    } = req;
     log(`retrieving all auth code with for user with id ${id}`);
-
-    const cards = await AuthCodesService.findMany(id);
+    const { offset, limit } = pagination(paginate);
+    const cards = await AuthCodesService.findMany(id, paginate);
 
     return res.status(200).send({
       success: true,
       message: "credit successfully deleted",
-      cards,
+      cards: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...cards,
+      },
     });
   }
 

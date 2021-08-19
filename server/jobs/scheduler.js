@@ -5,7 +5,7 @@ const config = configOptions[env];
 import { agendaInstance } from "./index";
 
 export const schedule = {
-  createPayout: async (data) => {
-    await agendaInstance.schedule(config.payoutInterval, "create-payout", data);
+  completePayout: async (data) => {
+    await agendaInstance.schedule(config.payoutInterval, "complete-payout", data);
   },
 };

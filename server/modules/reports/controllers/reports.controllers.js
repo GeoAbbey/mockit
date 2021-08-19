@@ -32,9 +32,12 @@ class ReportsController {
 
   reportExits(context) {
     return async (req, res, next) => {
-      const { id } = req.params;
+      const {
+        params: { id },
+        decodedToken,
+      } = req;
       log(`verifying that an report with id ${id} exits`);
-      const report = await ReportsService.find(id, context);
+      const report = await ReportsService.find(id, context, decodedToken.id);
       if (!report) return next(createError(404, "The report can not be found"));
       req.oldReport = report;
       return next();

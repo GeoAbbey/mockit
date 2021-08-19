@@ -11,6 +11,16 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.belongsTo(models.User, {
+        foreignKey: "ownerId",
+        onDelete: "CASCADE",
+        as: "ownerProfile",
+      });
+      this.belongsTo(models.User, {
+        foreignKey: "userAccessId",
+        as: "userWithAccessProfile",
+        onDelete: "CASCADE",
+      });
       this.belongsTo(models.Cooperate, {
         foreignKey: "ownerId",
       });
@@ -18,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   CooperateAccess.init(
     {
-      userEmail: {
+      userAccessId: {
         type: DataTypes.UUID,
         allowNull: false,
       },

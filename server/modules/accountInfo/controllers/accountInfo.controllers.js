@@ -63,8 +63,6 @@ class AccountInfosController {
   async getAccountInfoBalance(req, res, next) {
     const { oldAccountInfo } = req;
 
-    oldAccountInfo.walletAmount = oldAccountInfo.walletAmount / 100;
-
     return res.status(200).send({
       success: true,
       message: "account info successfully retrieved",

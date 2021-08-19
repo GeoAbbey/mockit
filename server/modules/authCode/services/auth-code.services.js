@@ -1,5 +1,6 @@
 import debug from "debug";
 import models from "../../../models";
+import { paginate } from "../../helpers";
 
 const debugLog = debug("app:AuthCodes-service");
 
@@ -23,10 +24,14 @@ class AuthCodesService {
     return models.AuthCode.findByPk(id, t);
   }
 
-  async findMany(id) {
+  async findMany(id, pageDetails) {
     debugLog(`looking for an auth code with id ${id}`);
 
-    return models.AuthCode.findAll({ where: { ownerId: id } });
+    return models.AuthCode.findAndCountAll({
+      where: { ownerId: id },
+      ...paginate(pageDetails),
+      order: [["createdAt", "DESC"]],
+    });
   }
 
   async remove(id, t = undefined) {

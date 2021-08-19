@@ -1,9 +1,9 @@
 "use strict";
 import { v4 } from "uuid";
-
 const { Model } = require("sequelize");
+
 module.exports = (sequelize, DataTypes) => {
-  class Payout extends Model {
+  class Withdrawal extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,10 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.User, { foreignKey: "ownerId", as: "lawyerProfile" });
+      this.belongsTo(models.User, { foreignKey: "ownerId" });
+      this.belongsTo(models.AccountInfo, { foreignKey: "id" });
     }
   }
-  Payout.init(
+  Withdrawal.init(
     {
       id: {
         type: DataTypes.UUID,
@@ -22,26 +23,22 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: () => v4(),
       },
-      ticketId: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      status: {
-        type: DataTypes.STRING,
-        validate: {
-          isIn: [["in-progress", "completed"]],
-        },
-        defaultValue: "in-progress",
-      },
       amount: { type: DataTypes.INTEGER, allowNull: false },
       ownerId: { type: DataTypes.UUID, allowNull: false },
-      modelType: { allowNull: false, type: DataTypes.STRING },
-      modelId: { allowNull: false, type: DataTypes.STRING },
+      data: { allowNull: false, type: DataTypes.JSONB },
+      payStackId: {
+        allowNull: false,
+        type: DataTypes.STRING,
+      },
+      code: {
+        allowNull: false,
+        type: DataTypes.STRING,
+      },
     },
     {
       sequelize,
-      modelName: "Payout",
+      modelName: "Withdrawal",
     }
   );
-  return Payout;
+  return Withdrawal;
 };

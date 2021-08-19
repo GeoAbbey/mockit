@@ -10,14 +10,16 @@ import PayInServices from "../../payIn/services/pay-in.services";
 import AuthCodeServices from "../../authCode/services/auth-code.services";
 import CooperateService from "../../cooperate/services/cooperate.services";
 import CooperateAccessService from "../../cooperateAccess/services/cooperate-access.services";
+import PayOutServices from "../../payout/services/payout.services";
+import PayoutsController from "../../payout/controllers/payout.controller";
 
 const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
 import { EVENT_IDENTIFIERS } from "../../../constants";
 import { toKobo } from "../../../utils/toKobo";
-import { paginate } from "../../helpers";
 
 const config = configOptions[env];
+const getAmount = PayoutsController.getAmount;
 
 const debugLog = debug("app:payment-service");
 
@@ -28,6 +30,104 @@ class PaymentsService {
       PaymentsService.instance = new PaymentsService();
     }
     return PaymentsService.instance;
+  }
+
+  async initializePayout(theModel) {
+    debugLog(
+      `Initializing payment for User with ID ${theModel.assignedLawyerId} for ${theModel.type} with ID of ${theModel.id}`
+    );
+    try {
+      let result = await models.sequelize.transaction(async (t) => {
+        const oldAccountInfo = await AccountInfosService.find(theModel.assignedLawyerId, {
+          transaction: t,
+        });
+
+        const [, [newAccountInfo]] = await AccountInfosService.update(
+          oldAccountInfo.dataValues.id,
+          {
+            bookBalance: {
+              info: true,
+              operation: "add",
+            },
+            pendingAmount: await getAmount(theModel.type, theModel.id),
+          },
+          oldAccountInfo,
+          { transaction: t }
+        );
+
+        const thePayout = await PayOutServices.create({
+          ownerId: theModel.assignedLawyerId,
+          modelType: theModel.type,
+          modelId: theModel.id,
+          ticketId: theModel.ticketId,
+          amount: await getAmount(theModel.type, theModel.id),
+        });
+
+        return {
+          success: true,
+          message: `Payment has been successfully initialized.`,
+        };
+      });
+      return result;
+    } catch (error) {
+      console.log({ error }, "🐒");
+      return error;
+    }
+  }
+
+  async completePayout(theModel) {
+    debugLog(
+      `Completing payment for User with ID ${theModel.assignedLawyerId} for ${theModel.type} with ID of ${theModel.id}`
+    );
+    try {
+      let result = await models.sequelize.transaction(async (t) => {
+        const oldAccountInfo = await AccountInfosService.find(theModel.assignedLawyerId, {
+          transaction: t,
+        });
+
+        const oldPayout = await PayOutServices.findOne({
+          ownerId: theModel.assignedLawyerId,
+          modelType: theModel.type,
+          modelId: theModel.id,
+          ticketId: theModel.ticketId,
+        });
+
+        const [, [newAccountInfo]] = await AccountInfosService.update(
+          oldAccountInfo.dataValues.id,
+          {
+            bookBalance: {
+              info: true,
+              operation: "deduct",
+            },
+            wallet: {
+              info: true,
+              operation: "add",
+            },
+            pendingAmount: oldPayout.dataValues.amount,
+            walletAmount: oldPayout.dataValues.amount,
+          },
+          oldAccountInfo,
+          { transaction: t }
+        );
+
+        const thePayout = await PayOutServices.update(
+          oldPayout.dataValues.id,
+          {
+            status: "completed",
+          },
+          oldPayout.dataValues
+        );
+
+        return {
+          success: true,
+          message: `Payment has been successfully completed.`,
+        };
+      });
+      return result;
+    } catch (error) {
+      console.log({ error }, "🐒");
+      return error;
+    }
   }
 
   async payInHistory(filter, pageDetails) {
@@ -49,6 +149,7 @@ class PaymentsService {
       invitation: this.handleInvitation,
       response: this.handleResponse,
       smallClaim: this.handleSmallClaim,
+      cooperate: this.handleCooperateTransfer,
     };
 
     if (PaymentDTO.code) return this.handleCooperate(PaymentDTO, eventEmitter, decodedToken);
@@ -134,7 +235,7 @@ class PaymentsService {
 
     return result;
   }
-  async handleSingleSmallClaim({ data }) {
+  async handleSingleSmallClaim({ data, eventEmitter, decodedToken }) {
     console.log({ data }, "🐥");
 
     let result = await models.sequelize.transaction(async (t) => {
@@ -191,6 +292,9 @@ class PaymentsService {
         },
         { transaction: t }
       );
+
+      eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken);
+
       return { success: true, service: paidSmallClaim };
     });
 
@@ -215,8 +319,10 @@ class PaymentsService {
       const [, [newAccountInfo]] = await AccountInfosService.update(
         metadata.id,
         {
-          info: "wallet",
-          operation: "add",
+          wallet: {
+            info: true,
+            operation: "add",
+          },
           walletAmount: amount,
         },
         oldAccountInfo,
@@ -327,8 +433,10 @@ class PaymentsService {
       const [, [newAccountInfo]] = await AccountInfosService.update(
         metadata.id,
         {
-          info: "subscription",
-          operation: "add",
+          subscription: {
+            info: true,
+            operation: "add",
+          },
           subscriptionCount: parseInt(amount / 100 / parseInt(config.costOfSubscriptionUnit)),
         },
         oldAccountInfo,
@@ -373,7 +481,7 @@ class PaymentsService {
     const oldCooperateInfo = await CooperateService.findOne(args.code);
 
     const hasAccess = await CooperateAccessService.findOne({
-      userEmail: decodedToken.email,
+      userAccessId: decodedToken.id,
       ownerId: oldCooperateInfo.dataValues.id,
     });
 
@@ -554,8 +662,10 @@ class PaymentsService {
         const newAccountInfo = await AccountInfosService.update(
           args.id,
           {
-            info: "wallet",
-            operation: "deduct",
+            wallet: {
+              info: true,
+              operation: "deduct",
+            },
             walletAmount: toKobo(config.invitationCost),
           },
           oldAccountInfo,
@@ -595,6 +705,73 @@ class PaymentsService {
     }
   }
 
+  async handleCooperateTransfer(args, emitter, decodedToken) {
+    debugLog("Transferring funds from personal wallet to cooperate wallet");
+
+    //find the personal wallet and check that he has above the specified amount
+    const oldAccountInfo = await AccountInfosService.find(args.id);
+    if (toKobo(args.amount) > oldAccountInfo.dataValues.walletAmount) {
+      return {
+        success: false,
+        message: `Insufficient funds: amount ${args.amount} is more than available balance of ${
+          oldAccountInfo.dataValues.walletAmount / 100
+        }`,
+      };
+    }
+
+    try {
+      let result = await models.sequelize.transaction(async (t) => {
+        //delete from the specified account
+        const newAccountInfo = await AccountInfosService.update(
+          args.id,
+          {
+            wallet: {
+              info: true,
+              operation: "deduct",
+            },
+            walletAmount: toKobo(args.amount),
+          },
+          oldAccountInfo,
+          { transaction: t }
+        );
+
+        const oldCooperateInfo = await CooperateService.find(args.id);
+
+        //add to the cooperate account
+        const newCooperateInfo = await CooperateService.update(
+          oldCooperateInfo.dataValues.id,
+          {
+            operation: "add",
+            walletAmount: toKobo(args.amount),
+          },
+          oldCooperateInfo,
+          { transaction: t }
+        );
+
+        //create receipt
+        const receipt = await TransactionService.create(
+          {
+            ownerId: args.id,
+            performedBy: args.id,
+            modelType: "cooperate",
+            amount: toKobo(args.amount),
+          },
+          { transaction: t }
+        );
+
+        return {
+          success: true,
+          message: "Transfer successfully executed",
+        };
+      });
+
+      return result;
+    } catch (error) {
+      console.log({ error }, "🐒");
+      return error;
+    }
+  }
+
   async handleSmallClaim(args, emitter, decodedToken) {
     debugLog("handling payment for small claim", args);
 
@@ -616,13 +793,6 @@ class PaymentsService {
         }
 
         const oldAccountInfo = await AccountInfosService.find(args.id, { transaction: t });
-
-        // const lawyerId = oldClaim.dataValues.assignedLawyerId;
-        // const {
-        //   dataValues: { baseCharge, serviceCharge },
-        // } = oldClaim.dataValues.interestedLawyers.find(
-        //   (lawyer) => lawyer.lawyerId === args.lawyerId
-        // );
 
         const lawyerOfInterest = oldClaim.dataValues.interestedLawyers.find(
           (lawyer) => lawyer.lawyerId === args.lawyerId
@@ -650,8 +820,10 @@ class PaymentsService {
         const newAccountInfo = await AccountInfosService.update(
           args.id,
           {
-            info: "wallet",
-            operation: "deduct",
+            wallet: {
+              info: true,
+              operation: "deduct",
+            },
             walletAmount: totalCostOfService,
           },
           oldAccountInfo,
@@ -697,8 +869,10 @@ class PaymentsService {
         const newAccountInfo = await AccountInfosService.update(
           args.id,
           {
-            info: "subscription",
-            operation: "add",
+            subscription: {
+              operation: "add",
+              info: true,
+            },
             subscriptionCount: 1,
           },
           oldAccountInfo,
@@ -752,8 +926,10 @@ class PaymentsService {
         const newAccountInfo = await AccountInfosService.update(
           args.id,
           {
-            info: "subscription",
-            operation: "deduct",
+            subscription: {
+              operation: "deduct",
+              info: true,
+            },
             subscriptionCount: 1,
           },
           oldAccountInfo,

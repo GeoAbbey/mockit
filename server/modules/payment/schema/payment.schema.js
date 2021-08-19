@@ -1,8 +1,15 @@
 import Joi from "joi";
 
 export const PaymentWithSubOrWalletSchema = Joi.object().keys({
-  modelType: Joi.string().valid("response", "smallClaim", "invitation").required(),
-  modelId: Joi.string().guid({ version: "uuidv4" }).required(),
+  modelType: Joi.string().valid("response", "smallClaim", "invitation", "cooperate").required(),
+  modelId: Joi.string().guid({ version: "uuidv4" }).when("modelType", {
+    not: "cooperate",
+    then: Joi.required(),
+  }),
+  amount: Joi.number().when("modelType", {
+    is: "cooperate",
+    then: Joi.required(),
+  }),
   lawyerId: Joi.string(),
 });
 

@@ -38,9 +38,18 @@ module.exports = (sequelize, DataTypes) => {
       });
       this.hasMany(models.PayIn, { foreignKey: "ownerId", as: "oneTimePayments" });
       this.hasMany(models.AuthCode, { foreignKey: "ownerId" });
-      this.hasMany(models.Payout, { foreignKey: "lawyerId" });
+      this.hasMany(models.Payout, { foreignKey: "ownerId" });
       this.hasOne(models.Cooperate, { foreignKey: "id" });
-      this.hasMany(models.CooperateAccess, { foreignKey: "ownerId" });
+      this.hasMany(models.CooperateAccess, {
+        foreignKey: "ownerId",
+        onDelete: "CASCADE",
+        as: "accessOwnerProfile",
+      });
+      this.hasMany(models.CooperateAccess, {
+        foreignKey: "userAccessId",
+        as: "userWithAccessProfile",
+        onDelete: "CASCADE",
+      });
     }
   }
 

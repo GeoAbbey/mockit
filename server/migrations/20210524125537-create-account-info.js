@@ -20,6 +20,7 @@ module.exports = {
       subscriptionCount: {
         type: Sequelize.INTEGER,
       },
+      pendingAmount: { type: Sequelize.INTEGER },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -1,16 +1,18 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("CooperateAccesses", {
+    await queryInterface.createTable("Withdrawals", {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
+      amount: {
+        type: Sequelize.INTEGER,
+      },
       ownerId: {
         type: Sequelize.UUID,
-        allowNull: false,
         onDelete: "CASCADE",
         references: {
           model: "Users",
@@ -18,14 +20,14 @@ module.exports = {
           as: "ownerId",
         },
       },
-      userAccessId: {
-        type: Sequelize.UUID,
+      data: { allowNull: false, type: Sequelize.JSONB },
+      payStackId: {
         allowNull: false,
-        references: {
-          model: "Users",
-          key: "id",
-          as: "userAccessId",
-        },
+        type: Sequelize.STRING,
+      },
+      code: {
+        allowNull: false,
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,
@@ -38,6 +40,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("CooperateAccesses");
+    await queryInterface.dropTable("Withdrawals");
   },
 };

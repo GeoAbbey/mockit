@@ -8,31 +8,26 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
-      lawyerId: {
+      ownerId: {
         type: Sequelize.UUID,
         onDelete: "CASCADE",
         references: {
           model: "Users",
           key: "id",
-          as: "lawyerId",
+          as: "ownerId",
         },
+      },
+      amount: { type: Sequelize.INTEGER },
+      status: {
+        type: Sequelize.STRING,
       },
       ticketId: {
         type: Sequelize.STRING,
         unique: true,
         allowNull: false,
       },
-      code: {
-        allowNull: false,
-        type: Sequelize.STRING,
-      },
       modelType: { allowNull: false, type: Sequelize.STRING },
       modelId: { allowNull: false, type: Sequelize.STRING },
-      payStackId: {
-        allowNull: false,
-        type: Sequelize.STRING,
-      },
-      data: { allowNull: false, type: Sequelize.JSONB },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -1,5 +1,6 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import AuthCodesController from "./controllers/auth-code.controllers";
+import { queryOptions } from "./schema/auth-codes.schema";
 
 import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
 
@@ -23,7 +24,11 @@ export class AuthCodeRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${this.path}/auth-codes`)
-      .get([Authenticate.verifyToken(), wrapCatch(AuthCodesController.getAuthCodes)]);
+      .get([
+        Authenticate.verifyToken(),
+        middleware({ schema: queryOptions, property: "query" }),
+        wrapCatch(AuthCodesController.getAuthCodes),
+      ]);
 
     return this.app;
   }

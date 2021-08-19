@@ -1,5 +1,6 @@
 import debug from "debug";
 import { EVENT_IDENTIFIERS, NOTIFICATION_DATA } from "../../constants";
+import PaymentsService from "../../modules/payment/services/payment.services";
 
 import {
   sendNotificationToLawyers,
@@ -8,7 +9,6 @@ import {
 } from "./helpers";
 const logger = debug("app:handlers:listeners:small-claim-events");
 
-import RecipientsService from "../../modules/recipient/services/recipient.services";
 import PayoutsController from "../../modules/payout/controllers/payout.controller";
 
 import { schedule } from "../../jobs/scheduler";
@@ -56,25 +56,16 @@ export const smallClaimEvents = (eventEmitter) => {
       "ownerId"
     );
 
-    const {
-      dataValues: { assignedLawyerId, id, ownerId },
-    } = claim;
-
-    const lawyerRecipientDetails = await RecipientsService.find(assignedLawyerId);
-
     const data = {
-      recipient: lawyerRecipientDetails.dataValues.code,
-      reason: JSON.stringify({
-        modelType: "smallClaim",
-        modelId: id,
-        text: "payment made from mark as complete",
-        id: ownerId,
-        lawyerId: assignedLawyerId,
-      }),
-      amount: await getAmount("smallClaim", id),
+      ...claim.dataValues,
+      type: "smallClaim",
     };
 
-    await schedule.createPayout(data);
+    const initializedPayout = await PaymentsService.initializePayout(data);
+
+    initializedPayout.success && schedule.completePayout(data);
+
+    console.log({ initializedPayout }, "🍅");
   });
 
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS, async (data, decodedToken) => {
