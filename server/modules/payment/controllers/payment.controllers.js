@@ -90,7 +90,7 @@ class PaymentsController {
     const eventEmitter = req.app.get("eventEmitter");
 
     const {
-      body: { modelId, modelType, lawyerId = undefined, amount = undefined },
+      body: { modelId, modelType, lawyerId = undefined, amount = undefined, quantity = undefined },
       params: { code = undefined },
       decodedToken,
     } = req;
@@ -99,6 +99,7 @@ class PaymentsController {
       {
         id: decodedToken.id,
         modelId,
+        quantity,
         lawyerId,
         amount,
         modelType,

@@ -150,6 +150,7 @@ class PaymentsService {
       response: this.handleResponse,
       smallClaim: this.handleSmallClaim,
       cooperate: this.handleCooperateTransfer,
+      subscriptionCount: this.handleSubscriptionCount,
     };
 
     if (PaymentDTO.code) return this.handleCooperate(PaymentDTO, eventEmitter, decodedToken);
@@ -696,6 +697,67 @@ class PaymentsService {
         });
 
         return { success: true, service: paidInvitation };
+      });
+
+      return result;
+    } catch (error) {
+      console.log({ error }, "🐒");
+      return error;
+    }
+  }
+
+  async handleSubscriptionCount(args, emitter, decodedToken) {
+    debugLog("Purchasing subscription count from my personal wallet");
+    console.log({ args }, "🤯");
+
+    const oldAccountInfo = await AccountInfosService.find(args.id);
+    const amount = toKobo(config.costOfSubscriptionUnit * args.quantity);
+    if (amount > oldAccountInfo.dataValues.walletAmount) {
+      return {
+        success: false,
+        message: `Insufficient funds: quantity of ${
+          args.quantity
+        } is more than available balance of ${oldAccountInfo.dataValues.walletAmount / 100}`,
+      };
+    }
+
+    try {
+      let result = await models.sequelize.transaction(async (t) => {
+        //delete from the specified account
+        const newAccountInfo = await AccountInfosService.update(
+          args.id,
+          {
+            wallet: {
+              info: true,
+              operation: "deduct",
+            },
+            subscription: {
+              info: true,
+              operation: "add",
+            },
+            subscriptionCount: parseInt(args.quantity),
+            walletAmount: amount,
+          },
+          oldAccountInfo,
+          { transaction: t }
+        );
+
+        //create receipt
+        const receipt = await TransactionService.create(
+          {
+            ownerId: args.id,
+            performedBy: args.id,
+            modelType: args.modelType,
+            notes: `Unit price of ${config.costOfSubscriptionUnit}`,
+            amount: amount,
+          },
+          { transaction: t }
+        );
+
+        return {
+          success: true,
+          message: "Transfer successfully executed",
+        };
       });
 
       return result;

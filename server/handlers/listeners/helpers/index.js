@@ -159,7 +159,7 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (
       content: JSON.stringify(
         NOTIFICATION_DATA.SMALL_CLAIM[action]({
           sender_id: data.dataValues.ownerId,
-          status_id: data.dataValues.id,
+          status_id: data.dataValues.modelId,
           sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
           sender_firebase_token: decodedToken.firebaseToken,
         })
@@ -172,7 +172,7 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (
     tokens: [ownerProfile.firebaseToken],
     data: NOTIFICATION_DATA.SMALL_CLAIM[action]({
       sender_id: decodedToken.id,
-      status_id: data.dataValues.id,
+      status_id: data.dataValues.modelId,
       sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
       sender_firebase_token: decodedToken.firebaseToken,
     }),
@@ -183,7 +183,7 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (
     notice,
     NOTIFICATION_DATA.SMALL_CLAIM[action]({
       sender_id: data.dataValues.ownerId,
-      status_id: data.dataValues.id,
+      status_id: data.dataValues.modelId,
       sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
       sender_firebase_token: decodedToken.firebaseToken,
     })
