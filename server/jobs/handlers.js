@@ -1,9 +1,9 @@
-import PayoutsService from "../modules/payout/services/payout.services";
+import PaymentService from "../modules/payment/services/payment.services";
 
 export const JobHandlers = {
-  createPayout: async (job, done) => {
+  completePayout: async (job, done) => {
     const { data } = job.attrs;
-    await PayoutsService.create(data);
+    await PaymentService.completePayout(data);
     done();
   },
 };

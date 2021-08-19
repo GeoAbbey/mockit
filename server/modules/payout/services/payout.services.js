@@ -21,29 +21,34 @@ class PayoutsService {
   async create(PayoutDTO) {
     debugLog("creating a Payout");
     //check if payment has already been made for the service.
-    const { lawyerId, modelId, modelType } = JSON.parse(PayoutDTO.reason);
+    const { ownerId, modelId, modelType } = PayoutDTO;
 
-    const isAlreadyPaid = await models.Payout.findOne({ where: { lawyerId, modelId, modelType } });
+    const isAlreadyPaid = await models.Payout.findOne({ where: { ownerId, modelId, modelType } });
     if (isAlreadyPaid) {
-      debugLog(`Lawyer with ID ${lawyerId} has already been paid for ${modelType} with ${modelId}`);
+      debugLog(`User with ID ${ownerId} has already been paid for ${modelType} with ${modelId}`);
       return {
         success: false,
-        response: `Lawyer with ID ${lawyerId} has already been paid for ${modelType} with ${modelId}`,
+        response: `User with ID ${ownerId} has already been paid for ${modelType} with ${modelId}`,
       };
     } else {
-      const res = await payment.transfer(PayoutDTO);
-      if (res.success === false) return res;
-
-      const dataFromPayStack = {
-        data: res.response.data,
-        code: res.response.data.transfer_code,
-        payStackId: res.response.data.id,
-        modelType,
-        modelId,
-        lawyerId,
-      };
-      return models.Payout.create(dataFromPayStack);
+      return models.Payout.create({ ...PayoutDTO, status: "in-progress" });
     }
+  }
+
+  async update(id, PayoutDTO, oldPayoutDTO, t = undefined) {
+    debugLog(`updating status of payout to ${PayoutDTO.status}`);
+    const { status } = oldPayoutDTO;
+    return models.Payout.update(
+      {
+        status: PayoutDTO.status || status,
+      },
+      { where: { id }, returning: true, ...t }
+    );
+  }
+
+  findOne(filter) {
+    debugLog(`retrieving payout with the following data ${JSON.stringify(filter)}`);
+    return models.Payout.findOne({ where: { ...filter } });
   }
 
   async getHistory(filter, pageDetails) {

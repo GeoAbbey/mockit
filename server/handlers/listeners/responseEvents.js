@@ -11,12 +11,7 @@ const config = configOptions[env];
 import { sendNotificationToUserOrLawyer, sendNotificationToEligibleLawyers } from "./helpers";
 const logger = debug("app:handlers:listeners:response-events");
 
-import RecipientsService from "../../modules/recipient/services/recipient.services";
-import PayoutsController from "../../modules/payout/controllers/payout.controller";
-
 import { schedule } from "../../jobs/scheduler";
-
-const getAmount = PayoutsController.getAmount;
 
 export const responseEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, async ({ response, decodedToken }) => {
@@ -170,25 +165,17 @@ export const responseEvents = (eventEmitter) => {
         "MARK_AS_COMPLETED",
         "ownerId"
       );
-      const {
-        dataValues: { assignedLawyerId, id, ownerId },
-      } = response;
-
-      const lawyerRecipientDetails = await RecipientsService.find(assignedLawyerId);
 
       const data = {
-        recipient: lawyerRecipientDetails.dataValues.code,
-        reason: JSON.stringify({
-          modelType: "response",
-          modelId: id,
-          text: "payment made from mark as complete",
-          id: ownerId,
-          lawyerId: assignedLawyerId,
-        }),
-        amount: await getAmount("response"),
+        ...response.dataValues,
+        type: "response",
       };
 
-      await schedule.createPayout(data);
+      const initializedPayout = await PaymentsService.initializePayout(data);
+
+      initializedPayout.success && schedule.completePayout(data);
+
+      console.log({ initializedPayout }, "🍅");
     }
   );
 

@@ -1,6 +1,6 @@
 "use strict";
 
-import { nanoid } from "nanoid";
+import { customAlphabet } from "nanoid";
 
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
@@ -33,7 +33,14 @@ module.exports = (sequelize, DataTypes) => {
       },
       contactName: { type: DataTypes.STRING, allowNull: false },
       contactPhone: { type: DataTypes.STRING, allowNull: false },
-      code: { type: DataTypes.STRING, allowNull: false, defaultValue: () => nanoid(15) },
+      code: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: customAlphabet(
+          "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+          10
+        ),
+      },
       walletAmount: {
         type: DataTypes.INTEGER,
         defaultValue: () => 0,

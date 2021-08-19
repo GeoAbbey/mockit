@@ -34,10 +34,10 @@ class UsersService {
     return models.User.findByPk(id);
   }
 
-  async findOne(email) {
-    debugLog(`retrieving a user with email ${email}`);
+  async findOne(filter) {
+    debugLog(`retrieving a user with email ${JSON.stringify(filter)}`);
     return models.User.findOne({
-      where: { email },
+      where: { ...filter },
     });
   }
 

@@ -6,12 +6,12 @@ agenda
   .on("error", () => console.log("Agenda connection error!"));
 
 agenda.define(
-  "create-payout",
+  "complete-payout",
   {
     priority: "normal",
     concurrency: 10,
   },
-  JobHandlers.createPayout
+  JobHandlers.completePayout
 );
 
 agenda.start();

@@ -90,7 +90,7 @@ class PaymentsController {
     const eventEmitter = req.app.get("eventEmitter");
 
     const {
-      body: { modelId, modelType, lawyerId = undefined },
+      body: { modelId, modelType, lawyerId = undefined, amount = undefined },
       params: { code = undefined },
       decodedToken,
     } = req;
@@ -100,6 +100,7 @@ class PaymentsController {
         id: decodedToken.id,
         modelId,
         lawyerId,
+        amount,
         modelType,
         code,
       },
@@ -110,7 +111,7 @@ class PaymentsController {
     if (!payment.success) return next(createError(400, `${payment.message}`));
     return res.status(201).send({
       success: true,
-      message: "payment successfully created",
+      message: payment.message ? payment.message : "payment successfully created",
       payment: payment.service,
     });
   }

@@ -55,10 +55,10 @@ class CooperateAccessController {
 
   async deleteCooperateAccess(req, res, next) {
     const {
-      body: { userEmail },
+      params: { id: userAccessId },
       decodedToken: { id: ownerId },
     } = req;
-    const found = await CooperateAccessService.remove({ userEmail, ownerId });
+    const found = await CooperateAccessService.remove({ userAccessId, ownerId });
 
     res.status(201).send({
       success: true,
@@ -69,10 +69,10 @@ class CooperateAccessController {
 
   async cooperateAccessExists(req, res, next) {
     const {
-      body: { userEmail },
+      params: { id: userAccessId },
       decodedToken: { id: ownerId },
     } = req;
-    const found = await CooperateAccessService.findOne({ userEmail, ownerId });
+    const found = await CooperateAccessService.findOne({ userAccessId, ownerId });
     if (!found) return next(createError(404, `The resource can not be found`));
 
     req.oldCooperateAccess = found;
@@ -101,24 +101,14 @@ class CooperateAccessController {
 
     let filter = {};
 
-    const commonOptions = () => {
-      if (query.search && query.search.userEmail) {
-        filter = { ...filter, userEmail: { [Op.iLike]: `%${query.search.userEmail}%` } };
-      }
-    };
-
     if (role === "admin" || role === "super-admin") {
       if (query.search && query.search.ownerId) {
         filter = { ...filter, ownerId: query.search.ownerId };
       }
-
-      commonOptions();
     }
 
     if (role === "user" || role === "lawyer") {
       filter = { ...filter, ownerId: id };
-
-      commonOptions();
     }
 
     req.filter = filter;

@@ -59,8 +59,8 @@ export const NOTIFICATION_DATA = {
       }),
     MARK_AS_COMPLETED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
       generic({
-        title: "Police Invitation Created",
-        body: "Kindly Indicate Interest to get assigned to the case",
+        title: "Police Invitation Completed",
+        body: "Kindly drop a review for the lawyer",
         sender_firebase_token,
         sender_id,
         status_id,
@@ -158,8 +158,8 @@ export const NOTIFICATION_DATA = {
       }),
     MARK_AS_COMPLETED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
       generic({
-        title: "Small Claims Created",
-        body: "Kindly Indicate Interest to get assigned to the case",
+        title: "Small Claims Completed",
+        body: "Kindly drop a review for the lawyer",
         sender_firebase_token,
         sender_id,
         status_id,
