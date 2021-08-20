@@ -1,5 +1,6 @@
 "use strict";
 import { v4 } from "uuid";
+import { nanoid } from "nanoid";
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
@@ -24,19 +25,43 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: () => v4(),
       },
       amount: { type: DataTypes.INTEGER, allowNull: false },
+      amountInNaira: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return this.amount / 100;
+        },
+        set(value) {
+          throw new Error(`Do not try to set the  pendingAmountInNaira ${value}!`);
+        },
+      },
+      status: {
+        type: DataTypes.STRING,
+        validate: {
+          isIn: [["otp", "success"]],
+        },
+      },
+      approveBy: { type: DataTypes.UUID },
+      reference: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      ticketId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        defaultValue: () => nanoid(10),
+      },
       ownerId: { type: DataTypes.UUID, allowNull: false },
       data: { allowNull: false, type: DataTypes.JSONB },
-      payStackId: {
-        allowNull: false,
-        type: DataTypes.STRING,
-      },
-      code: {
+      transfer_code: {
         allowNull: false,
         type: DataTypes.STRING,
       },
     },
     {
       sequelize,
+      paranoid: true,
       modelName: "Withdrawal",
     }
   );

@@ -20,12 +20,28 @@ module.exports = {
           as: "ownerId",
         },
       },
-      data: { allowNull: false, type: Sequelize.JSONB },
-      payStackId: {
-        allowNull: false,
+      approveBy: {
+        type: Sequelize.UUID,
+        onDelete: "CASCADE",
+        references: {
+          model: "Users",
+          key: "id",
+          as: "approveBy",
+        },
+      },
+      status: {
         type: Sequelize.STRING,
       },
-      code: {
+      reference: {
+        type: Sequelize.STRING,
+      },
+      ticketId: {
+        type: Sequelize.STRING,
+        unique: true,
+        allowNull: false,
+      },
+      data: { allowNull: false, type: Sequelize.JSONB },
+      transfer_code: {
         allowNull: false,
         type: Sequelize.STRING,
       },
@@ -35,6 +51,9 @@ module.exports = {
       },
       updatedAt: {
         allowNull: false,
+        type: Sequelize.DATE,
+      },
+      deletedAt: {
         type: Sequelize.DATE,
       },
     });
