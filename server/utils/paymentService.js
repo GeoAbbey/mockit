@@ -27,6 +27,10 @@ export const payStack = (request) => {
       return this.requestBuilder("https://api.paystack.co/transfer", data, "POST");
     },
 
+    async finalizeTransfer(data) {
+      return this.requestBuilder("https://api.paystack.co/finalize_transfer", data, "POST");
+    },
+
     async getBankCodes() {
       return this.requestBuilder("https://api.paystack.co/bank", null, "GET");
     },
@@ -62,6 +66,7 @@ export const payStack = (request) => {
 
         return { success: true, response: response.data };
       } catch (error) {
+        console.log({ error }, "🚎");
         return { success: false, response: error };
       }
     },

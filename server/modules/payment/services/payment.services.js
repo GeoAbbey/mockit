@@ -481,6 +481,12 @@ class PaymentsService {
     //get the cooperate account and the check the access.
     const oldCooperateInfo = await CooperateService.findOne(args.code);
 
+    if (!oldCooperateInfo)
+      return {
+        message: `The cooperate code ${args.code} is invalid`,
+        success: false,
+      };
+
     const hasAccess = await CooperateAccessService.findOne({
       userAccessId: decodedToken.id,
       ownerId: oldCooperateInfo.dataValues.id,
