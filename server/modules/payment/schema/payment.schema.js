@@ -18,7 +18,7 @@ export const PaymentWithSubOrWalletSchema = Joi.object().keys({
     is: "subscriptionCount",
     then: Joi.required(),
   }),
-  lawyerId: Joi.guid({ version: "uuidv4" }).when("modelType", {
+  lawyerId: Joi.string().guid({ version: "uuidv4" }).when("modelType", {
     is: "smallClaim",
     then: Joi.required(),
   }),
