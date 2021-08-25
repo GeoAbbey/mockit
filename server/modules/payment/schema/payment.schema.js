@@ -18,7 +18,10 @@ export const PaymentWithSubOrWalletSchema = Joi.object().keys({
     is: "subscriptionCount",
     then: Joi.required(),
   }),
-  lawyerId: Joi.string(),
+  lawyerId: Joi.number().when("modelType", {
+    is: "smallClaim",
+    then: Joi.required(),
+  }),
 });
 
 export const PayInSchema = Joi.object().keys({

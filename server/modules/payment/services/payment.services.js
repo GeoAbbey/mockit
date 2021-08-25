@@ -522,7 +522,7 @@ class PaymentsService {
 
         const oldCooperateInfo = await CooperateService.findOne(args.code);
 
-        const lawyerId = oldClaim.dataValues.assignedLawyerId;
+        const lawyerId = args.lawyerId;
         const {
           dataValues: { baseCharge, serviceCharge },
         } = oldClaim.dataValues.interestedLawyers.find((lawyer) => lawyer.lawyerId === lawyerId);
