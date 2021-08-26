@@ -39,6 +39,16 @@ const hoistedIOUser = (io) => {
         });
       }
     }
+
+    const { room, currentResponseId } = isOnline.dataValues;
+
+    if (room && currentResponseId) {
+      io.to(`room ${currentResponseId}`).emit("on:user:move", {
+        location: recipient.location,
+        distance: calcCrow(recipient.location.coordinates, location.coordinates),
+        speed: recipient.speed,
+      });
+    }
   };
 };
 

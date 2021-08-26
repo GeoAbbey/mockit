@@ -18,7 +18,7 @@ export const responseEvents = (eventEmitter) => {
     logger(`${EVENT_IDENTIFIERS.RESPONSE.ASSIGNED} event was received`);
 
     const {
-      dataValues: { ownerId, assignedLawyerId },
+      dataValues: { ownerId, assignedLawyerId, id },
     } = response;
 
     const [userLocationDetails, lawyerLocationDetails] = await Promise.all([
@@ -38,6 +38,7 @@ export const responseEvents = (eventEmitter) => {
         lawyerLocationDetails.dataValues.id,
         {
           assigningId: ownerId,
+          currentResponseId: id,
         },
         lawyerLocationDetails
       ),
@@ -70,6 +71,7 @@ export const responseEvents = (eventEmitter) => {
         userLocationDetails.id,
         {
           assigningId: null,
+          currentResponseId: null,
           online: false,
         },
         userLocationDetails
@@ -78,6 +80,7 @@ export const responseEvents = (eventEmitter) => {
         lawyerLocationDetails.id,
         {
           assigningId: null,
+          currentResponseId: null,
         },
         lawyerLocationDetails
       ),
@@ -108,13 +111,13 @@ export const responseEvents = (eventEmitter) => {
       } = response;
 
       //log user online
-
       const userDetails = await LocationServices.findByPk(ownerId);
 
       await LocationServices.update(
         userDetails.id,
         {
           online: true,
+          currentResponseId: responseId,
         },
         userDetails
       );

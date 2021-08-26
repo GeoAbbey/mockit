@@ -17,6 +17,18 @@ module.exports = {
         type: Sequelize.STRING,
         unique: true,
       },
+      room: {
+        type: Sequelize.BOOLEAN,
+      },
+      currentResponseId: {
+        type: Sequelize.UUID,
+        onDelete: "CASCADE",
+        references: {
+          model: "Responses",
+          key: "id",
+          as: "currentResponseId",
+        },
+      },
       online: {
         type: Sequelize.BOOLEAN,
       },
