@@ -32,12 +32,14 @@ class LocationsService {
   }
 
   async update(id, LocationDTO, oldLocation) {
-    const { location, online, assigningId, socketId } = oldLocation;
+    const { location, online, assigningId, socketId, currentResponseId, room } = oldLocation;
 
     return models.LocationDetail.update(
       {
         online: handleFalsy(LocationDTO.online, online),
         location: LocationDTO.location || location,
+        room: handleFalsy(LocationDTO.room, room),
+        currentResponseId: handleFalsy(LocationDTO.currentResponseId, currentResponseId),
         socketId: LocationDTO.socketId || socketId,
         assigningId: handleFalsy(LocationDTO.assigningId, assigningId),
       },

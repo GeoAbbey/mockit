@@ -5,7 +5,7 @@ import { handleFalsy } from "../../../utils";
 import { rawQueries } from "../../../utils/rawQueriers";
 import { paginate } from "../../helpers";
 
-const debugLog = debug("app:Responses-service");
+const debugLog = debug("app:responses-service");
 
 class ResponsesService {
   static instance;

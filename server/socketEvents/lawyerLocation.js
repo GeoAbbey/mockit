@@ -25,6 +25,16 @@ const hoistedIOLawyer = (io) => {
         });
       }
     }
+
+    const { room, currentResponseId } = isOnline.dataValues;
+
+    if (room && currentResponseId) {
+      io.to(`room ${currentResponseId}`).emit("on:lawyer:move", {
+        location: recipient.location,
+        distance: calcCrow(recipient.location.coordinates, location.coordinates),
+        speed: recipient.speed,
+      });
+    }
   };
 };
 

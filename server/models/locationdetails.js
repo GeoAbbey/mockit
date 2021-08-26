@@ -18,10 +18,15 @@ module.exports = (sequelize, DataTypes) => {
       id: { type: DataTypes.UUID, allowNull: false, primaryKey: true, allowNull: false },
       socketId: { type: DataTypes.STRING, unique: true },
       speed: { type: DataTypes.STRING },
+      currentResponseId: { type: DataTypes.UUID },
       online: { type: DataTypes.BOOLEAN, defaultValue: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       location: { type: DataTypes.GEOMETRY("POINT") },
       assigningId: { type: DataTypes.UUID },
+      room: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: () => false,
+      },
     },
     {
       sequelize,
