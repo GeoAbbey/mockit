@@ -97,7 +97,7 @@ export const responseEvents = (eventEmitter) => {
       decodedToken,
       "RESPONSE",
       "MEET_TIME",
-      "assignedLawyerId"
+      "ownerId"
     );
   });
 

@@ -1,7 +1,8 @@
 import debug from "debug";
 import models from "../../models";
-import { EVENT_IDENTIFIERS, NOTIFICATION_DATA } from "../../constants";
+import { EVENT_IDENTIFIERS, NOTIFICATION_DATA, TEMPLATE } from "../../constants";
 import { sendNotificationToClient } from "../../utils/sendNotificationToClient";
+import { sendTemplateEmail } from "../../utils";
 
 const logger = debug("app:handlers:listeners:review-events");
 
@@ -66,6 +67,8 @@ const notifyForReviews = async (events, review, action) => {
   ];
 
   logger("sending notification to the user");
+  sendTemplateEmail(detailsToNotify.email, TEMPLATE.REVIEW_CREATED, review.ticketId);
+
   sendNotificationToClient({
     tokens: [detailsToNotify.firebaseToken],
     data: NOTIFICATION_DATA.REVIEW({

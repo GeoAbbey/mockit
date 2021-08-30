@@ -43,7 +43,11 @@ export const sendNotificationToLawyers = async (events, data, decodedToken, mode
     }),
   });
 
-  sendBulkTemplatedEmail(allLawyers, TEMPLATE.POLICE_INVITATION_COMPLETED, data.ticketId);
+  if (modelName === "INVITATION")
+    sendBulkTemplatedEmail(allLawyers, TEMPLATE.POLICE_INVITATION_CREATED, data.ticketId);
+
+  if (modelName === "SMALL_CLAIM")
+    sendBulkTemplatedEmail(allLawyers, TEMPLATE.SMALL_CLAIM_CREATED, data.ticketId);
 
   logger("saving notification for qualified lawyers on the database");
   await models.Notification.bulkCreate(
@@ -68,6 +72,8 @@ export const sendNotificationToUserOrLawyer = async (
   logger(`${events} events has been received`);
   const modelOwner = await models.User.findByPk(data[context]);
 
+  console.log({ modelOwner }, "🍑🍋");
+
   const { firebaseToken, id, email, firstName } = modelOwner.dataValues;
 
   const tokens = [firebaseToken];
@@ -78,7 +84,7 @@ export const sendNotificationToUserOrLawyer = async (
       content: JSON.stringify(
         NOTIFICATION_DATA[modelName][action]({
           sender_id: data.dataValues.ownerId,
-          status_id: data.dataValues.id,
+          status_id: data.dataValues.id || "none",
           sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
           sender_firebase_token: decodedToken.firebaseToken,
         })
@@ -88,9 +94,13 @@ export const sendNotificationToUserOrLawyer = async (
 
   logger("sending notification to the user");
 
-  action === "ASSIGNED" && modelName === "INVITATION"
-    ? sendTemplateEmail(email, TEMPLATE.INVITATION_LAWYER_ASSIGNED, { firstName }, data.ticketId)
-    : sendTemplateEmail(email, TEMPLATE.POLICE_INVITATION_COMPLETED, { firstName }, data.ticketId);
+  if (modelName === "INVITATION") {
+    if (action === "ASSIGNED")
+      sendTemplateEmail(email, TEMPLATE.INVITATION_LAWYER_ASSIGNED, { firstName }, data.ticketId);
+
+    if (action === "MARK_AS_COMPLETED")
+      sendTemplateEmail(email, TEMPLATE.POLICE_INVITATION_COMPLETED, { firstName }, data.ticketId);
+  }
 
   if (modelName === "RESPONSE") {
     if (action === "ASSIGNED")
@@ -103,11 +113,30 @@ export const sendNotificationToUserOrLawyer = async (
       sendTemplateEmail(email, TEMPLATE.RESPONSE_MEET_TIME, { firstName }, data.ticketId);
   }
 
+  if (modelName === "SMALL_CLAIM") {
+    if (action === "PAID")
+      sendTemplateEmail(email, TEMPLATE.SMALL_CLAIM_ASSIGNED, { firstName }, data.ticketId);
+
+    if (action === "MARK_AS_COMPLETED")
+      sendTemplateEmail(email, TEMPLATE.SMALL_CLAIM_COMPLETED, { firstName }, data.ticketId);
+
+    if (action === "MARK_AS_IN_PROGRESS")
+      sendTemplateEmail(email, TEMPLATE.SMALL_CLAIM_STARTED, { firstName }, data.ticketId);
+  }
+
+  if (modelName === "COOPERATE_ACCESS") {
+    if (action === "GRANTED")
+      sendTemplateEmail(email, TEMPLATE.COOPERATE_ACCESS_GRANTED, { firstName });
+
+    if (action === "REVOKED")
+      sendTemplateEmail(email, TEMPLATE.COOPERATE_ACCESS_REVOKED, { firstName });
+  }
+
   sendNotificationToClient({
     tokens,
     data: NOTIFICATION_DATA[modelName][action]({
       sender_id: data.dataValues.ownerId,
-      status_id: data.dataValues.id,
+      status_id: data.dataValues.id || "none",
       sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
       sender_firebase_token: decodedToken.firebaseToken,
     }),
@@ -168,6 +197,9 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (
   ];
 
   logger("sending notification to the user");
+  if (action === "MARK_INTEREST")
+    sendTemplateEmail(ownerProfile.email, TEMPLATE.SMALL_CLAIM_INTEREST, data.ticketId);
+
   sendNotificationToClient({
     tokens: [ownerProfile.firebaseToken],
     data: NOTIFICATION_DATA.SMALL_CLAIM[action]({

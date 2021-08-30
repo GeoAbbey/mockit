@@ -224,6 +224,36 @@ export const NOTIFICATION_DATA = {
       google_sent_time: new Date().toISOString(),
     },
   }),
+
+  COOPERATE_ACCESS: {
+    GRANTED: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
+      generic({
+        title: "Access Granted",
+        body: `You have been granted access to use cooperate code`,
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "user",
+        view: "user_cooperate_access",
+        status: "cooperate_access",
+        click_action: "user_choose_me_for_cooperate_access",
+      }),
+
+    REVOKED: ({ sender_id, sender_name, status_id, sender_firebase_token, ...rest }) =>
+      generic({
+        title: "Access Revoked",
+        body: `Your access to use this cooperate code has been revoked`,
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "user",
+        view: "user_cooperate_access",
+        status: "cooperate_access",
+        click_action: "user_choose_me_for_cooperate_access",
+      }),
+  },
 };
 
 export const EVENT_IDENTIFIERS = {
@@ -253,7 +283,11 @@ export const EVENT_IDENTIFIERS = {
     MARK_AS_COMPLETED: "RESPONSE_MARK_AS_COMPLETED",
   },
   COOPERATE: {
-    CREATED: "COOPERATE CREATED",
+    CREATED: "COOPERATE_CREATED",
+  },
+  COOPERATE_ACCESS: {
+    GRANTED: "COOPERATE_ACCESS_GRANTED",
+    REVOKED: "COOPERATE_ACCESS_REVOKED",
   },
   USER: {
     CREATED: "USER_CREATED",
@@ -273,16 +307,19 @@ export const TEMPLATE = {
   SMALL_CLAIM_INTEREST: "Small_Claim_Interest",
   SMALL_CLAIM_COMPLETED: "Small_Claims_Completed",
   SMALL_CLAIM_CREATED: "Small_Claim_Created",
+  SMALL_CLAIM_ASSIGNED: "Small_Claim_Assigned",
   ELIGIBLE_LAWYERS: "Eligible_Lawyers",
   RESPONSE_LAWYER_ASSIGNED: "Response_Lawyer_Assigned",
   RESPONSE_MEET_TIME: "Response_MeetTime",
   RESPONSE_COMPLETED: "Response_Completed",
-  NEW_RATING: "New_Rating",
+  REVIEW_CREATED: "New_Rating",
   POLICE_INVITATION_COMPLETED: "Police_Invitation_Completed",
   POLICE_INVITATION_CREATED: "Police_Invitation_Created",
   INVITATION_LAWYER_ASSIGNED: "Invitation_Lawyer_Assigned",
+  COOPERATE_ACCESS_GRANTED: "Access_Granted",
+  COOPERATE_ACCESS_REVOKED: "Access_Revoked",
   LAWYER_SIGNUP: "Lawyer_signup",
   USER_SIGNUP: "User_signup",
-  USER_: "User_signup",
-  USER_SIGNUP: "User_signup",
+  OTP_RESET_PASSWORD: "User_signup",
+  OTP_VERIFY_EMAIL: "User_signup",
 };
