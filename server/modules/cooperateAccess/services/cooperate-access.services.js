@@ -1,7 +1,6 @@
 import debug from "debug";
 import { ROLES } from "../../../constants";
 import models from "../../../models";
-import CooperateService from "../../cooperate/services/cooperate.services";
 import { paginate } from "../../helpers";
 import UsersService from "../../users/service/user.service";
 

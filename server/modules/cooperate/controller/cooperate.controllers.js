@@ -1,5 +1,6 @@
 import debug from "debug";
 import createError from "http-errors";
+import { EVENT_IDENTIFIERS } from "../../../constants";
 import { paginate as pagination } from "../../helpers";
 
 import CooperateService from "../services/cooperate.services";
@@ -15,14 +16,15 @@ class CooperateController {
   }
 
   async createCooperate(req, res, next) {
-    const {
-      body,
-      decodedToken: { id },
-    } = req;
+    const eventEmitter = req.app.get("eventEmitter");
+    const { body, decodedToken } = req;
 
-    log(`creating a co-operate with id ${id}`);
+    log(`creating a co-operate with id ${decodedToken.id}`);
 
-    const cooperate = await CooperateService.create({ ...body, id });
+    const cooperate = await CooperateService.create({ ...body, id: decodedToken.id });
+
+    eventEmitter.emit(EVENT_IDENTIFIERS.COOPERATE.CREATED, { cooperate, decodedToken });
+
     return res.status(200).send({
       success: true,
       message: "co-operate account successfully created",
