@@ -1,9 +1,9 @@
 import debug from "debug";
 import createError from "http-errors";
+import { EVENT_IDENTIFIERS } from "../../../constants";
 import { paginate as pagination } from "../../helpers";
 
 import CooperateAccessService from "../services/cooperate-access.services";
-import { Op } from "sequelize";
 const logger = debug("app:cooperate-access-controller");
 
 class CooperateAccessController {
@@ -16,6 +16,8 @@ class CooperateAccessController {
   }
 
   async grantCooperateAccess(req, res, next) {
+    const eventEmitter = req.app.get("eventEmitter");
+
     const {
       body: { userEmail },
       decodedToken: { id: ownerId },
@@ -25,6 +27,11 @@ class CooperateAccessController {
 
     const result = await CooperateAccessService.findOrCreate({ ownerId, userEmail });
     if (result.success === false) return next(createError(400, result.message));
+
+    eventEmitter.emit(EVENT_IDENTIFIERS.COOPERATE_ACCESS.GRANTED, {
+      data: result.data,
+      decodedToken: req.decodedToken,
+    });
 
     return res.status(201).send({
       success: true,
@@ -54,11 +61,17 @@ class CooperateAccessController {
   }
 
   async deleteCooperateAccess(req, res, next) {
+    const eventEmitter = req.app.get("eventEmitter");
     const {
       params: { id: userAccessId },
       decodedToken: { id: ownerId },
     } = req;
     const found = await CooperateAccessService.remove({ userAccessId, ownerId });
+
+    eventEmitter.emit(EVENT_IDENTIFIERS.COOPERATE_ACCESS.REVOKED, {
+      data: { userAccessId, ownerId, dataValues: { userAccessId, ownerId } },
+      decodedToken: req.decodedToken,
+    });
 
     res.status(201).send({
       success: true,

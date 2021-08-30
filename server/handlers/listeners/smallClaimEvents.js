@@ -1,5 +1,5 @@
 import debug from "debug";
-import { EVENT_IDENTIFIERS, NOTIFICATION_DATA } from "../../constants";
+import { EVENT_IDENTIFIERS } from "../../constants";
 import PaymentsService from "../../modules/payment/services/payment.services";
 
 import {
@@ -9,11 +9,7 @@ import {
 } from "./helpers";
 const logger = debug("app:handlers:listeners:small-claim-events");
 
-import PayoutsController from "../../modules/payout/controllers/payout.controller";
-
 import { schedule } from "../../jobs/scheduler";
-
-const getAmount = PayoutsController.getAmount;
 
 export const smallClaimEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, (data, decodedToken) => {
