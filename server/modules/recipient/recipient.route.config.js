@@ -24,6 +24,14 @@ export class RecipientRoutes extends CommonRoutesConfig {
       .get([wrapCatch(RecipientsController.recipientExist("retrieve"))]);
 
     this.app
+      .route(`${this.path}/verify/recipients`)
+      .all([Authenticate.verifyToken(), RecipientsController.checkAccessLawyer()])
+      .post([
+        middleware({ schema: createRecipientSchema, property: "body" }),
+        wrapCatch(RecipientsController.verifyRecipient),
+      ]);
+
+    this.app
       .route(`${this.path}/recipients/bank_codes`)
       .all([Authenticate.verifyToken(), RecipientsController.checkAccessLawyer()])
       .get([wrapCatch(RecipientsController.getBankCodes)]);

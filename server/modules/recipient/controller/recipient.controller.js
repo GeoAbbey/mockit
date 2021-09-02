@@ -17,10 +17,10 @@ class RecipientsController {
     return RecipientsController.instance;
   }
 
-  async makeRecipient(req, res, next) {
+  verifyRecipient = async (req, res, next) => {
     const {
       decodedToken: { firstName, lastName, id, email },
-      body: { type, description, account_number, bank_code, currency },
+      body: { type, description, account_number, bank_code, currency, context = true },
     } = req;
     log(`creating a recipient for user with id ${id}`);
 
@@ -34,8 +34,34 @@ class RecipientsController {
       currency,
     });
 
-    if (!recipient.success) return next(createError(400, recipient.response));
+    if (!recipient.success)
+      return next(
+        createError(
+          400,
+          { message: "There was an error verifying your bank details" },
+          recipient.response
+        )
+      );
 
+    return context
+      ? res.status(201).send({
+          success: true,
+          message: "verify the following details",
+          recipient: recipient.response.data,
+        })
+      : recipient;
+  };
+
+  makeRecipient = async (req, res, next) => {
+    const {
+      decodedToken: { id },
+    } = req;
+
+    log(`creating a recipient for user with id ${id}`);
+
+    req.body.context = false;
+    const recipient = await this.verifyRecipient(req, res, next);
+    console.log({ recipient }, "🦋");
     const { response: recipientFromPayStack } = recipient;
 
     const newRecipient = await RecipientsService.create({
@@ -50,7 +76,7 @@ class RecipientsController {
       message: "recipient successfully created",
       recipient: newRecipient,
     });
-  }
+  };
 
   recipientExist(context) {
     return async (req, res, next) => {
