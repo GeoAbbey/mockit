@@ -50,7 +50,7 @@ export const responseEvents = (eventEmitter) => {
       decodedToken,
       "RESPONSE",
       "ASSIGNED",
-      "assignedLawyerId"
+      "ownerId"
     );
   });
 
