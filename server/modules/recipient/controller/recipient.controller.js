@@ -20,7 +20,14 @@ class RecipientsController {
   verifyRecipient = async (req, res, next) => {
     const {
       decodedToken: { firstName, lastName, id, email },
-      body: { type, description, account_number, bank_code, currency, context = true },
+      body: {
+        type = "nuban",
+        description,
+        account_number,
+        bank_code,
+        currency = "NGN",
+        context = true,
+      },
     } = req;
     log(`creating a recipient for user with id ${id}`);
 

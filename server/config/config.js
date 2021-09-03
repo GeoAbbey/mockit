@@ -22,7 +22,7 @@ module.exports = {
     host: process.env.HOST,
     mongoConnect: process.env.MONGO_DB_CONNECTION_LOCAL,
     runNotificationService: true,
-    runEmailNotificationService: false,
+    runEmailNotificationService: true,
     payoutInterval: process.env.PAYOUT_INTERVAL,
     ...common,
   },
