@@ -49,6 +49,7 @@ class UsersService {
 
   async update(id, UserDTO, oldDetails) {
     debugLog(`updating a user with id ${id}`);
+    console.log({ UserDTO }, "🍋");
     const { address, guarantors, lawyer, profilePic } = oldDetails;
     const handleDocuments = (recent, old) => {
       return {

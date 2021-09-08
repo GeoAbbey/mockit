@@ -113,8 +113,8 @@ class UsersController {
 
   handleUploads(req) {
     const { body } = req;
+
     const newBody = {
-      ...body,
       guarantors: {
         nextOfKin: {},
         surety: {},
@@ -122,6 +122,7 @@ class UsersController {
       lawyer: {
         documents: {},
       },
+      ...body,
     };
 
     if (req.files) {
