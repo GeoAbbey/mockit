@@ -22,6 +22,7 @@ module.exports = {
       },
       currentResponseId: {
         type: Sequelize.UUID,
+        onDelete: "SET NULL",
         references: {
           model: "Responses",
           key: "id",
