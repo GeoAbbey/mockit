@@ -22,7 +22,6 @@ module.exports = {
       },
       currentResponseId: {
         type: Sequelize.UUID,
-        onDelete: "CASCADE",
         references: {
           model: "Responses",
           key: "id",
