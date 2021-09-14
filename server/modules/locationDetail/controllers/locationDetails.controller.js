@@ -33,6 +33,13 @@ class LocationDetailsController {
     };
   }
 
+  async getCountriesAndStates(req, res, next) {
+    log("retrieving countries and the states in them");
+    const result = await LocationDetailsService.statesAndCountries();
+
+    return res.status(200).send({ ...result });
+  }
+
   async toggleVisibility(req, res, next) {
     const {
       oldLocationDetail,
@@ -46,7 +53,7 @@ class LocationDetailsController {
     );
     return res.status(200).send({
       success: true,
-      message: "locationDetail  successfully updated",
+      message: "LocationDetail successfully updated",
       locationDetail,
     });
   }

@@ -21,6 +21,10 @@ export class LocationDetailRoutes extends CommonRoutesConfig {
         wrapCatch(LocationDetailsController.getLocationDetail),
       ]);
 
+    this.app
+      .route(`${this.path}/location/countries/states`)
+      .get([wrapCatch(LocationDetailsController.getCountriesAndStates)]);
+
     return this.app;
   }
 }

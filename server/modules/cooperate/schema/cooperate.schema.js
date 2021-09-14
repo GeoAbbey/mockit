@@ -5,9 +5,7 @@ export const createCooperateSchema = Joi.object().keys({
   companyAddress: Joi.string().required(),
   companyEmail: Joi.string().email({ minDomainSegments: 2 }).required(),
   contactName: Joi.string().required(),
-  contactPhone: Joi.string()
-    .pattern(/^(0|\+234)\d{10}$/)
-    .required(),
+  contactPhone: Joi.string().required(),
 });
 
 export const editCooperateSchema = Joi.object().keys({
@@ -15,5 +13,5 @@ export const editCooperateSchema = Joi.object().keys({
   companyAddress: Joi.string(),
   companyEmail: Joi.string().email({ minDomainSegments: 2 }),
   contactName: Joi.string(),
-  contactPhone: Joi.string().pattern(/^(0|\+234)\d{10}$/),
+  contactPhone: Joi.string(),
 });

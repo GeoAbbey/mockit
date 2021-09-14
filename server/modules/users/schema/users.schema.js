@@ -23,9 +23,21 @@ export const updateUserSchema = Joi.object().keys({
   isSubscribed: Joi.boolean(),
   firebaseToken: Joi.string(),
   address: {
-    residential: Joi.string(),
-    work: Joi.string(),
-    preferredLocation: Joi.string(),
+    residential: Joi.object().keys({
+      country: Joi.string(),
+      state: Joi.string(),
+      street: Joi.string(),
+    }),
+    work: Joi.object().keys({
+      country: Joi.string(),
+      state: Joi.string(),
+      street: Joi.string(),
+    }),
+    preferredLocation: Joi.object().keys({
+      country: Joi.string(),
+      state: Joi.string(),
+      street: Joi.string(),
+    }),
   },
   phone: Joi.string(),
   dob: Joi.date(),

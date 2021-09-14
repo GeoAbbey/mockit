@@ -155,11 +155,17 @@ class SmallClaimsService {
       return attachments;
     };
 
+    const handleAddresses = (recent, old) => ({
+      country: recent.country || old.country,
+      state: recent.state || old.state,
+      street: recent.street || old.street,
+    });
+
     return models.SmallClaim.update(
       {
         status: smallClaimDTO.status || status,
         claim: smallClaimDTO.claim || claim,
-        venue: smallClaimDTO.venue || venue,
+        venue: smallClaimDTO.venue && handleAddresses(smallClaimDTO.venue, venue),
         amount: smallClaimDTO.amount || amount,
         assignedLawyerId: smallClaimDTO.assignedLawyerId || assignedLawyerId,
         attachments: handleAttachments(),

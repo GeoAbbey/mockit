@@ -113,11 +113,17 @@ class InvitationsService {
       return attachments;
     };
 
+    const handleAddresses = (recent, old) => ({
+      country: recent.country || old.country,
+      state: recent.state || old.state,
+      street: recent.street || old.street,
+    });
+
     return models.Invitation.update(
       {
         status: invitationDTO.status || status,
         reason: invitationDTO.reason || reason,
-        venue: invitationDTO.venue || venue,
+        venue: invitationDTO.venue && handleAddresses(invitationDTO.venue, venue),
         paid: handleFalsy(invitationDTO.paid, paid),
         dateOfVisit: invitationDTO.dateOfVisit || dateOfVisit,
         attachments: handleAttachments(),
