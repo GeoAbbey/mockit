@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.TEXT,
       },
       venue: {
-        type: Sequelize.STRING,
+        type: Sequelize.JSONB,
       },
       dateOfVisit: {
         type: Sequelize.DATE,

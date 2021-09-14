@@ -548,7 +548,7 @@ class PaymentsService {
 
         const [, [paidClaim]] = await SmallClaimsService.update(
           args.modelId,
-          { paid: true },
+          { paid: true, assignedLawyerId: lawyerId },
           oldClaim,
           { transaction: t }
         );

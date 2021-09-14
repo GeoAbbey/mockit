@@ -15,7 +15,7 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       venue: {
-        type: Sequelize.STRING,
+        type: Sequelize.JSONB,
       },
       attachments: {
         type: Sequelize.ARRAY(Sequelize.STRING),

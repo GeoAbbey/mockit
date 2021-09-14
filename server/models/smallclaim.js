@@ -1,6 +1,7 @@
 "use strict";
 import { v4 } from "uuid";
 import { nanoid } from "nanoid";
+import { someDefaults } from "../utils/processInput";
 
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
@@ -31,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       claim: { type: DataTypes.TEXT, allowNull: false },
       amount: { type: DataTypes.INTEGER, allowNull: false },
       attachments: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
-      venue: { type: DataTypes.STRING, allowNull: false },
+      venue: { type: DataTypes.JSONB, allowNull: false, defaultValue: someDefaults() },
       ownerId: { type: DataTypes.UUID, allowNull: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       assignedLawyerId: { type: DataTypes.UUID },

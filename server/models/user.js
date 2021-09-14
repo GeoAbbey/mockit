@@ -1,6 +1,7 @@
 "use strict";
 import { v4 } from "uuid";
 import { otp } from "../utils";
+import { someDefaults } from "../utils/processInput";
 
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
@@ -63,7 +64,13 @@ module.exports = (sequelize, DataTypes) => {
       password: { type: DataTypes.STRING, allowNull: false, min: 8 },
       isSubscribed: { type: DataTypes.BOOLEAN },
       isVerified: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-      address: { type: DataTypes.JSONB },
+      address: {
+        type: DataTypes.JSONB,
+        defaultValue: {
+          work: someDefaults(),
+          residential: someDefaults(),
+        },
+      },
       phone: { type: DataTypes.STRING },
       dob: { type: DataTypes.STRING, isDate: true },
       guarantors: { type: DataTypes.JSONB },
@@ -75,7 +82,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       lawyer: {
         type: DataTypes.JSONB,
-        allowNull: false,
         defaultValue: {
           isVerified: false,
           description: "",

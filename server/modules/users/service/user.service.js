@@ -48,18 +48,22 @@ class UsersService {
   }
 
   async update(id, UserDTO, oldDetails) {
-    debugLog(`updating a user with id ${id}`);
-    console.log({ UserDTO }, "🍋");
+    debugLog(`updating a user with id ${id} 🍋`);
+
     const { address, guarantors, lawyer, profilePic } = oldDetails;
-    const handleDocuments = (recent, old) => {
-      return {
-        photoIDOrNIN: recent.photoIDOrNIN || old.photoIDOrNIN,
-        LLBCertificate: recent.LLBCertificate || old.LLBCertificate,
-        NBAReceipt: recent.NBAReceipt || old.NBAReceipt,
-        callToBarCertificate: recent.callToBarCertificate || old.callToBarCertificate,
-        others: recent.others || old.others,
-      };
-    };
+    const handleDocuments = (recent, old) => ({
+      photoIDOrNIN: recent.photoIDOrNIN || old.photoIDOrNIN,
+      LLBCertificate: recent.LLBCertificate || old.LLBCertificate,
+      NBAReceipt: recent.NBAReceipt || old.NBAReceipt,
+      callToBarCertificate: recent.callToBarCertificate || old.callToBarCertificate,
+      others: recent.others || old.others,
+    });
+
+    const handleAddresses = (recent, old) => ({
+      country: recent.country || old.country,
+      state: recent.state || old.state,
+      street: recent.street || old.street,
+    });
 
     return models.User.update(
       {
@@ -80,14 +84,15 @@ class UsersService {
         },
         address: {
           residential:
-            (UserDTO.address && UserDTO.address.residential) ||
-            (address && address.residential) ||
-            null,
-          work: (UserDTO.address && UserDTO.address.work) || (address && address.work) || null,
-          preferredLocation:
-            (UserDTO.address && UserDTO.address.preferredLocation) ||
-            (address && address.preferredLocation) ||
-            null,
+            (UserDTO.address &&
+              UserDTO.address.residential &&
+              handleAddresses(UserDTO.address.residential, address.residential)) ||
+            address.residential,
+          work:
+            (UserDTO.address &&
+              UserDTO.address.work &&
+              handleAddresses(UserDTO.address.work, address.work)) ||
+            address.work,
         },
         phone: UserDTO.phone || oldDetails.phone,
         dob: UserDTO.dob || oldDetails.dob,

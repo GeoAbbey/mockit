@@ -2,6 +2,7 @@ import debug from "debug";
 import { QueryTypes } from "sequelize";
 import models from "../../../models";
 import { handleFalsy } from "../../../utils";
+import axios from "axios";
 
 const env = process.env.NODE_ENV || "development";
 
@@ -45,6 +46,20 @@ class LocationsService {
       },
       { where: { id }, returning: true }
     );
+  }
+
+  async statesAndCountries() {
+    debugLog("calling the external api to retrieve a list of countries and associated states");
+
+    const { data } = await axios({
+      url: "https://countriesnow.space/api/v0.1/countries/states",
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return data;
   }
 
   async findLawyersWithinRadius({ longitude, latitude, radius }) {
