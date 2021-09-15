@@ -21,6 +21,7 @@ class SmallClaimsController {
     const { body, decodedToken, attachments = [] } = req;
     const ownerId = req.decodedToken.id;
     log(`creating a new small claim for user with id ${ownerId}`);
+    body.venue = JSON.parse(body.venue);
     const smallClaim = await SmallClaimsService.create({ ...body, attachments, ownerId });
 
     eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, smallClaim, decodedToken);
@@ -104,9 +105,12 @@ class SmallClaimsController {
 
     const {
       query: { paginate = {} },
+      decodedToken: {
+        address: { country, state },
+      },
     } = req;
 
-    const filter = `"SmallClaims"."assignedLawyerId" IS NULL`;
+    const filter = `("SmallClaims"."assignedLawyerId" IS NULL AND (("SmallClaims"."venue"#>>'{country}') = '${country}' AND ("SmallClaims"."venue"#>>'{state}') = '${state}'))`;
 
     const smallClaims = await SmallClaimsService.findMany(filter, paginate);
     const { offset, limit } = pagination(paginate);

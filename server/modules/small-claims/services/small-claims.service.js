@@ -158,7 +158,7 @@ class SmallClaimsService {
     const handleAddresses = (recent, old) => ({
       country: recent.country || old.country,
       state: recent.state || old.state,
-      street: recent.street || old.street,
+      residence: recent.residence || old.residence,
     });
 
     return models.SmallClaim.update(

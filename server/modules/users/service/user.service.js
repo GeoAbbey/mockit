@@ -59,12 +59,6 @@ class UsersService {
       others: recent.others || old.others,
     });
 
-    const handleAddresses = (recent, old) => ({
-      country: recent.country || old.country,
-      state: recent.state || old.state,
-      street: recent.street || old.street,
-    });
-
     return models.User.update(
       {
         notification: handleFalsy(UserDTO.notification, oldDetails.notification),
@@ -83,16 +77,16 @@ class UsersService {
           expiresIn: (UserDTO.otp && UserDTO.otp.expiresIn) || oldDetails.otp.expiresIn,
         },
         address: {
-          residential:
-            (UserDTO.address &&
-              UserDTO.address.residential &&
-              handleAddresses(UserDTO.address.residential, address.residential)) ||
-            address.residential,
-          work:
-            (UserDTO.address &&
-              UserDTO.address.work &&
-              handleAddresses(UserDTO.address.work, address.work)) ||
-            address.work,
+          country: (UserDTO.address && UserDTO.address.country) || address.country,
+          state: (UserDTO.address && UserDTO.address.state) || address.state,
+          residence: {
+            work:
+              (UserDTO.address && UserDTO.address.residence && UserDTO.address.residence.work) ||
+              address.residence.work,
+            home:
+              (UserDTO.address && UserDTO.address.residence && UserDTO.address.residence.home) ||
+              address.residence.home,
+          },
         },
         phone: UserDTO.phone || oldDetails.phone,
         dob: UserDTO.dob || oldDetails.dob,

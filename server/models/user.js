@@ -67,8 +67,12 @@ module.exports = (sequelize, DataTypes) => {
       address: {
         type: DataTypes.JSONB,
         defaultValue: {
-          work: someDefaults(),
-          residential: someDefaults(),
+          country: "",
+          state: "",
+          residence: {
+            work: "",
+            home: "",
+          },
         },
       },
       phone: { type: DataTypes.STRING },
