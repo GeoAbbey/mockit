@@ -21,6 +21,7 @@ class InvitationsController {
     const ownerId = req.decodedToken.id;
 
     log(`creating a new invitation for user with id ${ownerId}`);
+    body.venue = JSON.parse(body.venue);
     const invitation = await InvitationsService.create({ attachments, ...body, ownerId });
 
     return res.status(201).send({
@@ -94,9 +95,19 @@ class InvitationsController {
     log("getting all unassigned invitations");
     const {
       query: { paginate = {} },
+      decodedToken: {
+        address: { country, state },
+      },
     } = req;
 
-    const data = { assignedLawyerId: null, paid: true };
+    const data = {
+      assignedLawyerId: null,
+      paid: true,
+      venue: {
+        country,
+        state,
+      },
+    };
 
     const invitations = await InvitationsService.findMany(data, paginate);
     const { offset, limit } = pagination(paginate);

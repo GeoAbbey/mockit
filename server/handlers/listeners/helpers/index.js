@@ -14,10 +14,12 @@ export const sendNotificationToLawyers = async (events, data, decodedToken, mode
   logger(`${events} events has been received`);
   const venue = JSON.parse(data.venue);
 
+  console.log({ venue }, "😃");
+
   const allLawyers = await models.User.findAll({
     where: {
       role: ROLES.LAWYER,
-      address: { work: { country: venue.country, state: venue.state } },
+      address: { country: venue.country, state: venue.state },
     },
   });
 
