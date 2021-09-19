@@ -135,6 +135,13 @@ class ResponsesController {
     log(`deleting an response with id ${id}`);
     const deletedResponse = await ResponsesService.remove(id);
 
+    if (!deletedResponse)
+      return res.status(400).send({
+        success: false,
+        message: "can not delete a response that has already been assigned to a lawyer",
+        response: deletedResponse,
+      });
+
     eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.DELETED, {
       decodedToken,
     });
