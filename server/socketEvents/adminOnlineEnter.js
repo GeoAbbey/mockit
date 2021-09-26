@@ -21,6 +21,11 @@ const hoistedAdminOnlineEnter = (io, socket) => {
       LocationServices.update(ownerId, { room: true }, oldUserLocation.value),
       LocationServices.update(assignedLawyerId, { room: true }, oldLawyerLocation.value),
     ]);
+
+    io.to(`room ${id}`).emit(
+      "on:successful:connect",
+      `you are successfully listening to location changes for the response with id ${id}`
+    );
   };
 };
 export { hoistedAdminOnlineEnter };
