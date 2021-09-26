@@ -193,9 +193,7 @@ class UsersService {
         profilePic: UserDTO.profilePic || profilePic,
         lawyer: {
           isVerified:
-            (UserDTO.lawyer &&
-              UserDTO.lawyer.isVerified &&
-              handleFalsy(UserDTO.lawyer.isVerified, lawyer.isVerified)) ||
+            (UserDTO.lawyer && handleFalsy(UserDTO.lawyer.isVerified, lawyer.isVerified)) ||
             lawyer.isVerified,
           description: (UserDTO.lawyer && UserDTO.lawyer.description) || lawyer.description,
           documents:
