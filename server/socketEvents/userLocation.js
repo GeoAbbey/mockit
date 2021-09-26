@@ -13,6 +13,7 @@ const hoistedIOUser = (io) => {
   return async function userLocation(payload) {
     logger(`user:online:location I have received this payload ${payload} 🐥🍅`);
     const isOnline = await LocationServices.findByPk(payload.id);
+
     if (isOnline.dataValues.online) {
       await updateDbWithNewLocation(payload, io, isOnline);
       const { recipient } = io;
@@ -42,13 +43,9 @@ const hoistedIOUser = (io) => {
 
     const { room, currentResponseId } = isOnline.dataValues;
 
-    if (room && currentResponseId) {
+    if (room && currentResponseId && isOnline) {
       const { recipient } = io;
-      io.to(`room ${currentResponseId}`).emit("on:user:move", {
-        location: recipient.location,
-        distance: calcCrow(recipient.location.coordinates, location.coordinates),
-        speed: recipient.speed,
-      });
+      io.to(`room ${currentResponseId}`).emit("on:user:move", recipient);
     }
   };
 };
