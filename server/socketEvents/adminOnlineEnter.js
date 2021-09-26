@@ -24,7 +24,7 @@ const hoistedAdminOnlineEnter = (io, socket) => {
 
     io.to(`room ${id}`).emit(
       "on:successful:connect",
-      `you are successfully listening to location changes for the response with id ${id}`
+      `you are successfully subscribed to location changes for the response with id ${id}`
     );
   };
 };

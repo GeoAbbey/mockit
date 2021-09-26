@@ -11,6 +11,11 @@ const hoistedAdminOnlineLeave = (io, socket) => {
       response: { ownerId, id, assignedLawyerId },
     } = payload;
 
+    io.to(`room ${id}`).emit(
+      "on:successful:disconnect",
+      `you are successfully unsubscribed to location changes for the response with id ${id}`
+    );
+
     //check weather a room exits if not create one
     socket.leave(`room ${id}`);
     const room = io.of("/").adapter.rooms.get(`room ${id}`);
