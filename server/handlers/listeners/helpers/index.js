@@ -82,8 +82,6 @@ export const sendNotificationToUserOrLawyer = async (
   logger(`${events} events has been received`);
   const modelOwner = await models.User.findByPk(data[context]);
 
-  const theSender = context === "ownerId" ? "ownerId" : "assignedLawyerId";
-
   console.log({ modelOwner }, "🍑🍋");
 
   const { firebaseToken, id, email, firstName } = modelOwner.dataValues;
@@ -95,7 +93,7 @@ export const sendNotificationToUserOrLawyer = async (
       ownerId: id,
       content: JSON.stringify(
         NOTIFICATION_DATA[modelName][action]({
-          sender_id: data.dataValues[theSender],
+          sender_id: decodedToken.id,
           status_id: data.dataValues.id || "none",
           sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
           sender_firebase_token: decodedToken.firebaseToken,
@@ -147,7 +145,7 @@ export const sendNotificationToUserOrLawyer = async (
   sendNotificationToClient({
     tokens,
     data: NOTIFICATION_DATA[modelName][action]({
-      sender_id: data.dataValues[theSender],
+      sender_id: decodedToken.id,
       status_id: data.dataValues.id || "none",
       sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
       sender_firebase_token: decodedToken.firebaseToken,
@@ -158,7 +156,7 @@ export const sendNotificationToUserOrLawyer = async (
   await models.Notification.bulkCreate(
     notice,
     NOTIFICATION_DATA[modelName][action]({
-      sender_id: data.dataValues[theSender],
+      sender_id: decodedToken.id,
       status_id: data.dataValues.id,
       sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
       sender_firebase_token: decodedToken.firebaseToken,
