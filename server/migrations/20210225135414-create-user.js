@@ -75,6 +75,9 @@ module.exports = {
       dob: {
         type: Sequelize.STRING,
       },
+      description: {
+        type: Sequelize.STRING,
+      },
       hasAgreedToTerms: {
         type: Sequelize.BOOLEAN,
       },

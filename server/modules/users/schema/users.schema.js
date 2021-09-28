@@ -22,6 +22,7 @@ export const updateUserSchema = Joi.object().keys({
   isAccountSuspended: Joi.boolean(),
   isSubscribed: Joi.boolean(),
   firebaseToken: Joi.string(),
+  description: Joi.string(),
   address: {
     residential: Joi.object().keys({
       country: Joi.string(),
@@ -67,7 +68,6 @@ export const updateUserSchema = Joi.object().keys({
   creditCard: Joi.string().creditCard(),
   lawyer: Joi.object().keys({
     isVerified: Joi.boolean(),
-    description: Joi.string(),
     documents: Joi.object(),
   }),
 

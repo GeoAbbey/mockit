@@ -78,6 +78,7 @@ module.exports = (sequelize, DataTypes) => {
       phone: { type: DataTypes.STRING },
       dob: { type: DataTypes.STRING, isDate: true },
       guarantors: { type: DataTypes.JSONB },
+      description: { type: DataTypes.STRING },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       profilePic: {
         type: DataTypes.STRING,
@@ -88,7 +89,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.JSONB,
         defaultValue: {
           isVerified: false,
-          description: "",
           documents: {
             NBAReceipt: "",
             LLBCertificate: "",

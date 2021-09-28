@@ -35,13 +35,29 @@ class InvitationsService {
           {
             model: models.User,
             as: "lawyerProfile",
-            attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
+            attributes: [
+              "firstName",
+              "lastName",
+              "email",
+              "profilePic",
+              "firebaseToken",
+              "phone",
+              "description",
+            ],
             required: false,
           },
           {
             model: models.User,
             as: "ownerProfile",
-            attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
+            attributes: [
+              "firstName",
+              "lastName",
+              "email",
+              "profilePic",
+              "firebaseToken",
+              "phone",
+              "description",
+            ],
             required: false,
             include: [
               {
@@ -79,13 +95,29 @@ class InvitationsService {
         {
           model: models.User,
           as: "ownerProfile",
-          attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
+          attributes: [
+            "firstName",
+            "lastName",
+            "email",
+            "profilePic",
+            "firebaseToken",
+            "phone",
+            "description",
+          ],
           required: false,
         },
         {
           model: models.User,
           as: "lawyerProfile",
-          attributes: ["firstName", "lastName", "email", "profilePic", "firebaseToken", "phone"],
+          attributes: [
+            "firstName",
+            "lastName",
+            "email",
+            "profilePic",
+            "firebaseToken",
+            "phone",
+            "description",
+          ],
           required: false,
         },
       ],

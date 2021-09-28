@@ -68,6 +68,7 @@ class UsersService {
         lastName: UserDTO.lastName || oldDetails.lastName,
         email: UserDTO.email || oldDetails.email,
         password: UserDTO.password || oldDetails.password,
+        description: UserDTO.description || oldDetails.description,
         role: UserDTO.role || oldDetails.role,
         gender: UserDTO.gender || oldDetails.gender,
         isSubscribed: handleFalsy(UserDTO.isSubscribed, oldDetails.isSubscribed),
@@ -193,7 +194,6 @@ class UsersService {
         profilePic: UserDTO.profilePic || profilePic,
         lawyer: {
           isVerified: UserDTO.lawyer && handleFalsy(UserDTO.lawyer.isVerified, lawyer.isVerified),
-          description: (UserDTO.lawyer && UserDTO.lawyer.description) || lawyer.description,
           documents:
             UserDTO.lawyer && UserDTO.lawyer.documents
               ? handleDocuments(UserDTO.lawyer.documents, lawyer.documents)
