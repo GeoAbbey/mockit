@@ -48,6 +48,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: () => false,
       },
+      isNotified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: () => false,
+      },
       ticketId: {
         type: DataTypes.STRING,
         allowNull: false,

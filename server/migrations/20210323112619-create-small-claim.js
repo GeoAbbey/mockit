@@ -17,6 +17,9 @@ module.exports = {
       venue: {
         type: Sequelize.JSONB,
       },
+      isNotified: {
+        type: Sequelize.BOOLEAN,
+      },
       attachments: {
         type: Sequelize.ARRAY(Sequelize.STRING),
       },

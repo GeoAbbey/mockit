@@ -34,6 +34,15 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: "in-progress",
       },
       amount: { type: DataTypes.INTEGER, allowNull: false },
+      amountInNaira: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return this.amount / 100;
+        },
+        set(value) {
+          throw new Error(`Do not try to set the  pendingAmountInNaira ${value}!`);
+        },
+      },
       ownerId: { type: DataTypes.UUID, allowNull: false },
       modelType: { allowNull: false, type: DataTypes.STRING },
       modelId: { allowNull: false, type: DataTypes.STRING },

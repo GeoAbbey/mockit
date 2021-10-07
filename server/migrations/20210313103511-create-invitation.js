@@ -23,6 +23,9 @@ module.exports = {
       paid: {
         type: Sequelize.BOOLEAN,
       },
+      isNotified: {
+        type: Sequelize.BOOLEAN,
+      },
       status: {
         type: Sequelize.STRING,
       },

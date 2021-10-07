@@ -132,6 +132,7 @@ class InvitationsService {
       attachments,
       assignedLawyerId,
       dateOfVisit,
+      isNotified,
       paid,
     } = oldInvitation;
     const handleAttachments = () => {
@@ -158,6 +159,7 @@ class InvitationsService {
         venue: invitationDTO.venue && handleAddresses(invitationDTO.venue, venue),
         paid: handleFalsy(invitationDTO.paid, paid),
         dateOfVisit: invitationDTO.dateOfVisit || dateOfVisit,
+        isNotified: handleFalsy(invitationDTO.isNotified, isNotified),
         attachments: handleAttachments(),
         assignedLawyerId: invitationDTO.assignedLawyerId || assignedLawyerId,
       },

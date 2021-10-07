@@ -146,7 +146,16 @@ class SmallClaimsService {
   }
 
   async update(id, smallClaimDTO, oldSmallClaim, t = undefined) {
-    const { status, claim, venue, attachments, amount, assignedLawyerId, paid } = oldSmallClaim;
+    const {
+      status,
+      claim,
+      venue,
+      attachments,
+      amount,
+      assignedLawyerId,
+      paid,
+      isNotified,
+    } = oldSmallClaim;
     const handleAttachments = () => {
       if (typeof smallClaimDTO.attachments === "number") {
         attachments.splice(smallClaimDTO.attachments, 1);
@@ -170,6 +179,7 @@ class SmallClaimsService {
         claim: smallClaimDTO.claim || claim,
         venue: smallClaimDTO.venue && handleAddresses(smallClaimDTO.venue, venue),
         amount: smallClaimDTO.amount || amount,
+        isNotified: handleFalsy(smallClaimDTO.isNotified, isNotified),
         assignedLawyerId: smallClaimDTO.assignedLawyerId || assignedLawyerId,
         attachments: handleAttachments(),
         paid: handleFalsy(smallClaimDTO.paid, paid),

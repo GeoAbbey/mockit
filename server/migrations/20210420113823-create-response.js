@@ -14,6 +14,9 @@ module.exports = {
       meta: {
         type: Sequelize.JSONB,
       },
+      isNotified: {
+        type: Sequelize.BOOLEAN,
+      },
       ticketId: {
         type: Sequelize.STRING,
         allowNull: false,

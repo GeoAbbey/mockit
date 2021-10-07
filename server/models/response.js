@@ -51,6 +51,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: () => false,
       },
+      isNotified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: () => false,
+      },
       startingLocation: {
         type: DataTypes.GEOMETRY("POINT"),
         allowNull: false,
