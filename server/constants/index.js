@@ -322,4 +322,5 @@ export const TEMPLATE = {
   USER_SIGNUP: "User_signup",
   OTP_RESET_PASSWORD: "Otp_Reset_Password",
   OTP_VERIFY_EMAIL: "Otp_Verify_Email",
+  NOTIFY_ADMIN: "Notify_Admin",
 };

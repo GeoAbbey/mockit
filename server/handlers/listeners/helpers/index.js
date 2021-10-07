@@ -3,6 +3,8 @@ import { sendNotificationToClient } from "../../../utils/sendNotificationToClien
 import { EVENT_IDENTIFIERS, NOTIFICATION_DATA, ROLES, TEMPLATE } from "../../../constants";
 import models from "../../../models";
 import { sendBulkTemplatedEmail, sendTemplateEmail } from "../../../utils/MailService";
+import { notifyAdminOfNoLawyer } from "./notifyAdminOfNoLawyer";
+import { updateModelInstance } from "./updateModelInstance";
 const env = process.env.NODE_ENV || "development";
 const configOptions = require("../../../config/config");
 
@@ -23,6 +25,8 @@ export const sendNotificationToLawyers = async (events, data, decodedToken, mode
   });
 
   console.log({ allLawyers }, "🍅");
+  if (!allLawyers.length) notifyAdminOfNoLawyer(data, modelName);
+  else updateModelInstance(data, modelName);
 
   const tokens = [];
   const allNotices = [];

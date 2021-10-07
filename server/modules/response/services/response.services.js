@@ -135,7 +135,7 @@ class ResponsesService {
   }
 
   async update(id, ResponseDTO, oldResponse, t = undefined) {
-    const { status, meetTime, assignedLawyerId, paid } = oldResponse;
+    const { status, meetTime, assignedLawyerId, paid, isNotified } = oldResponse;
 
     const handleMeeTime = () => {
       if (ResponseDTO.meetTime) {
@@ -149,6 +149,7 @@ class ResponsesService {
         status: ResponseDTO.status || status,
         meetTime: handleMeeTime(),
         paid: handleFalsy(ResponseDTO.paid, paid),
+        isNotified: handleFalsy(ResponseDTO.isNotified, isNotified),
         assignedLawyerId: ResponseDTO.assignedLawyerId || assignedLawyerId,
       },
       { where: { id }, returning: true, ...t }
