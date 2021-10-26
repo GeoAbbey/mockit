@@ -72,6 +72,15 @@ export class InvitationRoutes extends CommonRoutesConfig {
       ]);
 
     this.app
+      .route(`${this.path}/invitations/assign-lawyer/:id`)
+      .put([
+        Authenticate.verifyToken(),
+        InvitationsController.checkAccessAdmin(),
+        wrapCatch(InvitationsController.invitationExits()),
+        wrapCatch(InvitationsController.adminAssignLawyer),
+      ]);
+
+    this.app
       .route(`${this.path}/invitations/stats`)
       .get([
         Authenticate.verifyToken(),

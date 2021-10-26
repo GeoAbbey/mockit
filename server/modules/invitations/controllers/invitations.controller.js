@@ -16,6 +16,37 @@ class InvitationsController {
     return InvitationsController.instance;
   }
 
+  async adminAssignLawyer(req, res, next) {
+    const eventEmitter = req.app.get("eventEmitter");
+    const {
+      params: { id },
+      body: { lawyerId },
+      oldInvitation,
+    } = req;
+
+    if (!oldInvitation.paid)
+      return next(
+        createError(400, "You can't assign a lawyer to an invitation that hasn't been paid for")
+      );
+
+    const [, [updatedInvitation]] = await InvitationsService.update(
+      id,
+      { isNotified: true, assignedLawyerId: lawyerId },
+      oldInvitation
+    );
+
+    eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.ADMIN_ASSIGN_LAWYER, {
+      invitation: updatedInvitation,
+      decodedToken,
+    });
+
+    return res.status(200).send({
+      success: true,
+      message: "lawyer has been successfully assigned",
+      invitation: updatedInvitation,
+    });
+  }
+
   async makeInvite(req, res) {
     const { body, attachments = [] } = req;
     const ownerId = req.decodedToken.id;
