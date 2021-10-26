@@ -121,7 +121,7 @@ export class UserRoutes extends CommonRoutesConfig {
         middleware({ schema: validateUUID("id"), property: "params" }),
         UsersController.userExistMiddleware(),
       ])
-      .patch([
+      .put([
         AccessControl.checkPermissionAdminAccess(),
         middleware({ schema: updateUserSchema, property: "body" }),
         wrapCatch(UsersController.updateUser),
