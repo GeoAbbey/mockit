@@ -1,4 +1,5 @@
 import PaymentsService from "../../modules/payment/services/payment.services";
+import UserService from "../../modules/users/service/user.service";
 
 import { EVENT_IDENTIFIERS } from "../../constants";
 
@@ -6,8 +7,34 @@ import { sendNotificationToLawyers, sendNotificationToUserOrLawyer } from "./hel
 import { schedule } from "../../jobs/scheduler";
 
 export const invitationEvents = (eventEmitter) => {
+  eventEmitter.on(
+    EVENT_IDENTIFIERS.INVITATION.ADMIN_ASSIGN_LAWYER,
+    async ({ invitation, decodedToken }) => {
+      console.log(`${EVENT_IDENTIFIERS.INVITATION.ADMIN_ASSIGN_LAWYER} has been received`);
+      const lawyerToken = await UserService.findByPk(invitation.assignedLawyerId);
+      const userToken = await UserService.findByPk(invitation.ownerId);
+
+      sendNotificationToUserOrLawyer(
+        EVENT_IDENTIFIERS.INVITATION.ASSIGNED,
+        invitation,
+        lawyerToken,
+        "INVITATION",
+        "ASSIGNED",
+        "ownerId"
+      );
+
+      sendNotificationToUserOrLawyer(
+        EVENT_IDENTIFIERS.INVITATION.ASSIGNED,
+        invitation,
+        userToken,
+        "INVITATION",
+        "CREATED",
+        "assignedLawyerId"
+      );
+    }
+  );
+
   eventEmitter.on(EVENT_IDENTIFIERS.INVITATION.CREATED, async ({ invitation, decodedToken }) => {
-    console.log({ invitation, decodedToken }, "🐥");
     sendNotificationToLawyers(
       EVENT_IDENTIFIERS.INVITATION.CREATED,
       invitation,

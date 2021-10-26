@@ -46,7 +46,7 @@ export const NOTIFICATION_DATA = {
       }),
     CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
       generic({
-        title: "Police Invitation Created",
+        title: "New Police Invitation",
         body: "Kindly Indicate Interest to get assigned to the case",
         sender_firebase_token,
         sender_id,
@@ -101,7 +101,7 @@ export const NOTIFICATION_DATA = {
       }),
     CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token, ...rest }) =>
       generic({
-        title: "Emergency Response Created",
+        title: "New Emergency Response",
         body: "Kindly Indicate Interest to get assigned to the case",
         sender_firebase_token,
         sender_id,
@@ -145,7 +145,7 @@ export const NOTIFICATION_DATA = {
       }),
     CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
       generic({
-        title: "Small Claims Created",
+        title: "New Small Claims",
         body: "Kindly Indicate Interest to get assigned to the case",
         sender_firebase_token,
         sender_id,
@@ -261,6 +261,7 @@ export const EVENT_IDENTIFIERS = {
     CREATED: "INVITATION_CREATED",
     ASSIGNED: "INVITATION_ASSIGNED",
     MARK_AS_COMPLETED: "INVITATION_MARK_AS_COMPLETED",
+    ADMIN_ASSIGN_LAWYER: "INVITATION_ADMIN_ASSIGN_LAWYER",
   },
   REVIEW: {
     CREATED: "REVIEW_CREATED",

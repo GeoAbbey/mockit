@@ -8,8 +8,13 @@ import { HandlePassword, otp } from "../../../utils";
 import { parseISO } from "date-fns/esm";
 import { EVENT_IDENTIFIERS } from "../../../constants";
 
+const envs = process.env.NODE_ENV || "development";
+
+import configOptions from "../../../config/config";
+const config = configOptions[envs];
+
 import { Op } from "sequelize";
-import { process } from "../../../utils/processInput";
+import { process as convert } from "../../../utils/processInput";
 import { paginate as pagination } from "../../helpers";
 
 const log = debug("app:users-controller");
@@ -33,8 +38,8 @@ class UsersController {
     req.body.email = req.body.email.trim();
     req.body.firstName = req.body.firstName.trim();
     req.body.lastName = req.body.lastName.trim();
-    req.body.gender = process(req.body.gender);
-    req.body.phone = process(req.body.phone);
+    req.body.gender = convert(req.body.gender);
+    req.body.phone = convert(req.body.phone);
 
     const user = await UsersService.create(req.body);
     delete user.dataValues.password;
@@ -50,7 +55,7 @@ class UsersController {
   };
 
   createAnAdmin = async (req, res, next) => {
-    req.body.password = "Zapp101";
+    req.body.password = config.lawyerPassword;
     req.body.isVerified = true;
 
     return this.signUp(req, res, next);
@@ -345,6 +350,10 @@ class UsersController {
 
     if (query.search && query.search.role) {
       filter = { ...filter, role: query.search.role };
+    }
+
+    if (query.search && query.search.email) {
+      filter = { ...filter, email: { [Op.iLike]: `%${query.search.email}%` } };
     }
 
     if (query.search && query.search.name) {

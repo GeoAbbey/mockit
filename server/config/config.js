@@ -11,6 +11,7 @@ const common = {
   payStackPublicKey: process.env.PAYSTACK_PUBLIC,
   lawyerPercentage: process.env.LAWYERS_PERCENTAGE,
   averageSpeed: process.env.AVERAGE_SPEED,
+  lawyerPassword: process.env.LAWYER_PASSWORD,
 };
 
 module.exports = {
