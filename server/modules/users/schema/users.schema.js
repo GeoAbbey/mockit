@@ -98,7 +98,7 @@ export const queryOptions = Joi.object().keys({
   search: Joi.object().keys({
     role: Joi.string().valid("user", "lawyer", "admin", "super-admin"),
     name: Joi.string(),
-    email: Joi.string(),
+    phone: Joi.string(),
     gender: Joi.string().valid("male", "female"),
   }),
   paginate: Joi.object().keys({

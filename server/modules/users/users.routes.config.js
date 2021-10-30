@@ -84,7 +84,7 @@ export class UserRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/users/reset-password`)
       .all([UsersController.userExistMiddleware()])
-      .patch([
+      .put([
         middleware({ schema: validOtpAndPassword, property: "body" }),
         wrapCatch(UsersController.validateOTP),
         wrapCatch(UsersController.resetPassword),
@@ -104,6 +104,14 @@ export class UserRoutes extends CommonRoutesConfig {
       .get([
         AccessControl.checkPermissionAdminAccess(),
         wrapCatch(UsersController.getNoOfDistinctUsers),
+      ]);
+
+    this.app
+      .route(`${this.path}/users/stats/active`)
+      .all([Authenticate.verifyToken()])
+      .get([
+        AccessControl.checkPermissionAdminAccess(),
+        wrapCatch(UsersController.getNoOfActiveUsers),
       ]);
 
     this.app

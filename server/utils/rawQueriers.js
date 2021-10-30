@@ -3,6 +3,10 @@ export const rawQueries = {
     return `SELECT status, COUNT(*) FROM "${modelType}" GROUP BY status`;
   },
   noOfDistinctUsers: () => {
+    return `SELECT role, COUNT(*) FROM "Users" GROUP BY role`;
+  },
+
+  noOfActiveUsers: () => {
     return `SELECT role, COUNT(*) FROM "Users" WHERE "Users"."isVerified"=true GROUP BY role`;
   },
 };
