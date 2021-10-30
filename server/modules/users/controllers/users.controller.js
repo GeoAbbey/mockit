@@ -91,6 +91,16 @@ class UsersController {
     });
   }
 
+  async getNoOfActiveUsers(req, res, next) {
+    const result = await UsersService.noOfActiveUsers();
+
+    return res.status(200).send({
+      success: true,
+      message: "data successfully retrieved",
+      result,
+    });
+  }
+
   async changePassword(req, res, next) {
     let {
       body: { newPassword, password },
@@ -352,8 +362,8 @@ class UsersController {
       filter = { ...filter, role: query.search.role };
     }
 
-    if (query.search && query.search.email) {
-      filter = { ...filter, email: { [Op.iLike]: `%${query.search.email}%` } };
+    if (query.search && query.search.phone) {
+      filter = { ...filter, phone: { [Op.iLike]: `%${query.search.phone}%` } };
     }
 
     if (query.search && query.search.name) {
@@ -366,6 +376,7 @@ class UsersController {
           {
             lastName: { [Op.iLike]: `%${query.search.name}%` },
           },
+          { email: { [Op.iLike]: `%${query.search.email}%` } },
         ],
       };
     }

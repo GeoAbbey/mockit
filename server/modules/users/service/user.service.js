@@ -29,6 +29,13 @@ class UsersService {
     });
   }
 
+  async noOfActiveUsers() {
+    debugLog("returning data for different types users");
+    return models.sequelize.query(rawQueries.noOfActiveUsers(), {
+      type: QueryTypes.SELECT,
+    });
+  }
+
   async findByPk(id) {
     debugLog(`retrieving a user with id ${id}`);
     return models.User.findByPk(id);
