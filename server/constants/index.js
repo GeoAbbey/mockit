@@ -321,6 +321,7 @@ export const TEMPLATE = {
   COOPERATE_ACCESS_REVOKED: "Access_Revoked",
   LAWYER_SIGNUP: "Lawyer_signup",
   USER_SIGNUP: "User_signup",
+  ADMIN_CREATED: "Admin_created",
   OTP_RESET_PASSWORD: "Otp_Reset_Password",
   OTP_VERIFY_EMAIL: "Otp_Verify_Email",
   NOTIFY_ADMIN: "Notify_Admin",

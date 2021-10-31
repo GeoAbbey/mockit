@@ -5,16 +5,35 @@ import LocationService from "../../modules/locationDetail/services/locationDetai
 import { sendTemplateEmail } from "../../utils";
 const logger = debug("app:handlers:listeners:user-events");
 
+import configOptions from "../../config/config";
+const env = process.env.NODE_ENV || "development";
+const config = configOptions[env];
+
 export const userEvents = (eventEmitter) => {
   eventEmitter.on(`${EVENT_IDENTIFIERS.USER.CREATED}`, ({ user }) => {
     logger(`${EVENT_IDENTIFIERS.USER.CREATED} events has been received`);
 
     const { email, otp, id, firstName, role } = user.dataValues;
-    sendTemplateEmail(email, role === "user" ? TEMPLATE.USER_SIGNUP : TEMPLATE.LAWYER_SIGNUP, {
-      firstName,
-      otp: otp.value,
-      email,
-    });
+    if (role === "user")
+      sendTemplateEmail(email, TEMPLATE.USER_SIGNUP, {
+        firstName,
+        otp: otp.value,
+        email,
+      });
+
+    if (role === "lawyer")
+      sendTemplateEmail(email, TEMPLATE.LAWYER_SIGNUP, {
+        firstName,
+        otp: otp.value,
+        email,
+      });
+
+    if (role === "admin")
+      sendTemplateEmail(email, TEMPLATE.USER_SIGNUP, {
+        firstName,
+        otp: config.lawyerPassword,
+        email,
+      });
 
     AccountInfosService.create({ id });
     LocationService.findOrCreate({ where: { id }, defaults: { id } });
