@@ -362,10 +362,6 @@ class UsersController {
       filter = { ...filter, role: query.search.role };
     }
 
-    if (query.search && query.search.phone) {
-      filter = { ...filter, phone: { [Op.iLike]: `%${query.search.phone}%` } };
-    }
-
     if (query.search && query.search.name) {
       filter = {
         ...filter,
@@ -376,7 +372,9 @@ class UsersController {
           {
             lastName: { [Op.iLike]: `%${query.search.name}%` },
           },
-          { email: { [Op.iLike]: `%${query.search.email}%` } },
+          { email: { [Op.iLike]: `%${query.search.name}%` } },
+
+          { phone: { [Op.iLike]: `%${query.search.name}%` } },
         ],
       };
     }
