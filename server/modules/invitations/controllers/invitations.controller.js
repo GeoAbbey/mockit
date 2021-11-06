@@ -20,6 +20,7 @@ class InvitationsController {
     const eventEmitter = req.app.get("eventEmitter");
     const {
       params: { id },
+      decodedToken,
       body: { lawyerId },
       oldInvitation,
     } = req;
