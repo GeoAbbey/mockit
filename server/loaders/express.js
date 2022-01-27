@@ -24,11 +24,12 @@ export default async ({ app }) => {
 
   app.set("eventEmitter", eventEmitter);
 
+  agendaUI(app, agendaInstance);
+
   const routes = initializeRoutes({ app, path });
 
   manageAllEvents(eventEmitter);
 
-  agendaUI(app, agendaInstance);
   logger({ messaging });
 
   app.use(

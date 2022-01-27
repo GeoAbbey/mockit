@@ -1,5 +1,5 @@
-export function exceptionHandler({ message, status }) {
+export function exceptionHandler({ message, status, name }) {
   this.message = message;
-  this.name = "exceptionHandler";
+  this.name = name || "exceptionHandler";
   this.status = status;
 }
