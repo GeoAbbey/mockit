@@ -1,4 +1,4 @@
-## This is the Back End application for the Zapp-Lawyer Project
+## This is the Back End application for the App-Rescue Project
 
 ### To run this project.
 

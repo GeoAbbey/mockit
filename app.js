@@ -49,7 +49,7 @@ export const startServer = async () => {
   app.set("io", io);
 
   server.listen(port, () => {
-    debugLog(`Zapp Lawyer Backend app  listening at http://localhost:${port}`);
+    debugLog(`App Rescue Backend app  listening at http://localhost:${port}`);
     routes.forEach((route) => {
       debugLog(`Routes configured for ${route.getName()}`);
     });

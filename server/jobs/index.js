@@ -1,19 +1,14 @@
 import { agenda } from "./agenda";
-import { JobHandlers } from "./handlers";
+import { allDefinitions } from "./definitions";
 
 agenda
   .on("ready", () => console.log("Agenda started!"))
   .on("error", () => console.log("Agenda connection error!"));
 
-agenda.define(
-  "complete-payout",
-  {
-    priority: "normal",
-    concurrency: 10,
-  },
-  JobHandlers.completePayout
-);
+allDefinitions(agenda);
 
 agenda.start();
+
+console.log({ jobs: agenda._definitions });
 
 export { agenda as agendaInstance };
