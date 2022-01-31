@@ -4,8 +4,13 @@ export const createWithdrawalSchema = Joi.object().keys({
   amount: Joi.number().min(1000).required(),
 });
 
+export const accountWithdrawalSchema = Joi.object().keys({
+  accountCode: Joi.string().required(),
+});
+
 export const finalizeOTP = Joi.object().keys({
   otp: Joi.string().required(),
+  reference: Joi.string().required(),
 });
 
 export const queryOptions = Joi.object().keys({
@@ -17,4 +22,8 @@ export const queryOptions = Joi.object().keys({
     page: Joi.number().min(1),
     pageSize: Joi.number().max(20),
   }),
+});
+
+export const referenceSchema = Joi.object().keys({
+  reference: Joi.string().required(),
 });

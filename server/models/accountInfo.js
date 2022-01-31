@@ -15,17 +15,17 @@ module.exports = (sequelize, DataTypes) => {
   AccountInfo.init(
     {
       walletAmount: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL(10, 2),
         defaultValue: () => 0,
       },
       pendingAmount: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL(10, 2),
         defaultValue: () => 0,
       },
       walletAmountInNaira: {
         type: DataTypes.VIRTUAL,
         get() {
-          return this.walletAmount / 100;
+          return this.walletAmount;
         },
         set(value) {
           throw new Error(`Do not try to set the walletAmountInNaira ${value}!`);
@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
       pendingAmountInNaira: {
         type: DataTypes.VIRTUAL,
         get() {
-          return this.pendingAmount / 100;
+          return this.pendingAmount;
         },
         set(value) {
           throw new Error(`Do not try to set the  pendingAmountInNaira ${value}!`);
@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
       bookAmount: {
         type: DataTypes.VIRTUAL,
         get() {
-          return (this.walletAmount + this.pendingAmount) / 100;
+          return this.walletAmount + this.pendingAmount;
         },
         set(value) {
           throw new Error(`Do not try to set the bookAmount ${value}!`);

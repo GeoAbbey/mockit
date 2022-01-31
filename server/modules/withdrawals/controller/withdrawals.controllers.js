@@ -4,6 +4,7 @@ import { paginate as pagination } from "../../helpers";
 import { Op } from "sequelize";
 
 import WithdrawalsService from "../services/withdrawals.services";
+import { EVENT_IDENTIFIERS } from "../../../constants";
 
 const log = debug("app:Withdrawals-controller");
 
@@ -17,22 +18,31 @@ class WithdrawalsController {
   }
 
   async makeWithdrawal(req, res, next) {
+    const eventEmitter = req.app.get("eventEmitter");
+
     const {
       decodedToken: { firstName, lastName, id, email },
       body: { amount },
+      params: { accountCode },
     } = req;
     log(`creating a withdrawal for user with id ${id}`);
 
-    const withdrawal = await WithdrawalsService.create({
+    const response = await WithdrawalsService.create({
       name: `${firstName} ${lastName}`,
       amount,
       id,
       email,
+      accountCode,
     });
 
-    console.log({ withdrawal }, "🎳");
+    response.success &&
+      eventEmitter.emit(EVENT_IDENTIFIERS.WITHDRAWAL.INITIATED, {
+        data: response.withdrawal,
+        decodedToken: req.decodedToken,
+      });
+
     return res.status(201).send({
-      ...withdrawal,
+      ...response,
     });
   }
 
@@ -58,16 +68,31 @@ class WithdrawalsController {
     });
   }
 
-  async finalizeAWithdrawal(req, res, next) {
+  async authorizeAWithdrawal(req, res, next) {
+    const eventEmitter = req.app.get("eventEmitter");
+
     const {
       oldWithdrawal,
-      body,
       params: { id },
+      decodedToken: { id: adminId },
+      monnifyToken,
     } = req;
-    const withdrawal = await WithdrawalsService.update(id, body, oldWithdrawal);
+
+    const [, [withdrawal]] = await WithdrawalsService.update({
+      id,
+      adminId,
+      oldWithdrawal,
+      monnifyToken,
+    });
+
+    eventEmitter.emit(EVENT_IDENTIFIERS.WITHDRAWAL.AUTHORIZED, {
+      data: withdrawal,
+      decodedToken: req.decodedToken,
+    });
+
     return res.status(200).send({
       success: true,
-      message: "withdrawals successfully finalized",
+      message: "withdrawal successfully finalized",
       withdrawal,
     });
   }
@@ -107,6 +132,20 @@ class WithdrawalsController {
     });
   }
 
+  async resendOTP(req, res, next) {
+    const {
+      body: { reference },
+      monnifyToken,
+    } = req;
+
+    const response = await WithdrawalsService.resendOTP({ reference, monnifyToken });
+
+    return res.status(200).send({
+      success: true,
+      response,
+    });
+  }
+
   checkAccessLawyer(context) {
     return async (req, res, next) => {
       const {
@@ -124,10 +163,14 @@ class WithdrawalsController {
     return async (req, res, next) => {
       const {
         decodedToken: { role, id },
-        oldWithdrawal: { ownerId },
+        oldWithdrawal,
       } = req;
       if (role === "admin" || role === "super-admin") return next();
-      if (role === "lawyer" && id !== ownerId) {
+
+      if (role === "user")
+        return next(createError(401, `You do not have access to ${context} this resource`));
+
+      if (role === "lawyer" && id !== oldWithdrawal.ownerId) {
         return next(createError(401, `You do not have access to ${context} this withdrawal`));
       }
 
@@ -141,7 +184,6 @@ class WithdrawalsController {
         decodedToken: { role },
       } = req;
 
-      console.log({ role }, "♟");
       if (role === "admin" || role === "super-admin") return next();
       else return next(createError(401, `You do not have access to perform this operation`));
     };

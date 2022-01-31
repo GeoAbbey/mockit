@@ -5,6 +5,7 @@ import { smallClaimEvents } from "./smallClaimEvents";
 import { responseEvents } from "./responseEvents";
 import { cooperateEvents } from "./cooperateEvents";
 import { cooperateAccessEvents } from "./cooperateAccessEvents";
+import { withdrawalEvents } from "./withdrawalEvents";
 
 const allEvents = [
   userEvents,
@@ -14,6 +15,7 @@ const allEvents = [
   responseEvents,
   cooperateEvents,
   cooperateAccessEvents,
+  withdrawalEvents,
 ];
 
 export const manageAllEvents = (eventEmitter) => {

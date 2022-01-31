@@ -16,7 +16,6 @@ import PayoutsController from "../../payout/controllers/payout.controller";
 const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
 import { EVENT_IDENTIFIERS } from "../../../constants";
-import { toKobo } from "../../../utils/toKobo";
 
 const config = configOptions[env];
 const getAmount = PayoutsController.getAmount;
@@ -158,6 +157,9 @@ class PaymentsService {
   }
 
   async processPayIn({ data, eventEmitter, decodedToken }) {
+    debugLog("processing a payment");
+    data.paymentDescription = JSON.parse(data.paymentDescription);
+
     const mapper = {
       subscription: this.handleSubscriptionPayIn,
       singleSmallClaim: this.handleSingleSmallClaim,
@@ -166,13 +168,14 @@ class PaymentsService {
       cooperate: this.handleCooperatePayIn,
     };
 
-    return mapper[data.metadata.type]({ data, eventEmitter, decodedToken });
+    return mapper[data.paymentDescription.type]({ data, eventEmitter, decodedToken });
   }
 
   async handleSingleInvitation({ data, eventEmitter, decodedToken }) {
+    debugLog("processing a payment handleSingleInvitation");
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const { metadata, amount, reference } = data;
+      const { paymentDescription: metadata, amount, transactionReference: reference } = data;
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
         transaction: t,
       });
@@ -212,20 +215,6 @@ class PaymentsService {
         { transaction: t }
       );
 
-      //TODO
-      //if can credentials doesn't exist save it.
-      const { authorization } = data;
-      console.log({ authorization });
-
-      const authDetails = await AuthCodeServices.findOrCreate({
-        where: { ownerId: metadata.id, authorizationCode: authorization.authorization_code },
-        defaults: {
-          last4: authorization.last4,
-          cardDetails: authorization,
-        },
-        transaction: t,
-      });
-
       eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
         invitation: paidInvitation,
         decodedToken,
@@ -237,11 +226,12 @@ class PaymentsService {
     return result;
   }
   async handleSingleSmallClaim({ data, eventEmitter, decodedToken }) {
-    console.log({ data }, "🐥");
+    debugLog("processing a payment handleSingleSmallClaim");
 
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const { metadata, amount, reference } = data;
+      const { paymentDescription: metadata, amount, transactionReference: reference } = data;
+
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
         transaction: t,
       });
@@ -280,20 +270,6 @@ class PaymentsService {
         { transaction: t }
       );
 
-      //TODO
-      //if can credentials doesn't exist save it.
-      const { authorization } = data;
-      const authDetails = await AuthCodeServices.findOrCreate(
-        {
-          where: { ownerId: metadata.id, authorizationCode: authorization.authorization_code },
-          defaults: {
-            last4: authorization.last4,
-            cardDetails: authorization,
-          },
-        },
-        { transaction: t }
-      );
-
       eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken);
 
       return { success: true, service: paidSmallClaim };
@@ -303,12 +279,20 @@ class PaymentsService {
   }
 
   async handleWalletPayIn({ data }) {
+    debugLog("processing a payment handleWalletPayIn");
+
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const { metadata, amount, reference } = data;
+      const {
+        paymentDescription: metadata,
+        amountPaid: amount,
+        transactionReference: reference,
+      } = data;
+
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
         transaction: t,
       });
+
       if (referenceIsAlreadyUsed) {
         return {
           message: `you account has already been credited with the supplied reference ${reference}`,
@@ -316,7 +300,10 @@ class PaymentsService {
         };
       }
 
-      const oldAccountInfo = await AccountInfosService.find(metadata.id, { transaction: t });
+      const oldAccountInfo = await AccountInfosService.find(metadata.id, {
+        transaction: t,
+      });
+
       const [, [newAccountInfo]] = await AccountInfosService.update(
         metadata.id,
         {
@@ -324,7 +311,7 @@ class PaymentsService {
             info: true,
             operation: "add",
           },
-          walletAmount: amount,
+          walletAmount: Number(amount),
         },
         oldAccountInfo,
         { transaction: t }
@@ -333,23 +320,9 @@ class PaymentsService {
       const receipt = await PayInServices.create(
         {
           for: metadata.type,
-          amount,
+          amount: Number(amount),
           reference,
           ownerId: metadata.id,
-        },
-        { transaction: t }
-      );
-
-      //TODO
-      //if can credentials doesn't exist save it.
-      const { authorization } = data;
-      const authDetails = await AuthCodeServices.findOrCreate(
-        {
-          where: { ownerId: metadata.id, authorizationCode: authorization.authorization_code },
-          defaults: {
-            last4: authorization.last4,
-            cardDetails: authorization,
-          },
         },
         { transaction: t }
       );
@@ -361,10 +334,11 @@ class PaymentsService {
   }
 
   async handleCooperatePayIn({ data }) {
+    debugLog("processing a payment handleWalletPayIn");
     // ...to do implement services
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const { metadata, amount, reference } = data;
+      const { paymentDescription: metadata, amount, transactionReference: reference } = data;
       console.log({ data }, "💰");
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
         transaction: t,
@@ -398,20 +372,6 @@ class PaymentsService {
         { transaction: t }
       );
 
-      //TODO
-      //if can credentials doesn't exist save it.
-      const { authorization } = data;
-      const authDetails = await AuthCodeServices.findOrCreate(
-        {
-          where: { ownerId: metadata.id, authorizationCode: authorization.authorization_code },
-          defaults: {
-            last4: authorization.last4,
-            cardDetails: authorization,
-          },
-        },
-        { transaction: t }
-      );
-
       return { success: true, service: newCooperateInfo };
     });
 
@@ -419,9 +379,12 @@ class PaymentsService {
   }
 
   async handleSubscriptionPayIn({ data }) {
+    debugLog("processing a payment handleSubscriptionPayIn");
+
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const { metadata, amount, reference } = data;
+      const { paymentDescription: metadata, amount, transactionReference: reference } = data;
+
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, t);
       if (referenceIsAlreadyUsed) {
         return {
@@ -438,7 +401,7 @@ class PaymentsService {
             info: true,
             operation: "add",
           },
-          subscriptionCount: parseInt(amount / 100 / parseInt(config.costOfSubscriptionUnit)),
+          subscriptionCount: parseInt(amount / parseInt(config.costOfSubscriptionUnit)),
         },
         oldAccountInfo,
         { transaction: t }
@@ -450,7 +413,7 @@ class PaymentsService {
           amount,
           reference,
           subQuantity: {
-            count: parseInt(amount / 100 / parseInt(config.costOfSubscriptionUnit)),
+            count: parseInt(amount / parseInt(config.costOfSubscriptionUnit)),
             pricePerCount: config.costOfSubscriptionUnit,
           },
           ownerId: metadata.id,
@@ -458,19 +421,6 @@ class PaymentsService {
         { transaction: t }
       );
 
-      //TODO
-      //if can credentials doesn't exist save it.
-      const { authorization } = data;
-      const authDetails = await AuthCodeServices.findOrCreate(
-        {
-          where: { ownerId: metadata.id, authorizationCode: authorization.authorization_code },
-          defaults: {
-            last4: authorization.last4,
-            cardDetails: authorization,
-          },
-        },
-        { transaction: t }
-      );
       return { success: true, service: newAccountInfo };
     });
 
@@ -592,7 +542,7 @@ class PaymentsService {
         }
         const oldCooperateInfo = await CooperateService.findOne(args.code);
 
-        if (oldCooperateInfo.walletAmount < toKobo(config.invitationCost)) {
+        if (oldCooperateInfo.walletAmount < config.invitationCost) {
           return {
             message: "you do not have sufficient funds to prosecute this transaction",
             success: false,
@@ -603,7 +553,7 @@ class PaymentsService {
           oldCooperateInfo.dataValues.id,
           {
             operation: "deduct",
-            walletAmount: toKobo(config.invitationCost),
+            walletAmount: config.invitationCost,
           },
           oldCooperateInfo,
           { transaction: t }
@@ -623,7 +573,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "invitation",
             modelId: args.modelId,
-            amount: toKobo(config.invitationCost),
+            amount: config.invitationCost,
           },
           { transaction: t }
         );
@@ -654,12 +604,13 @@ class PaymentsService {
           };
         }
         const oldAccountInfo = await AccountInfosService.find(args.id, { transaction: t });
-        console.log({
+
+        debugLog({
           oldAccountInfo: oldAccountInfo.walletAmount,
-          invitationCost: config.invitationCost * 100,
+          invitationCost: config.invitationCost,
         });
 
-        if (oldAccountInfo.walletAmount < toKobo(config.invitationCost)) {
+        if (oldAccountInfo.walletAmount < config.invitationCost) {
           return {
             message: "you do not have sufficient funds to prosecute this transaction",
             success: false,
@@ -673,7 +624,7 @@ class PaymentsService {
               info: true,
               operation: "deduct",
             },
-            walletAmount: toKobo(config.invitationCost),
+            walletAmount: config.invitationCost,
           },
           oldAccountInfo,
           { transaction: t }
@@ -692,7 +643,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "invitation",
             modelId: args.modelId,
-            amount: toKobo(config.invitationCost),
+            amount: config.invitationCost,
           },
           { transaction: t }
         );
@@ -717,7 +668,7 @@ class PaymentsService {
     console.log({ args }, "🤯");
 
     const oldAccountInfo = await AccountInfosService.find(args.id);
-    const amount = toKobo(config.costOfSubscriptionUnit * args.quantity);
+    const amount = config.costOfSubscriptionUnit * args.quantity;
     if (amount > oldAccountInfo.dataValues.walletAmount) {
       return {
         success: false,
@@ -778,7 +729,7 @@ class PaymentsService {
 
     //find the personal wallet and check that he has above the specified amount
     const oldAccountInfo = await AccountInfosService.find(args.id);
-    if (toKobo(args.amount) > oldAccountInfo.dataValues.walletAmount) {
+    if (args.amount > oldAccountInfo.dataValues.walletAmount) {
       return {
         success: false,
         message: `Insufficient funds: amount ${args.amount} is more than available balance of ${
@@ -797,7 +748,7 @@ class PaymentsService {
               info: true,
               operation: "deduct",
             },
-            walletAmount: toKobo(args.amount),
+            walletAmount: args.amount,
           },
           oldAccountInfo,
           { transaction: t }
@@ -810,7 +761,7 @@ class PaymentsService {
           oldCooperateInfo.dataValues.id,
           {
             operation: "add",
-            walletAmount: toKobo(args.amount),
+            walletAmount: args.amount,
           },
           oldCooperateInfo,
           { transaction: t }
@@ -822,7 +773,7 @@ class PaymentsService {
             ownerId: args.id,
             performedBy: args.id,
             modelType: "cooperate",
-            amount: toKobo(args.amount),
+            amount: args.amount,
           },
           { transaction: t }
         );
@@ -953,7 +904,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "response",
             notes: "return",
-            amount: toKobo(parseInt(config.costOfSubscriptionUnit)),
+            amount: parseInt(config.costOfSubscriptionUnit),
           },
           { transaction: t }
         );
@@ -1017,7 +968,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "response",
             modelId: args.modelId,
-            amount: toKobo(parseInt(config.costOfSubscriptionUnit)),
+            amount: parseInt(config.costOfSubscriptionUnit),
           },
           { transaction: t }
         );

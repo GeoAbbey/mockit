@@ -1,3 +1,5 @@
+import { nanoid } from "nanoid";
+import debug from "debug";
 import InvitationsService from "../../invitations/service/invitations.service";
 import SmallClaimsService from "../../small-claims/services/small-claims.service";
 
@@ -5,16 +7,29 @@ const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
 
 const config = configOptions[env];
+const logger = debug("app:modules:payment:controllers:helpers");
+
+const common = (args) => ({
+  customerEmail: args.email,
+  contractCode: config.payment_contract_code,
+  currencyCode: "NGN",
+  customerName: `${args.firstName} ${args.lastName}`,
+  paymentMethods: ["CARD", "ACCOUNT_TRANSFER"],
+  redirectUrl: args.callback_url,
+  monnifyToken: args.monnifyToken,
+  paymentReference: nanoid(15),
+});
 
 export const walletPay = (args) => {
+  logger("composing input for wallet initialization");
+
   if (!args.amount)
     return { success: false, message: "amount to be loaded into wallet is required" };
 
   return {
-    email: args.email,
-    amount: args.amount * 100,
-    callback_url: args.callback_url,
-    metadata: { id: args.id, type: args.type },
+    ...common(args),
+    amount: args.amount,
+    paymentDescription: JSON.stringify({ id: args.id, type: args.type }),
   };
 };
 
@@ -23,14 +38,15 @@ export const subscriptionPay = (args) => {
     return { success: false, message: "Quantity of subscription to be purchased is required" };
 
   return {
-    email: args.email,
-    callback_url: args.callback_url,
-    amount: args.quantity * parseInt(config.costOfSubscriptionUnit) * 100,
-    metadata: { id: args.id, type: args.type },
+    ...common(args),
+    paymentDescription: JSON.stringify({ id: args.id, type: args.type }),
+    amount: args.quantity * parseInt(config.costOfSubscriptionUnit),
   };
 };
 
 export const singleInvitationPay = async (args) => {
+  logger("composing input for singleInvitationPay initialization");
+
   if (!args.modelId)
     return { success: false, message: "invitation modelId is required to prosecute payment" };
 
@@ -44,10 +60,9 @@ export const singleInvitationPay = async (args) => {
   }
 
   return {
-    email: args.email,
-    callback_url: args.callback_url,
-    amount: parseInt(config.invitationCost) * 100,
-    metadata: { id: args.id, type: args.type, modelId: args.modelId },
+    ...common(args),
+    amount: config.invitationCost,
+    paymentDescription: JSON.stringify({ id: args.id, type: args.type, modelId: args.modelId }),
   };
 };
 
@@ -84,14 +99,13 @@ export const singleSmallClaimPay = async (args) => {
   const totalCostOfService = baseCharge + serviceCharge;
 
   return {
-    email: args.email,
-    callback_url: args.callback_url,
+    ...common(args),
     amount: totalCostOfService,
-    metadata: {
+    paymentDescription: JSON.stringify({
       id: args.id,
       type: args.type,
       modelId: args.modelId,
       assignedLawyerId: args.lawyerId,
-    },
+    }),
   };
 };

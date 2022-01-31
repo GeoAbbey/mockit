@@ -8,6 +8,11 @@ import { walletPay, subscriptionPay, singleInvitationPay, singleSmallClaimPay } 
 import { paginate as pagination } from "../../helpers";
 import { Op } from "sequelize";
 
+const env = process.env.NODE_ENV || "development";
+import configOptions from "../../../config/config";
+
+const config = configOptions[env];
+
 const log = debug("app:payments-controller");
 
 const payment = payStack(axios);
@@ -123,13 +128,18 @@ class PaymentsController {
     const {
       params: { ref },
       decodedToken,
+      monnifyToken,
     } = req;
-    const result = await payment.verifyPayment(ref);
+
+    const result = await payment.verifyPayment(ref, { monnifyToken });
     const {
-      response: { data },
+      success,
+      response: { responseBody: data },
     } = result;
 
-    if (data.status !== "success")
+    console.log({ result: data });
+
+    if (!success)
       return next(createError(400, "There was an error processing your payment kindly try again"));
 
     const paymentResult = await PaymentsService.processPayIn({
@@ -257,12 +267,24 @@ class PaymentsController {
         lawyerId = undefined,
       },
       decodedToken: { email, firstName, lastName, id },
+      monnifyToken,
     } = req;
 
     const mapper = {
-      subscription: () => this.handleSubscriptionPayIn({ quantity, email, id, type, callback_url }),
+      subscription: () =>
+        this.handleSubscriptionPayIn({
+          quantity,
+          email,
+          id,
+          firstName,
+          lastName,
+          type,
+          callback_url,
+          monnifyToken,
+        }),
       wallet: () =>
         this.handleWalletOrCooperatePayIn({
+          monnifyToken,
           amount,
           email,
           firstName,
@@ -273,6 +295,7 @@ class PaymentsController {
         }),
       singleInvitation: () =>
         this.handleSingleInvitationPayIn({
+          monnifyToken,
           email,
           firstName,
           lastName,
@@ -283,6 +306,7 @@ class PaymentsController {
         }),
       singleSmallClaim: () =>
         this.handleSingleSmallClaimPayIn({
+          monnifyToken,
           email,
           firstName,
           lastName,
@@ -294,6 +318,7 @@ class PaymentsController {
         }),
       cooperate: () =>
         this.handleWalletOrCooperatePayIn({
+          monnifyToken,
           email,
           firstName,
           lastName,

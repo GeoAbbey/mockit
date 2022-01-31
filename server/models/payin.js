@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       amount: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL(10, 2),
       },
       ticketId: {
         type: DataTypes.STRING,

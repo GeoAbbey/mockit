@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         defaultValue: "in-progress",
       },
-      amount: { type: DataTypes.INTEGER, allowNull: false },
+      amount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
       amountInNaira: {
         type: DataTypes.VIRTUAL,
         get() {

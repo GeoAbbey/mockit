@@ -11,6 +11,12 @@ import AccountInfoServices from "../../accountInfo/services/accountInfo.services
 import { exceptionHandler } from "../../../utils/exceptionHandler";
 import { paginate } from "../../helpers";
 
+const env = process.env.NODE_ENV || "development";
+import configOptions from "../../../config/config";
+import { nanoid } from "nanoid";
+
+const config = configOptions[env];
+
 const payment = payStack(axios);
 
 class WithdrawalsService {
@@ -24,8 +30,8 @@ class WithdrawalsService {
 
   async create(withdrawalDTO) {
     debugLog(`creating a withdrawal for user with id ${withdrawalDTO.id}`);
-    const { id, amount, email, name } = withdrawalDTO;
-    const theRecipient = await RecipientServices.find(id);
+    const { id, amount, email, name, accountCode } = withdrawalDTO;
+    const theRecipient = await RecipientServices.findByCode({ lawyerId: id, code: accountCode });
 
     if (!theRecipient)
       return {
@@ -35,23 +41,12 @@ class WithdrawalsService {
 
     const oldAccountInfo = await AccountInfoServices.find(id);
 
-    if (toKobo(amount) > oldAccountInfo.dataValues.walletAmount) {
+    if (amount > oldAccountInfo.dataValues.walletAmount) {
       return {
         success: false,
         message: `Insufficient funds: you do not have up to the amount you are trying to withdraw`,
       };
     }
-
-    const data = {
-      recipient: theRecipient.dataValues.code,
-      source: "balance",
-      amount: toKobo(amount),
-      reason: JSON.stringify({
-        name,
-        email,
-        id,
-      }),
-    };
 
     try {
       return models.sequelize.transaction(async (t) => {
@@ -62,30 +57,26 @@ class WithdrawalsService {
               info: true,
               operation: "deduct",
             },
-            walletAmount: toKobo(amount),
+            walletAmount: amount,
           },
           oldAccountInfo,
           { transaction: t }
         );
 
-        const result = await payment.transfer(data);
-
-        if (!result.success)
-          throw new exceptionHandler({
-            message: "There was an internal error, kindly try again later",
-            status: 503,
-          });
-
         const withdrawal = await models.Withdrawal.create({
-          transfer_code: result.response.data.transfer_code,
-          data: result.response.data,
-          amount: toKobo(amount),
-          status: result.response.data.status,
-          reference: result.response.data.reference,
+          amount,
+          status: "INITIATED",
+          reference: nanoid(15),
+          accountID: theRecipient.code,
+          data: { email, name },
           ownerId: id,
         });
 
-        return { success: true, message: `Withdrawal of ${amount} was successful`, withdrawal };
+        return {
+          success: true,
+          message: `Withdrawal of ${amount} was successful initiated, you will be paid when an account officer verifies this transaction`,
+          withdrawal,
+        };
       });
     } catch (error) {
       console.log(error, "🍋");
@@ -98,22 +89,48 @@ class WithdrawalsService {
     return models.Withdrawal.findByPk(id, paranoid);
   }
 
-  async update(id, withdrawalDTO, oldWithdrawal, t = undefined) {
-    const result = await payment.finalizeTransfer({
-      transfer_code: oldWithdrawal.transfer_code,
-      otp: withdrawalDTO.otp,
+  async update({ id, adminId, oldWithdrawal, monnifyToken, t = undefined }) {
+    const theRecipient = await RecipientServices.findByCode({
+      lawyerId: oldWithdrawal.ownerId,
+      code: oldWithdrawal.accountID,
     });
 
-    if (!result.success)
-      throw new exceptionHandler({
-        message: "There was an internal error, kindly try again later",
-        status: 503,
-      });
+    console.log({ theRecipient: theRecipient.details }, "⏰");
 
-    return models.Withdrawal.update(
-      { status: result.response.data.status, data: result.response.data },
-      { where: { id }, returning: true, ...t }
-    );
+    const data = {
+      monnifyToken,
+      amount: oldWithdrawal.amount,
+      reference: oldWithdrawal.reference,
+      narration: `payment initiated by lawyer with id-${oldWithdrawal.ownerId} email-${oldWithdrawal.data.email} name-${oldWithdrawal.data.name}`,
+      destinationBankCode: theRecipient.details.bankCode,
+      destinationAccountNumber: theRecipient.details.accountNumber,
+      currency: "NGN",
+      sourceAccountNumber: config.payment_source_account_number,
+    };
+
+    try {
+      return models.sequelize.transaction(async (t) => {
+        const result = await payment.disbursements(data);
+
+        if (!result.success)
+          throw new exceptionHandler({
+            message: result.response,
+            status: 503,
+          });
+
+        return models.Withdrawal.update(
+          {
+            status: result.response.responseBody.status,
+            data: result.response.responseBody,
+            approvedBy: adminId,
+          },
+          { where: { id }, returning: true, ...t }
+        );
+      });
+    } catch (error) {
+      console.log(error, "🍋");
+      return { success: false, error };
+    }
   }
 
   async findMany(filter, pageDetails, paranoid) {

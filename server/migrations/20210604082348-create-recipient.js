@@ -7,6 +7,12 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
+      },
+      lawyerId: {
+        allowNull: false,
+        primaryKey: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
         onDelete: "CASCADE",
         references: {
           model: "Users",
@@ -15,10 +21,6 @@ module.exports = {
         },
       },
       code: {
-        allowNull: false,
-        type: Sequelize.STRING,
-      },
-      payStackId: {
         allowNull: false,
         type: Sequelize.STRING,
       },

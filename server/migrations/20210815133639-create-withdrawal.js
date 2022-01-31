@@ -20,7 +20,7 @@ module.exports = {
           as: "ownerId",
         },
       },
-      approveBy: {
+      approvedBy: {
         type: Sequelize.UUID,
         onDelete: "CASCADE",
         references: {
@@ -35,16 +35,13 @@ module.exports = {
       reference: {
         type: Sequelize.STRING,
       },
+      accountID: { type: Sequelize.STRING },
       ticketId: {
         type: Sequelize.STRING,
         unique: true,
         allowNull: false,
       },
       data: { allowNull: false, type: Sequelize.JSONB },
-      transfer_code: {
-        allowNull: false,
-        type: Sequelize.STRING,
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
       amountInNaira: {
         type: DataTypes.VIRTUAL,
         get() {
-          return this.amount / 100;
+          return this.amount;
         },
         set(value) {
           throw new Error(`Do not try to set the  pendingAmountInNaira ${value}!`);
@@ -37,15 +37,16 @@ module.exports = (sequelize, DataTypes) => {
       status: {
         type: DataTypes.STRING,
         validate: {
-          isIn: [["otp", "success"]],
+          isIn: [["PENDING_AUTHORIZATION", "SUCCESS", "FAILED", "INITIATED"]],
         },
       },
-      approveBy: { type: DataTypes.UUID },
+      approvedBy: { type: DataTypes.UUID },
       reference: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
       },
+      accountID: { type: DataTypes.STRING, allowNull: false },
       ticketId: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -53,11 +54,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: () => nanoid(10),
       },
       ownerId: { type: DataTypes.UUID, allowNull: false },
-      data: { allowNull: false, type: DataTypes.JSONB },
-      transfer_code: {
-        allowNull: false,
-        type: DataTypes.STRING,
-      },
+      data: { type: DataTypes.JSONB },
     },
     {
       sequelize,

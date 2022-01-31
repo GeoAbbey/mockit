@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "assignedLawyerId",
       });
       this.hasOne(models.LocationDetail, { foreignKey: "id" });
+      this.hasMany(models.Recipient, { foreignKey: "id" });
       this.hasOne(models.AccountInfo, { foreignKey: "id" });
       this.hasMany(models.Transaction, { foreignKey: "ownerId", as: "paymentFromWallet" });
       this.hasMany(models.EligibleLawyer, {

@@ -8,6 +8,7 @@ import {
   queryOptions,
 } from "./schema/payment.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
+import { paymentAuthMiddleware } from "./controllers/paymentAuth.js";
 
 export class PaymentRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {
@@ -43,13 +44,14 @@ export class PaymentRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/payment/verify/:ref`)
       .all([Authenticate.verifyToken()])
-      .get([wrapCatch(PaymentsController.processPayment)]);
+      .get([wrapCatch(paymentAuthMiddleware()), wrapCatch(PaymentsController.processPayment)]);
 
     this.app
       .route(`${this.path}/payin-service-or-credit-account`)
       .all([Authenticate.verifyToken()])
       .post([
         middleware({ schema: PayInSchema, property: "body" }),
+        wrapCatch(paymentAuthMiddleware()),
         wrapCatch(PaymentsController.payInPayment),
       ]);
 

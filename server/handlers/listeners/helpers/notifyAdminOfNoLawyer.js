@@ -1,6 +1,6 @@
 import debug from "debug";
 import { ROLES, TEMPLATE } from "../../../constants";
-import models from "../../../models";
+import userService from "../../../modules/users/service/user.service";
 import { sendBulkTemplatedEmail } from "../../../utils/MailService";
 
 const logger = debug("app:handlers:listeners:helpers:notifyAdminOfNoLawyer");
@@ -8,11 +8,11 @@ const logger = debug("app:handlers:listeners:helpers:notifyAdminOfNoLawyer");
 export const notifyAdminOfNoLawyer = async (data, modelName) => {
   logger(`sending emails to admins for not finding a lawyer to notify of ${modelName}`);
 
-  const admins = await models.User.findAll({
-    where: {
-      role: ROLES.ADMIN,
-    },
+  const admins = await userService.findMany({
+    role: ROLES.ADMIN,
   });
 
-  sendBulkTemplatedEmail(admins, TEMPLATE.NOTIFY_ADMIN, data.ticketId);
+  //send Notification to admins that no lawyer was found.
+
+  sendBulkTemplatedEmail(admins, TEMPLATE.NOTIFY_ADMIN, { ticketId: data.ticketId });
 };

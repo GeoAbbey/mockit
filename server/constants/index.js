@@ -225,6 +225,37 @@ export const NOTIFICATION_DATA = {
     },
   }),
 
+  WITHDRAWAL: {
+    INITIATED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+      generic({
+        title: "Withdrawal Initiated",
+        body: "A withdrawal has been initiated kindly approve this transaction for disbursement",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "admin",
+        view: "withdrawal_initiated_screen",
+        status: "withdrawal_initiated",
+        click_action: "new_withdrawal_initiated",
+      }),
+
+    AUTHORIZED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+      generic({
+        title: "Withdrawal Authorized",
+        body:
+          "Withdrawal has been authorized and funds should be available in your account shortly, kindly reach out to support in case there are any delays",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "lawyer",
+        view: "withdrawal_authorized_screen",
+        status: "withdrawal_authorized",
+        click_action: "new_withdrawal_authorized",
+      }),
+  },
+
   COOPERATE_ACCESS: {
     GRANTED: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
       generic({
@@ -294,6 +325,11 @@ export const EVENT_IDENTIFIERS = {
     CREATED: "USER_CREATED",
     GENERATE_NEW_OTP: "USER_GENERATE_NEW_OTP",
   },
+
+  WITHDRAWAL: {
+    INITIATED: "WITHDRAWAL_INITIATED",
+    AUTHORIZED: "WITHDRAWAL_AUTHORIZED",
+  },
 };
 
 export const ROLES = {
@@ -325,4 +361,6 @@ export const TEMPLATE = {
   OTP_RESET_PASSWORD: "Otp_Reset_Password",
   OTP_VERIFY_EMAIL: "Otp_Verify_Email",
   NOTIFY_ADMIN: "Notify_Admin",
+  WITHDRAWAL_INITIATED: "Withdrawal_Initiated",
+  WITHDRAWAL_AUTHORIZED: "Withdrawal_Authorized",
 };

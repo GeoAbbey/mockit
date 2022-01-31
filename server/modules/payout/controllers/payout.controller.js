@@ -46,10 +46,11 @@ class PayoutsController {
   };
 
   async getAmount(modelType, modelId) {
-    if (modelType === "invitation")
-      return toKobo(config.invitationCost * (config.lawyerPercentage / 100));
+    if (modelType === "invitation") return config.invitationCost * (config.lawyerPercentage / 100);
+
     if (modelType === "response")
-      return toKobo(config.costOfSubscriptionUnit * (config.lawyerPercentage / 100));
+      return config.costOfSubscriptionUnit * (config.lawyerPercentage / 100);
+
     if (modelType === "smallClaim") {
       const oldClaim = await SmallClaimsService.find(modelId, true);
       const lawyerId = oldClaim.dataValues.assignedLawyerId;

@@ -19,27 +19,19 @@ class RecipientsController {
 
   verifyRecipient = async (req, res, next) => {
     const {
-      decodedToken: { firstName, lastName, id, email },
-      body: {
-        type = "nuban",
-        description,
-        account_number,
-        bank_code,
-        currency = "NGN",
-        context = true,
-      },
+      decodedToken: { id },
+      body: { account_number, bank_code },
+      monnifyToken,
     } = req;
-    log(`creating a recipient for user with id ${id}`);
+    log(`verifying account details for a user with id ${id}`);
 
-    const recipient = await payment.createRecipient({
-      name: `${firstName} ${lastName}`,
-      type,
-      description,
-      email,
-      account_number,
-      bank_code,
-      currency,
+    const recipient = await payment.verifyRecipient({
+      monnifyToken,
+      accountNumber: account_number,
+      bankCode: bank_code,
     });
+
+    console.log({ recipient }, "🦋");
 
     if (!recipient.success)
       return next(
@@ -50,32 +42,34 @@ class RecipientsController {
         )
       );
 
-    return context
-      ? res.status(201).send({
-          success: true,
-          message: "verify the following details",
-          recipient: recipient.response.data,
-        })
-      : recipient;
+    res.status(201).send({
+      success: true,
+      message: "bank info successfully verified",
+      recipient: recipient.response,
+    });
   };
 
   makeRecipient = async (req, res, next) => {
     const {
       decodedToken: { id },
+      body: { account_number, bank_code, account_name },
     } = req;
 
     log(`creating a recipient for user with id ${id}`);
 
-    req.body.context = false;
-    const recipient = await this.verifyRecipient(req, res, next);
-    console.log({ recipient }, "🦋");
-    const { response: recipientFromPayStack } = recipient;
+    const recipient = await RecipientsService.findOne({ bank_code, account_number, id });
+    if (recipient)
+      return next(
+        createError(403, `An account info with the existing information has already been created`)
+      );
 
     const newRecipient = await RecipientsService.create({
-      id,
-      code: recipientFromPayStack.data.recipient_code,
-      payStackId: recipientFromPayStack.data.id,
-      details: recipientFromPayStack.data,
+      lawyerId: id,
+      details: {
+        accountNumber: account_number,
+        bankCode: bank_code,
+        accountName: account_name,
+      },
     });
 
     return res.status(201).send({
@@ -85,26 +79,36 @@ class RecipientsController {
     });
   };
 
-  recipientExist(context) {
-    return async (req, res, next) => {
-      const {
-        decodedToken: { id },
-      } = req;
-      const recipient = await RecipientsService.find(id);
-      if (!recipient)
-        return next(createError(404, `You don't have a recipient account kindly create one`));
+  async getRecipients(req, res, next) {
+    const {
+      decodedToken: { id },
+    } = req;
+    const recipient = await RecipientsService.find(id);
 
-      if (context) {
-        return res.status(200).send({
-          success: true,
-          message: `recipient successfully ${context}`,
-          recipient,
-        });
-      }
+    if (!recipient)
+      return next(createError(404, `You don't have a recipient account kindly create one`));
 
-      req.oldRecipient = recipient;
-      return next();
-    };
+    return res.status(200).send({
+      success: true,
+      message: `recipients successfully retrieved`,
+      recipient,
+    });
+  }
+
+  async recipientExists(req, res, next) {
+    const {
+      decodedToken: { id },
+      params: { code },
+    } = req;
+    const recipient = await RecipientsService.findByCode({ lawyerId: id, code });
+
+    if (!recipient)
+      return next(
+        createError(404, `Account details with code ${code} doesn\'t exist for user with id ${id}`)
+      );
+
+    req.oldRecipient = recipient;
+    return next();
   }
 
   async deleteRecipient(req, res, next) {
@@ -123,12 +127,13 @@ class RecipientsController {
   }
 
   async getBankCodes(req, res, next) {
-    const { response } = await RecipientsService.findMany();
+    const { monnifyToken } = req;
+    const { response } = await RecipientsService.findMany({ monnifyToken });
 
     return res.status(200).send({
       success: true,
-      message: response.message,
-      response: response.data,
+      message: "bank codes successfully retrieved",
+      response,
     });
   }
 

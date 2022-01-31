@@ -30,7 +30,7 @@ module.exports = {
         type: Sequelize.UUID,
       },
       amount: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.FLOAT,
       },
       ticketId: {
         type: Sequelize.STRING,

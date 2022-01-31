@@ -15,12 +15,12 @@ module.exports = {
         },
       },
       walletAmount: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.FLOAT,
       },
       subscriptionCount: {
         type: Sequelize.INTEGER,
       },
-      pendingAmount: { type: Sequelize.INTEGER },
+      pendingAmount: { type: Sequelize.FLOAT },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

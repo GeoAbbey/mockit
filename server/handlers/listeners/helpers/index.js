@@ -3,12 +3,9 @@ import { sendNotificationToClient } from "../../../utils/sendNotificationToClien
 import { EVENT_IDENTIFIERS, NOTIFICATION_DATA, ROLES, TEMPLATE } from "../../../constants";
 import models from "../../../models";
 import { sendBulkTemplatedEmail, sendTemplateEmail } from "../../../utils/MailService";
+import userService from "../../../modules/users/service/user.service";
 import { notifyAdminOfNoLawyer } from "./notifyAdminOfNoLawyer";
 import { updateModelInstance } from "./updateModelInstance";
-const env = process.env.NODE_ENV || "development";
-const configOptions = require("../../../config/config");
-
-const config = configOptions[env];
 
 const logger = debug("app:handlers:listeners:helpers");
 
@@ -17,11 +14,9 @@ export const sendNotificationToLawyers = async (events, data, decodedToken, mode
 
   console.log(data.venue.country, "🤬");
 
-  const allLawyers = await models.User.findAll({
-    where: {
-      role: ROLES.LAWYER,
-      address: { country: data.venue.country, state: data.venue.state },
-    },
+  const allLawyers = await userService.findMany({
+    role: ROLES.ADMIN,
+    address: { country: data.venue.country, state: data.venue.state },
   });
 
   console.log({ allLawyers }, "🍅");
@@ -30,38 +25,35 @@ export const sendNotificationToLawyers = async (events, data, decodedToken, mode
 
   const tokens = [];
   const allNotices = [];
+  const notificationData = NOTIFICATION_DATA[modelName][action]({
+    sender_id: data.dataValues.ownerId,
+    status_id: data.dataValues.id,
+    sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+    sender_firebase_token: decodedToken.firebaseToken,
+  });
+
   allLawyers.forEach((lawyer) => {
     if (lawyer.firebaseToken) tokens.push(lawyer.firebaseToken);
     allNotices.push({
       for: EVENT_IDENTIFIERS[modelName][action],
       ownerId: lawyer.id,
-      content: JSON.stringify(
-        NOTIFICATION_DATA[modelName][action]({
-          sender_id: data.dataValues.ownerId,
-          status_id: data.dataValues.id,
-          sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
-          sender_firebase_token: decodedToken.firebaseToken,
-        })
-      ),
+      content: JSON.stringify(notificationData),
     });
   });
 
   logger("sending notification to qualified lawyers");
   sendNotificationToClient({
     tokens,
-    data: NOTIFICATION_DATA[modelName][action]({
-      sender_id: data.dataValues.ownerId,
-      status_id: data.dataValues.id,
-      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
-      sender_firebase_token: decodedToken.firebaseToken,
-    }),
+    data: notificationData,
   });
 
   if (modelName === "INVITATION")
-    sendBulkTemplatedEmail(allLawyers, TEMPLATE.POLICE_INVITATION_CREATED, data.ticketId);
+    sendBulkTemplatedEmail(allLawyers, TEMPLATE.POLICE_INVITATION_CREATED, {
+      ticketId: data.ticketId,
+    });
 
   if (modelName === "SMALL_CLAIM")
-    sendBulkTemplatedEmail(allLawyers, TEMPLATE.SMALL_CLAIM_CREATED, data.ticketId);
+    sendBulkTemplatedEmail(allLawyers, TEMPLATE.SMALL_CLAIM_CREATED, { ticketId: data.ticketId });
 
   logger("saving notification for qualified lawyers on the database");
   await models.Notification.bulkCreate(
@@ -144,6 +136,16 @@ export const sendNotificationToUserOrLawyer = async (
 
     if (action === "REVOKED")
       sendTemplateEmail(email, TEMPLATE.COOPERATE_ACCESS_REVOKED, { firstName });
+  }
+
+  if (modelName === "WITHDRAWAL") {
+    if (action === "AUTHORIZED")
+      sendTemplateEmail(email, TEMPLATE.WITHDRAWAL_AUTHORIZED, {
+        firstName,
+        email,
+        ticketId: data.ticketId,
+        amount: data.amount,
+      });
   }
 
   sendNotificationToClient({
@@ -265,7 +267,9 @@ export const sendNotificationToEligibleLawyers = async ({
     });
   });
 
-  sendBulkTemplatedEmail(lawyersToNotify, TEMPLATE.ELIGIBLE_LAWYERS, response.ticketId);
+  sendBulkTemplatedEmail(lawyersToNotify, TEMPLATE.ELIGIBLE_LAWYERS, {
+    ticketId: response.ticketId,
+  });
 
   logger("sending notification to all eligible lawyers");
   sendNotificationToClient({

@@ -49,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
       walletAmountInNaira: {
         type: DataTypes.VIRTUAL,
         get() {
-          return this.walletAmount / 100;
+          return this.walletAmount;
         },
         set(value) {
           throw new Error(`Do not try to set the walletAmountInNaira ${value}!`);

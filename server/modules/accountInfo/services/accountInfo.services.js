@@ -1,7 +1,7 @@
 import debug from "debug";
 import models from "../../../models";
 
-const debugLog = debug("app:small-claims-service");
+const debugLog = debug("app:account-info-service");
 
 class AccountInfosService {
   static instance;

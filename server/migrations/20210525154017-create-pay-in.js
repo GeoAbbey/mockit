@@ -26,7 +26,7 @@ module.exports = {
         unique: true,
       },
       amount: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.FLOAT,
       },
       reference: {
         type: Sequelize.STRING,

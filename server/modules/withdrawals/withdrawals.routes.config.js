@@ -1,7 +1,14 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import WithdrawalsController from "./controller/withdrawals.controllers";
-import { createWithdrawalSchema, queryOptions, finalizeOTP } from "./schema/withdrawals.schema";
+import {
+  createWithdrawalSchema,
+  queryOptions,
+  finalizeOTP,
+  accountWithdrawalSchema,
+  referenceSchema,
+} from "./schema/withdrawals.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
+import { paymentAuthMiddleware } from "../payment/controllers/paymentAuth";
 
 export class WithdrawalRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {
@@ -10,14 +17,21 @@ export class WithdrawalRoutes extends CommonRoutesConfig {
 
   configureRoutes() {
     this.app
-      .route(`${this.path}/withdrawals`)
-      .all([Authenticate.verifyToken()])
+      .route(`${this.path}/withdrawals/:accountCode`)
+      .all([
+        middleware({ schema: accountWithdrawalSchema, property: "params" }),
+        Authenticate.verifyToken(),
+      ])
       .post([
         middleware({ schema: createWithdrawalSchema, property: "body" }),
         wrapCatch(WithdrawalsController.makeWithdrawal),
-      ])
+      ]);
+
+    this.app
+      .route(`${this.path}/withdrawals`)
+      .all([middleware({ schema: queryOptions, property: "query" }), Authenticate.verifyToken()])
       .get([
-        middleware({ schema: queryOptions, property: "query" }),
+        WithdrawalsController.checkAccessUser("retrieve"),
         wrapCatch(WithdrawalsController.queryContext),
         wrapCatch(WithdrawalsController.getAllWithdrawals),
       ]);
@@ -43,11 +57,11 @@ export class WithdrawalRoutes extends CommonRoutesConfig {
       .route(`${this.path}/withdrawal/:id`)
       .post([
         middleware({ schema: validateUUID("id"), property: "params" }),
-        middleware({ schema: finalizeOTP, property: "body" }),
         Authenticate.verifyToken(),
         wrapCatch(WithdrawalsController.checkAccessAdmin()),
         wrapCatch(WithdrawalsController.withdrawalExist("finalize")),
-        wrapCatch(WithdrawalsController.finalizeAWithdrawal),
+        wrapCatch(paymentAuthMiddleware()),
+        wrapCatch(WithdrawalsController.authorizeAWithdrawal),
       ]);
 
     return this.app;

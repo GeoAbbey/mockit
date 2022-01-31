@@ -67,7 +67,7 @@ const sendTemplateEmail = (recipientEmail, templateName, templateData, ticketId)
   sendTheMail(sendPromise);
 };
 
-const sendBulkTemplatedEmail = (destinations, templateName, ticketId) => {
+const sendBulkTemplatedEmail = (destinations, templateName, { ticketId, ...rest }) => {
   logger("sending a personalized mail using a template to multiple destinations");
 
   const params = {

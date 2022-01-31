@@ -17,7 +17,7 @@ module.exports = {
           as: "ownerId",
         },
       },
-      amount: { type: Sequelize.INTEGER },
+      amount: { type: Sequelize.FLOAT },
       status: {
         type: Sequelize.STRING,
       },

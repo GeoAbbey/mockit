@@ -8,7 +8,7 @@
     "debug:dev": "export DEBUG=*,-engine:* &&  nodemon ./bin/www",
     "start": "export NODE_ENV=production && export DEBUG=* && node ./bin/www",
     "stop": "pm2 stop 'all'",
-    "start:dev": "export DEBUG=app && nodemon ./bin/www",
+    "start:dev": "export DEBUG=* && nodemon ./bin/www",
     "db:migrate": "./node_modules/.bin/sequelize db:migrate",
     "db:migrate:undo": "./node_modules/.bin/sequelize db:migrate:undo",
     "db:migrate:undo:all": "./node_modules/.bin/sequelize db:migrate:undo:all",

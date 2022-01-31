@@ -27,8 +27,8 @@ class InterestedLawyersController {
     logger(`creating an interest for lawyer with ID ${lawyerId} on ${modelType} with ID ${id}`);
 
     const interest = await InterestedLawyersService.create({
-      baseCharge: toKobo(baseCharge),
-      serviceCharge: toKobo(serviceCharge),
+      baseCharge: baseCharge,
+      serviceCharge: serviceCharge,
       lawyerId,
       modelType,
       modelId: id,

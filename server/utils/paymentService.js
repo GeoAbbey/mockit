@@ -5,49 +5,58 @@ const config = configOptions[env];
 export const payStack = (request) => {
   return {
     async initializePayment(data) {
-      return this.requestBuilder("https://api.paystack.co/transaction/initialize", data, "POST");
-    },
-    async verifyPayment(ref) {
       return this.requestBuilder(
-        `https://api.paystack.co/transaction/verify/${encodeURIComponent(ref)}`,
-        null,
+        `${config.payment_base_url}/api/v1/merchant/transactions/init-transaction`,
+        data,
+        "POST"
+      );
+    },
+    async verifyPayment(ref, data) {
+      return this.requestBuilder(
+        `${config.payment_base_url}/api/v2/transactions/${encodeURIComponent(ref)}`,
+        data,
         "GET"
       );
     },
 
-    async chargeCard(data) {
-      return this.requestBuilder("https://api.paystack.co/charge", data, "POST");
-    },
-
-    async createRecipient(data) {
-      return this.requestBuilder("https://api.paystack.co/transferrecipient", data, "POST");
-    },
-
-    async transfer(data) {
-      return this.requestBuilder("https://api.paystack.co/transfer", data, "POST");
-    },
-
-    async finalizeTransfer(data) {
-      return this.requestBuilder("https://api.paystack.co/finalize_transfer", data, "POST");
-    },
-
-    async getBankCodes() {
-      return this.requestBuilder("https://api.paystack.co/bank", null, "GET");
-    },
-
-    async deleteRecipient(authCode) {
+    async verifyRecipient(data) {
       return this.requestBuilder(
-        `https://api.paystack.co/transferrecipient/${authCode}`,
-        null,
-        "DELETE"
+        `${config.payment_base_url}/api/v1/disbursements/account/validate?accountNumber=${data.accountNumber}&bankCode=${data.bankCode}`,
+        data,
+        "GET"
+      );
+    },
+
+    async disbursements(data) {
+      return this.requestBuilder(
+        `${config.payment_base_url}/api/v2/disbursements/single`,
+        data,
+        "POST"
+      );
+    },
+
+    async getBankCodes(data) {
+      return this.requestBuilder(`${config.payment_base_url}/api/v1/banks`, data, "GET");
+    },
+
+    async resendOTP(data) {
+      return this.requestBuilder(
+        `${config.payment_base_url}/api/v2/disbursements/single/resend-otp`,
+        data,
+        "POST"
       );
     },
 
     async requestBuilder(url, data, method) {
+      console.log({ data }, "monnify-token");
+
       const headers = {
-        Authorization: `Bearer ${config.payStackSecretKey}`,
+        Authorization: `Bearer ${data.monnifyToken}`,
         "Content-Type": "application/json",
       };
+
+      delete data.monnifyToken;
+
       let response;
 
       try {
@@ -66,7 +75,7 @@ export const payStack = (request) => {
 
         return { success: true, response: response.data };
       } catch (error) {
-        console.log({ error }, "🚎");
+        console.log({ error }, error.response, "🚎");
         return { success: false, response: error };
       }
     },

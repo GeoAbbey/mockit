@@ -24,33 +24,36 @@ class RecipientsService {
 
   async find(id) {
     debugLog(`retrieving recipient with ${id}`);
-    return models.Recipient.findByPk(id);
+    return models.Recipient.findAll({ where: { lawyerId: id } });
   }
 
-  async update(id, RecipientDTO, oldRecipient) {
-    const { description, account_number, bank_code } = oldRecipient;
+  async findByCode(filter) {
+    debugLog(`retrieving recipient  account with code ${JSON.stringify(filter)}`);
+    return models.Recipient.findOne({ where: { ...filter } });
+  }
 
-    return models.Recipient.update(
-      {
-        description: RecipientDTO.description || description,
-        account_number: RecipientDTO.account_number || account_number,
-        bank_code: RecipientDTO.bank_code || bank_code,
+  async findOne({ bank_code, account_number, id }) {
+    debugLog(`retrieving recipient with bankCode ${bank_code} and accountNumber ${account_number}`);
+
+    return models.Recipient.findOne({
+      where: {
+        lawyerId: id,
+        details: {
+          bankCode: bank_code,
+          accountNumber: account_number,
+        },
       },
-      { where: { id }, returning: true, ...t }
-    );
+    });
   }
 
-  async findMany() {
-    return payment.getBankCodes();
+  async findMany(data) {
+    return payment.getBankCodes(data);
   }
 
   async delete(id, oldRecipient) {
-    const result = await payment.deleteRecipient(oldRecipient.code);
-    if (result.success === false) return null;
-    else
-      return models.Recipient.destroy({
-        where: { id },
-      });
+    return models.Recipient.destroy({
+      where: { lawyerId: id, code: oldRecipient.code },
+    });
   }
 }
 

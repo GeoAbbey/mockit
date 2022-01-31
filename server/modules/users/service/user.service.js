@@ -54,6 +54,12 @@ class UsersService {
     return models.User.findAndCountAll({ where: { ...filter }, ...paginate(pageDetails) });
   }
 
+  async findMany(filter) {
+    debugLog(`retrieving all user on the platform using ${JSON.stringify(filter)}`);
+
+    return models.User.findAll({ where: { ...filter } });
+  }
+
   async update(id, UserDTO, oldDetails) {
     debugLog(`updating a user with id ${id} 🍋`);
 
