@@ -162,11 +162,13 @@ class PaymentsController {
         lawyerId = undefined,
       },
       decodedToken: { email, firstName, lastName, id },
+      monnifyToken,
     } = req;
 
     const mapper = {
       subscription: () =>
         this.handleSubscriptionCardPayIn({
+          monnifyToken,
           email,
           firstName,
           lastName,
@@ -177,6 +179,7 @@ class PaymentsController {
         }),
       wallet: () =>
         this.handleWalletOrCooperateCardPayIn({
+          monnifyToken,
           email,
           firstName,
           lastName,
@@ -187,6 +190,7 @@ class PaymentsController {
         }),
       singleInvitation: () =>
         this.handleSingleInvitationCardPayIn({
+          monnifyToken,
           email,
           firstName,
           lastName,
@@ -197,6 +201,7 @@ class PaymentsController {
         }),
       singleSmallClaim: () =>
         this.handleSingleSmallClaimCardPayIn({
+          monnifyToken,
           email,
           firstName,
           lastName,
@@ -208,6 +213,7 @@ class PaymentsController {
         }),
       cooperate: () =>
         this.handleWalletOrCooperateCardPayIn({
+          monnifyToken,
           email,
           firstName,
           lastName,
@@ -228,7 +234,7 @@ class PaymentsController {
     let data = walletPay(args);
 
     if (data.success === false) return data;
-    data = { ...data, authorization_code: args.authCode };
+    data = { ...data, cardToken: args.authCode };
     return payment.chargeCard(data);
   }
 
@@ -236,7 +242,7 @@ class PaymentsController {
     let data = subscriptionPay(args);
 
     if (data.success === false) return data;
-    data = { ...data, authorization_code: args.authCode };
+    data = { ...data, cardToken: args.authCode };
     return payment.chargeCard(data);
   }
 
@@ -244,7 +250,7 @@ class PaymentsController {
     let data = await singleInvitationPay(args);
 
     if (data.success === false) return data;
-    data = { ...data, authorization_code: args.authCode };
+    data = { ...data, cardToken: args.authCode };
     return payment.chargeCard(data);
   }
 
@@ -252,7 +258,7 @@ class PaymentsController {
     let data = await singleSmallClaimPay(args);
 
     if (data.success === false) return data;
-    data = { ...data, authorization_code: args.authCode };
+    data = { ...data, cardToken: args.authCode };
     return payment.chargeCard(data);
   }
 

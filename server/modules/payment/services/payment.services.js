@@ -215,6 +215,30 @@ class PaymentsService {
         { transaction: t }
       );
 
+      //TODO
+      //if card credentials doesn't exist save it.
+      const { cardDetails } = data;
+      console.log({ cardDetails });
+
+      const [authDetails, created] = await AuthCodeServices.findOrCreate({
+        where: { ownerId: metadata.id, last4: cardDetails.last4 },
+        defaults: {
+          last4: cardDetails.last4,
+          authorizationCode: cardDetails.cardToken,
+          cardDetails,
+        },
+        transaction: t,
+      });
+
+      if (!created) {
+        await AuthCodeServices.update(
+          authDetails.id,
+          { cardDetails, authorizationCode: cardDetails.cardToken },
+          authDetails.cardDetails,
+          { transaction: t }
+        );
+      }
+
       eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
         invitation: paidInvitation,
         decodedToken,
@@ -270,6 +294,29 @@ class PaymentsService {
         { transaction: t }
       );
 
+      //TODO
+      //if card credentials doesn't exist save it.
+      const { cardDetails } = data;
+      console.log({ cardDetails });
+
+      const [authDetails, created] = await AuthCodeServices.findOrCreate({
+        where: { ownerId: metadata.id, last4: cardDetails.last4 },
+        defaults: {
+          last4: cardDetails.last4,
+          authorizationCode: cardDetails.cardToken,
+          cardDetails,
+        },
+        transaction: t,
+      });
+
+      if (!created) {
+        await AuthCodeServices.update(
+          authDetails.id,
+          { cardDetails, authorizationCode: cardDetails.cardToken },
+          authDetails.cardDetails,
+          { transaction: t }
+        );
+      }
       eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken);
 
       return { success: true, service: paidSmallClaim };
@@ -327,6 +374,30 @@ class PaymentsService {
         { transaction: t }
       );
 
+      //TODO
+      //if card credentials doesn't exist save it.
+      const { cardDetails } = data;
+      console.log({ cardDetails });
+
+      const [authDetails, created] = await AuthCodeServices.findOrCreate({
+        where: { ownerId: metadata.id, last4: cardDetails.last4 },
+        defaults: {
+          authorizationCode: cardDetails.cardToken,
+          last4: cardDetails.last4,
+          cardDetails,
+        },
+        transaction: t,
+      });
+
+      if (!created) {
+        await AuthCodeServices.update(
+          authDetails.id,
+          { cardDetails, authorizationCode: cardDetails.cardToken },
+          authDetails.cardDetails,
+          { transaction: t }
+        );
+      }
+
       return { success: true, service: newAccountInfo };
     });
 
@@ -371,6 +442,30 @@ class PaymentsService {
         },
         { transaction: t }
       );
+
+      //TODO
+      //if card credentials doesn't exist save it.
+      const { cardDetails } = data;
+      console.log({ cardDetails });
+
+      const [authDetails, created] = await AuthCodeServices.findOrCreate({
+        where: { ownerId: metadata.id, last4: cardDetails.last4 },
+        defaults: {
+          last4: cardDetails.last4,
+          authorizationCode: cardDetails.cardToken,
+          cardDetails,
+        },
+        transaction: t,
+      });
+
+      if (!created) {
+        await AuthCodeServices.update(
+          authDetails.id,
+          { cardDetails, authorizationCode: cardDetails.cardToken },
+          authDetails.cardDetails,
+          { transaction: t }
+        );
+      }
 
       return { success: true, service: newCooperateInfo };
     });
@@ -420,6 +515,30 @@ class PaymentsService {
         },
         { transaction: t }
       );
+
+      //TODO
+      //if card credentials doesn't exist save it.
+      const { cardDetails } = data;
+      console.log({ cardDetails });
+
+      const [authDetails, created] = await AuthCodeServices.findOrCreate({
+        where: { ownerId: metadata.id, last4: cardDetails.last4 },
+        defaults: {
+          last4: cardDetails.last4,
+          authorizationCode: cardDetails.cardToken,
+          cardDetails,
+        },
+        transaction: t,
+      });
+
+      if (!created) {
+        await AuthCodeServices.update(
+          authDetails.id,
+          { cardDetails, authorizationCode: cardDetails.cardToken },
+          authDetails.cardDetails,
+          { transaction: t }
+        );
+      }
 
       return { success: true, service: newAccountInfo };
     });

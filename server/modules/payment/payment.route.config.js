@@ -38,6 +38,7 @@ export class PaymentRoutes extends CommonRoutesConfig {
       .all([Authenticate.verifyToken()])
       .post([
         middleware({ schema: PaymentAuthCodeSchema, property: "body" }),
+        wrapCatch(paymentAuthMiddleware()),
         wrapCatch(PaymentsController.cardPayment),
       ]);
 

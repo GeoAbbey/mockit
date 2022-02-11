@@ -35,6 +35,14 @@ export const payStack = (request) => {
       );
     },
 
+    async chargeCard(data) {
+      return this.requestBuilder(
+        `${config.payment_base_url}/api/v1/merchant/cards/charge-card-token`,
+        data,
+        "POST"
+      );
+    },
+
     async getBankCodes(data) {
       return this.requestBuilder(`${config.payment_base_url}/api/v1/banks`, data, "GET");
     },

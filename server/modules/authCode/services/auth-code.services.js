@@ -41,6 +41,19 @@ class AuthCodesService {
       ...t,
     });
   }
+
+  async update(id, authCodeDTO, oldAuthCode, t = undefined) {
+    const { authorizationCode, last4, cardDetails } = oldAuthCode;
+
+    return models.AuthCode.update(
+      {
+        authorizationCode: authCodeDTO.authorizationCode || authorizationCode,
+        last4: authCodeDTO.last4 || last4,
+        cardDetails: authCodeDTO.cardDetails || cardDetails,
+      },
+      { where: { id }, returning: true, ...t }
+    );
+  }
 }
 
 export default AuthCodesService.getInstance();
