@@ -244,7 +244,7 @@ export const NOTIFICATION_DATA = {
       generic({
         title: "Withdrawal Authorized",
         body:
-          "Withdrawal has been authorized and funds should be available in your account shortly, kindly reach out to support in case there are any delays",
+          "Withdrawal has been authorized and funds should be available in your account shortly, kindly reach out to support in case there is any delays",
         sender_firebase_token,
         sender_id,
         status_id,
