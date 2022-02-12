@@ -415,7 +415,12 @@ class PaymentsService {
     // ...to do implement services
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const { paymentDescription: metadata, amount, transactionReference: reference } = data;
+      const {
+        paymentDescription: metadata,
+        amountPaid: amount,
+        transactionReference: reference,
+      } = data;
+
       console.log({ data }, "💰");
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
         transaction: t,
@@ -433,7 +438,7 @@ class PaymentsService {
         metadata.id,
         {
           operation: "add",
-          walletAmount: amount,
+          walletAmount: Number(amount),
         },
         oldCooperateInfo,
         { transaction: t }
@@ -866,9 +871,7 @@ class PaymentsService {
     if (args.amount > oldAccountInfo.dataValues.walletAmount) {
       return {
         success: false,
-        message: `Insufficient funds: amount ${args.amount} is more than available balance of ${
-          oldAccountInfo.dataValues.walletAmount / 100
-        }`,
+        message: `Insufficient funds: amount ${args.amount} is more than available balance of ${oldAccountInfo.dataValues.walletAmount}`,
       };
     }
 
