@@ -220,23 +220,25 @@ class PaymentsService {
       const { cardDetails } = data;
       console.log({ cardDetails });
 
-      const [authDetails, created] = await AuthCodeServices.findOrCreate({
-        where: { ownerId: metadata.id, last4: cardDetails.last4 },
-        defaults: {
-          last4: cardDetails.last4,
-          authorizationCode: cardDetails.cardToken,
-          cardDetails,
-        },
-        transaction: t,
-      });
+      if (cardDetails.cardToken) {
+        const [authDetails, created] = await AuthCodeServices.findOrCreate({
+          where: { ownerId: metadata.id, last4: cardDetails.last4 },
+          defaults: {
+            last4: cardDetails.last4,
+            authorizationCode: cardDetails.cardToken,
+            cardDetails,
+          },
+          transaction: t,
+        });
 
-      if (!created) {
-        await AuthCodeServices.update(
-          authDetails.id,
-          { cardDetails, authorizationCode: cardDetails.cardToken },
-          authDetails.cardDetails,
-          { transaction: t }
-        );
+        if (!created) {
+          await AuthCodeServices.update(
+            authDetails.id,
+            { cardDetails, authorizationCode: cardDetails.cardToken },
+            authDetails.cardDetails,
+            { transaction: t }
+          );
+        }
       }
 
       eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
@@ -299,23 +301,25 @@ class PaymentsService {
       const { cardDetails } = data;
       console.log({ cardDetails });
 
-      const [authDetails, created] = await AuthCodeServices.findOrCreate({
-        where: { ownerId: metadata.id, last4: cardDetails.last4 },
-        defaults: {
-          last4: cardDetails.last4,
-          authorizationCode: cardDetails.cardToken,
-          cardDetails,
-        },
-        transaction: t,
-      });
+      if (cardDetails.cardToken) {
+        const [authDetails, created] = await AuthCodeServices.findOrCreate({
+          where: { ownerId: metadata.id, last4: cardDetails.last4 },
+          defaults: {
+            last4: cardDetails.last4,
+            authorizationCode: cardDetails.cardToken,
+            cardDetails,
+          },
+          transaction: t,
+        });
 
-      if (!created) {
-        await AuthCodeServices.update(
-          authDetails.id,
-          { cardDetails, authorizationCode: cardDetails.cardToken },
-          authDetails.cardDetails,
-          { transaction: t }
-        );
+        if (!created) {
+          await AuthCodeServices.update(
+            authDetails.id,
+            { cardDetails, authorizationCode: cardDetails.cardToken },
+            authDetails.cardDetails,
+            { transaction: t }
+          );
+        }
       }
       eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken);
 
@@ -379,23 +383,25 @@ class PaymentsService {
       const { cardDetails } = data;
       console.log({ cardDetails });
 
-      const [authDetails, created] = await AuthCodeServices.findOrCreate({
-        where: { ownerId: metadata.id, last4: cardDetails.last4 },
-        defaults: {
-          authorizationCode: cardDetails.cardToken,
-          last4: cardDetails.last4,
-          cardDetails,
-        },
-        transaction: t,
-      });
+      if (cardDetails.cardToken) {
+        const [authDetails, created] = await AuthCodeServices.findOrCreate({
+          where: { ownerId: metadata.id, last4: cardDetails.last4 },
+          defaults: {
+            authorizationCode: cardDetails.cardToken,
+            last4: cardDetails.last4,
+            cardDetails,
+          },
+          transaction: t,
+        });
 
-      if (!created) {
-        await AuthCodeServices.update(
-          authDetails.id,
-          { cardDetails, authorizationCode: cardDetails.cardToken },
-          authDetails.cardDetails,
-          { transaction: t }
-        );
+        if (!created) {
+          await AuthCodeServices.update(
+            authDetails.id,
+            { cardDetails, authorizationCode: cardDetails.cardToken },
+            authDetails.cardDetails,
+            { transaction: t }
+          );
+        }
       }
 
       return { success: true, service: newAccountInfo };
@@ -448,23 +454,25 @@ class PaymentsService {
       const { cardDetails } = data;
       console.log({ cardDetails });
 
-      const [authDetails, created] = await AuthCodeServices.findOrCreate({
-        where: { ownerId: metadata.id, last4: cardDetails.last4 },
-        defaults: {
-          last4: cardDetails.last4,
-          authorizationCode: cardDetails.cardToken,
-          cardDetails,
-        },
-        transaction: t,
-      });
+      if (cardDetails.cardToken) {
+        const [authDetails, created] = await AuthCodeServices.findOrCreate({
+          where: { ownerId: metadata.id, last4: cardDetails.last4 },
+          defaults: {
+            last4: cardDetails.last4,
+            authorizationCode: cardDetails.cardToken,
+            cardDetails,
+          },
+          transaction: t,
+        });
 
-      if (!created) {
-        await AuthCodeServices.update(
-          authDetails.id,
-          { cardDetails, authorizationCode: cardDetails.cardToken },
-          authDetails.cardDetails,
-          { transaction: t }
-        );
+        if (!created) {
+          await AuthCodeServices.update(
+            authDetails.id,
+            { cardDetails, authorizationCode: cardDetails.cardToken },
+            authDetails.cardDetails,
+            { transaction: t }
+          );
+        }
       }
 
       return { success: true, service: newCooperateInfo };
@@ -478,7 +486,11 @@ class PaymentsService {
 
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const { paymentDescription: metadata, amount, transactionReference: reference } = data;
+      const {
+        paymentDescription: metadata,
+        amountPaid: amount,
+        transactionReference: reference,
+      } = data;
 
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, t);
       if (referenceIsAlreadyUsed) {
@@ -489,6 +501,7 @@ class PaymentsService {
       }
 
       const oldAccountInfo = await AccountInfosService.find(metadata.id, { transaction: t });
+
       const [, [newAccountInfo]] = await AccountInfosService.update(
         metadata.id,
         {
@@ -496,7 +509,7 @@ class PaymentsService {
             info: true,
             operation: "add",
           },
-          subscriptionCount: parseInt(amount / parseInt(config.costOfSubscriptionUnit)),
+          subscriptionCount: parseInt(Number(amount) / parseInt(config.costOfSubscriptionUnit)),
         },
         oldAccountInfo,
         { transaction: t }
@@ -521,23 +534,25 @@ class PaymentsService {
       const { cardDetails } = data;
       console.log({ cardDetails });
 
-      const [authDetails, created] = await AuthCodeServices.findOrCreate({
-        where: { ownerId: metadata.id, last4: cardDetails.last4 },
-        defaults: {
-          last4: cardDetails.last4,
-          authorizationCode: cardDetails.cardToken,
-          cardDetails,
-        },
-        transaction: t,
-      });
+      if (cardDetails.cardToken) {
+        const [authDetails, created] = await AuthCodeServices.findOrCreate({
+          where: { ownerId: metadata.id, last4: cardDetails.last4 },
+          defaults: {
+            last4: cardDetails.last4,
+            authorizationCode: cardDetails.cardToken,
+            cardDetails,
+          },
+          transaction: t,
+        });
 
-      if (!created) {
-        await AuthCodeServices.update(
-          authDetails.id,
-          { cardDetails, authorizationCode: cardDetails.cardToken },
-          authDetails.cardDetails,
-          { transaction: t }
-        );
+        if (!created) {
+          await AuthCodeServices.update(
+            authDetails.id,
+            { cardDetails, authorizationCode: cardDetails.cardToken },
+            authDetails.cardDetails,
+            { transaction: t }
+          );
+        }
       }
 
       return { success: true, service: newAccountInfo };
