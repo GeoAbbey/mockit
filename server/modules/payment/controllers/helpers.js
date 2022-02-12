@@ -17,7 +17,7 @@ const common = (args) => ({
   paymentMethods: ["CARD", "ACCOUNT_TRANSFER"],
   redirectUrl: args.callback_url,
   monnifyToken: args.monnifyToken,
-  paymentReference: nanoid(15),
+  paymentReference: `ARC-${nanoid(12)}`,
 });
 
 export const walletPay = (args) => {
