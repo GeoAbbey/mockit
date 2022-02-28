@@ -29,7 +29,8 @@ export const walletPay = (args) => {
   return {
     ...common(args),
     amount: args.amount,
-    paymentDescription: JSON.stringify({ id: args.id, type: args.type }),
+    metaData: { id: args.id, type: args.type },
+    paymentDescription: `amount of ${args.amount} to be added to ${args.type} by user ${args.id}`,
   };
 };
 
@@ -39,8 +40,9 @@ export const subscriptionPay = (args) => {
 
   return {
     ...common(args),
-    paymentDescription: JSON.stringify({ id: args.id, type: args.type }),
+    metaData: { id: args.id, type: args.type },
     amount: args.quantity * parseInt(config.costOfSubscriptionUnit),
+    paymentDescription: `${args.quantity} of subscription has been purchased by user ${args.id}`,
   };
 };
 
@@ -62,7 +64,8 @@ export const singleInvitationPay = async (args) => {
   return {
     ...common(args),
     amount: config.invitationCost,
-    paymentDescription: JSON.stringify({ id: args.id, type: args.type, modelId: args.modelId }),
+    paymentDescription: `amount of ${config.invitationCost} is paid for single invitation with ${args.modelId} by user ${args.id}`,
+    metaData: { id: args.id, type: args.type, modelId: args.modelId },
   };
 };
 
@@ -101,11 +104,12 @@ export const singleSmallClaimPay = async (args) => {
   return {
     ...common(args),
     amount: totalCostOfService,
-    paymentDescription: JSON.stringify({
+    paymentDescription: `amount of ${totalCostOfService} is paid for single small claim with ${args.modelId} by user ${args.id}`,
+    metaData: {
       id: args.id,
       type: args.type,
       modelId: args.modelId,
       assignedLawyerId: args.lawyerId,
-    }),
+    },
   };
 };
