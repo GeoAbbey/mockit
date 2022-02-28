@@ -158,7 +158,6 @@ class PaymentsService {
 
   async processPayIn({ data, eventEmitter, decodedToken }) {
     debugLog("processing a payment");
-    data.paymentDescription = JSON.parse(data.paymentDescription);
 
     const mapper = {
       subscription: this.handleSubscriptionPayIn,
@@ -168,14 +167,14 @@ class PaymentsService {
       cooperate: this.handleCooperatePayIn,
     };
 
-    return mapper[data.paymentDescription.type]({ data, eventEmitter, decodedToken });
+    return mapper[data.metaData.type]({ data, eventEmitter, decodedToken });
   }
 
   async handleSingleInvitation({ data, eventEmitter, decodedToken }) {
     debugLog("processing a payment handleSingleInvitation");
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const { paymentDescription: metadata, amount, transactionReference: reference } = data;
+      const { metaData: metadata, amount, transactionReference: reference } = data;
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
         transaction: t,
       });
@@ -220,7 +219,7 @@ class PaymentsService {
       const { cardDetails } = data;
       console.log({ cardDetails });
 
-      if (cardDetails.cardToken) {
+      if (cardDetails && cardDetails.cardToken) {
         const [authDetails, created] = await AuthCodeServices.findOrCreate({
           where: { ownerId: metadata.id, last4: cardDetails.last4 },
           defaults: {
@@ -256,7 +255,7 @@ class PaymentsService {
 
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const { paymentDescription: metadata, amount, transactionReference: reference } = data;
+      const { metaData: metadata, amount, transactionReference: reference } = data;
 
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
         transaction: t,
@@ -301,7 +300,7 @@ class PaymentsService {
       const { cardDetails } = data;
       console.log({ cardDetails });
 
-      if (cardDetails.cardToken) {
+      if (cardDetails && cardDetails.cardToken) {
         const [authDetails, created] = await AuthCodeServices.findOrCreate({
           where: { ownerId: metadata.id, last4: cardDetails.last4 },
           defaults: {
@@ -334,11 +333,7 @@ class PaymentsService {
 
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const {
-        paymentDescription: metadata,
-        amountPaid: amount,
-        transactionReference: reference,
-      } = data;
+      const { metaData: metadata, amountPaid: amount, transactionReference: reference } = data;
 
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
         transaction: t,
@@ -383,7 +378,7 @@ class PaymentsService {
       const { cardDetails } = data;
       console.log({ cardDetails });
 
-      if (cardDetails.cardToken) {
+      if (cardDetails && cardDetails.cardToken) {
         const [authDetails, created] = await AuthCodeServices.findOrCreate({
           where: { ownerId: metadata.id, last4: cardDetails.last4 },
           defaults: {
@@ -415,11 +410,7 @@ class PaymentsService {
     // ...to do implement services
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const {
-        paymentDescription: metadata,
-        amountPaid: amount,
-        transactionReference: reference,
-      } = data;
+      const { metaData: metadata, amountPaid: amount, transactionReference: reference } = data;
 
       console.log({ data }, "💰");
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
@@ -459,7 +450,7 @@ class PaymentsService {
       const { cardDetails } = data;
       console.log({ cardDetails });
 
-      if (cardDetails.cardToken) {
+      if (cardDetails && cardDetails.cardToken) {
         const [authDetails, created] = await AuthCodeServices.findOrCreate({
           where: { ownerId: metadata.id, last4: cardDetails.last4 },
           defaults: {
@@ -491,11 +482,7 @@ class PaymentsService {
 
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const {
-        paymentDescription: metadata,
-        amountPaid: amount,
-        transactionReference: reference,
-      } = data;
+      const { metaData: metadata, amountPaid: amount, transactionReference: reference } = data;
 
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, t);
       if (referenceIsAlreadyUsed) {
@@ -539,7 +526,7 @@ class PaymentsService {
       const { cardDetails } = data;
       console.log({ cardDetails });
 
-      if (cardDetails.cardToken) {
+      if (cardDetails && cardDetails.cardToken) {
         const [authDetails, created] = await AuthCodeServices.findOrCreate({
           where: { ownerId: metadata.id, last4: cardDetails.last4 },
           defaults: {
