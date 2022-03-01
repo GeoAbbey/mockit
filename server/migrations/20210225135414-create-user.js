@@ -60,6 +60,9 @@ module.exports = {
       lawyer: {
         type: Sequelize.JSONB,
       },
+      gender: {
+        type: Sequelize.STRING,
+      },
       address: {
         type: Sequelize.JSONB,
       },
@@ -72,17 +75,19 @@ module.exports = {
       dob: {
         type: Sequelize.STRING,
       },
+      description: {
+        type: Sequelize.STRING,
+      },
       hasAgreedToTerms: {
         type: Sequelize.BOOLEAN,
       },
       role: {
-        type: Sequelize.ENUM,
-        values: ["user", "lawyer", "admin", "super-admin"],
-      },
-      profilePic: {
         type: Sequelize.STRING,
       },
-      creditCard: {
+      firebaseToken: {
+        type: Sequelize.STRING,
+      },
+      profilePic: {
         type: Sequelize.STRING,
       },
       updatedAt: {
@@ -91,6 +96,9 @@ module.exports = {
       },
       deletedAt: {
         type: Sequelize.DATE,
+      },
+      meta: {
+        type: Sequelize.JSONB,
       },
     });
   },

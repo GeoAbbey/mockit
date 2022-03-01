@@ -31,8 +31,12 @@ class Permissions {
     return async (req, res, next) => {
       log("checking admin access to perform a certain operation");
       const { role } = req.decodedToken;
-      if (role !== "super-admin" && role !== "admin")
+
+      console.log({ role, decodedToken: req.decodedToken, body: req.body });
+
+      if (role !== "admin" && role !== "super-admin") {
         return next(createError(403, "you do not have access to perform this operation"));
+      }
 
       if (role === "admin" && req.body.role === "admin") {
         return next(
@@ -43,7 +47,7 @@ class Permissions {
         );
       }
 
-      next();
+      return next();
     };
   }
 
@@ -51,33 +55,37 @@ class Permissions {
     return (req, res, next) => {
       log("checking user or lawyer access to perform a certain operation");
       const { role } = req.decodedToken;
-      if (role !== "lawyer" && role !== "user")
-        return next(createError(403, "to perform this operation make use of the admin route"));
+      if (role == "admin" || role == "super-admin") return next();
 
-      if (req.body.isAccountSuspended === true || req.body.isAccountSuspended === false)
-        return next(
-          createError(403, "you do not have access to perform this operation, is Account Suspended")
-        );
-      if (req.body.lawyer) {
-        if (req.body.lawyer.isVerified === true || req.body.lawyer.isVerified === false) {
+      if (role === "lawyer" || role === "user") {
+        if (req.body.isAccountSuspended === true || req.body.isAccountSuspended === false)
           return next(
             createError(
               403,
-              "you do not have access to perform this operation, is lawyer Documents"
+              "you do not have access to perform this operation, is Account Suspended"
             )
           );
+        if (req.body.lawyer) {
+          if (req.body.lawyer.isVerified === true || req.body.lawyer.isVerified === false) {
+            return next(
+              createError(
+                403,
+                "you do not have access to perform this operation, is lawyer Documents"
+              )
+            );
+          }
         }
-      }
 
-      const roleOrEmailOrVerified = req.body.role || req.body.email;
-      if (roleOrEmailOrVerified)
-        return next(
-          createError(
-            403,
-            `you do not have access to perform this operation, you can't modify to a  ${roleOrEmailOrVerified}`
-          )
-        );
-      next();
+        const theRole = req.body.role;
+        if (theRole)
+          return next(
+            createError(
+              403,
+              `you do not have access to perform this operation, you can't modify to a ${theRole}`
+            )
+          );
+        return next();
+      }
     };
   }
 }

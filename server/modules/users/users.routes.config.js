@@ -3,12 +3,22 @@ import UsersController from "./controllers/users.controller";
 import {
   createUserSchema,
   updateUserSchema,
-  validateUUID,
   loginUserSchema,
   validOTP,
   validOtpAndPassword,
+  newOTP,
+  queryOptions,
+  changePasswordSchema,
+  createAnAdminSchema,
 } from "./schema/users.schema";
-import { middleware, wrapCatch, Authenticate, AccessControl } from "../../utils";
+import {
+  middleware,
+  wrapCatch,
+  Authenticate,
+  AccessControl,
+  validateUUID,
+  uploadMiddleware,
+} from "../../utils";
 
 export class UserRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {
@@ -26,53 +36,114 @@ export class UserRoutes extends CommonRoutesConfig {
       .route(`${this.path}/users/signup`)
       .post([
         middleware({ schema: createUserSchema, property: "body" }),
+        UsersController.userExistMiddleware("signup"),
         wrapCatch(UsersController.signUp),
       ]);
 
     this.app
       .route(`${this.path}/users/profile`)
-      .all([Authenticate.verifyToken, UsersController.userExistMiddleware])
+      .all([Authenticate.verifyToken()])
       .patch([
-        middleware({ schema: updateUserSchema, property: "body" }),
+        UsersController.userExistMiddleware(),
         AccessControl.checkPermissionUserOrLawyerAccess(),
-        UsersController.updateUser,
+        uploadMiddleware([
+          { name: "profilePic", maxCount: 1 },
+          { name: "nextOfKinProfilePic", maxCount: 1 },
+          { name: "suretyProfilePic", maxCount: 1 },
+          { name: "NBAReceipt", maxCount: 1 },
+          { name: "LLBCertificate", maxCount: 1 },
+          { name: "callToBarCertificate", maxCount: 1 },
+          { name: "photoIDOrNIN", maxCount: 1 },
+          { name: "others", maxCount: 1 },
+        ]),
+        wrapCatch(UsersController.updateUser),
+      ])
+      .get([
+        AccessControl.checkPermissionUserOrLawyerAccess(),
+        UsersController.userExistMiddleware("getProfile"),
       ]);
 
     this.app
       .route(`${this.path}/users/new-otp`)
-      .all([UsersController.userExistMiddleware])
-      .post([UsersController.generateNewOtp]);
+      .all([
+        middleware({ schema: newOTP, property: "query" }),
+        UsersController.userExistMiddleware(),
+      ])
+      .post([wrapCatch(UsersController.generateNewOtp)]);
 
     this.app
       .route(`${this.path}/users/verify`)
-      .all([Authenticate.verifyToken, UsersController.userExistMiddleware])
+      .all([Authenticate.verifyToken("verify"), UsersController.userExistMiddleware()])
       .patch([
         middleware({ schema: validOTP, property: "body" }),
         AccessControl.checkPermissionUserOrLawyerAccess(),
-        UsersController.validateOTP,
-        UsersController.verifyEmail,
+        wrapCatch(UsersController.validateOTP),
+        wrapCatch(UsersController.verifyEmail),
       ]);
 
     this.app
       .route(`${this.path}/users/reset-password`)
-      .all([UsersController.userExistMiddleware])
-      .patch([
+      .all([UsersController.userExistMiddleware()])
+      .put([
         middleware({ schema: validOtpAndPassword, property: "body" }),
-        UsersController.validateOTP,
-        UsersController.resetPassword,
+        wrapCatch(UsersController.validateOTP),
+        wrapCatch(UsersController.resetPassword),
       ]);
+
+    this.app
+      .route(`${this.path}/users/change-password`)
+      .all([Authenticate.verifyToken()])
+      .patch([
+        middleware({ schema: changePasswordSchema, property: "body" }),
+        wrapCatch(UsersController.changePassword),
+      ]);
+
+    this.app
+      .route(`${this.path}/users/stats`)
+      .all([Authenticate.verifyToken()])
+      .get([
+        AccessControl.checkPermissionAdminAccess(),
+        wrapCatch(UsersController.getNoOfDistinctUsers),
+      ]);
+
+    this.app
+      .route(`${this.path}/users/stats/active`)
+      .all([Authenticate.verifyToken()])
+      .get([
+        AccessControl.checkPermissionAdminAccess(),
+        wrapCatch(UsersController.getNoOfActiveUsers),
+      ]);
+
+    this.app
+      .route(`${this.path}/users/create`)
+      .all([
+        Authenticate.verifyToken(),
+        middleware({ schema: createAnAdminSchema, property: "body" }),
+      ])
+      .post([AccessControl.checkPermissionAdminAccess(), wrapCatch(UsersController.createAnAdmin)]);
 
     this.app
       .route(`${this.path}/users/:id`)
       .all([
-        Authenticate.verifyToken,
-        middleware({ schema: validateUUID, property: "params" }),
-        UsersController.userExistMiddleware,
+        Authenticate.verifyToken(),
+        middleware({ schema: validateUUID("id"), property: "params" }),
+        UsersController.userExistMiddleware(),
       ])
-      .patch([
-        middleware({ schema: updateUserSchema, property: "body" }),
+      .put([
         AccessControl.checkPermissionAdminAccess(),
-        UsersController.updateUser,
+        middleware({ schema: updateUserSchema, property: "body" }),
+        wrapCatch(UsersController.updateUser),
+      ])
+      .get([wrapCatch(UsersController.getUser)]);
+
+    this.app
+      .route(`${this.path}/users`)
+      .all([Authenticate.verifyToken()])
+      .get([
+        middleware({ schema: queryOptions, property: "query" }),
+        AccessControl.checkPermissionAdminAccess(),
+        wrapCatch(UsersController.queryContext),
+        wrapCatch(UsersController.getAllUsers),
       ]);
 
     return this.app;

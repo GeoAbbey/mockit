@@ -1,6 +1,7 @@
 "use strict";
 import { v4 } from "uuid";
 import { otp } from "../utils";
+import { someDefaults } from "../utils/processInput";
 
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
@@ -12,6 +13,45 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.hasMany(models.Invitation, { as: "myInvitations", foreignKey: "ownerId" });
+      this.hasMany(models.Invitation, { as: "invitationLawyer", foreignKey: "assignedLawyerId" });
+      this.hasMany(models.Review, { as: "reviews", foreignKey: "reviewerId" });
+      this.hasMany(models.SmallClaim, { as: "myClaims", foreignKey: "ownerId" });
+      this.hasMany(models.SmallClaim, { as: "claimsLawyer", foreignKey: "assignedLawyerId" });
+      this.hasMany(models.Report, { as: "ownerProfile", foreignKey: "reporterId" });
+      this.hasMany(models.Comment, { as: "myProfile", foreignKey: "commenterId" });
+      this.hasMany(models.Notification, { as: "profile", foreignKey: "ownerId" });
+      this.hasMany(models.InterestedLawyer, { foreignKey: "lawyerId" });
+      this.hasMany(models.Reaction, { as: "myLikes", foreignKey: "ownerId" });
+      this.hasMany(models.Reaction, { as: "myRepost", foreignKey: "ownerId" });
+      this.hasMany(models.Response, { as: "myEmergencyResponse", foreignKey: "ownerId" });
+      this.hasMany(models.Response, {
+        as: "assignedEmergencyResponse",
+        foreignKey: "assignedLawyerId",
+      });
+      this.hasOne(models.LocationDetail, { foreignKey: "id" });
+      this.hasMany(models.Recipient, { foreignKey: "id" });
+      this.hasOne(models.AccountInfo, { foreignKey: "id" });
+      this.hasMany(models.Transaction, { foreignKey: "ownerId", as: "paymentFromWallet" });
+      this.hasMany(models.EligibleLawyer, {
+        as: "lawyerProfile",
+        foreignKey: "lawyerId",
+        onDelete: "CASCADE",
+      });
+      this.hasMany(models.PayIn, { foreignKey: "ownerId", as: "oneTimePayments" });
+      this.hasMany(models.AuthCode, { foreignKey: "ownerId" });
+      this.hasMany(models.Payout, { foreignKey: "ownerId" });
+      this.hasOne(models.Cooperate, { foreignKey: "id" });
+      this.hasMany(models.CooperateAccess, {
+        foreignKey: "ownerId",
+        onDelete: "CASCADE",
+        as: "accessOwnerProfile",
+      });
+      this.hasMany(models.CooperateAccess, {
+        foreignKey: "userAccessId",
+        as: "userWithAccessProfile",
+        onDelete: "CASCADE",
+      });
     }
   }
 
@@ -25,25 +65,55 @@ module.exports = (sequelize, DataTypes) => {
       password: { type: DataTypes.STRING, allowNull: false, min: 8 },
       isSubscribed: { type: DataTypes.BOOLEAN },
       isVerified: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-      address: { type: DataTypes.JSONB },
+      address: {
+        type: DataTypes.JSONB,
+        defaultValue: {
+          country: "",
+          state: "",
+          residence: {
+            work: "",
+            home: "",
+          },
+        },
+      },
       phone: { type: DataTypes.STRING },
       dob: { type: DataTypes.STRING, isDate: true },
       guarantors: { type: DataTypes.JSONB },
-      profilePic: { type: DataTypes.STRING },
-      creditCard: { type: DataTypes.STRING, isCreditCard: true },
+      description: { type: DataTypes.STRING },
+      meta: { type: DataTypes.JSONB, defaultValue: {} },
+      profilePic: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "https://zapplawyer.s3.us-west-2.amazonaws.com/attachments/user.png",
+      },
       lawyer: {
         type: DataTypes.JSONB,
-        allowNull: false,
         defaultValue: {
           isVerified: false,
-          documents: {},
+          documents: {
+            NBAReceipt: "",
+            LLBCertificate: "",
+            callToBarCertificate: "",
+            photoIDOrNIN: "",
+            others: "",
+          },
         },
       },
+      firebaseToken: { type: DataTypes.STRING },
       hasAgreedToTerms: { type: DataTypes.BOOLEAN },
       role: {
-        type: DataTypes.ENUM,
-        values: ["user", "lawyer", "admin", "super-admin"],
+        type: DataTypes.STRING,
+        validate: {
+          isIn: [["user", "lawyer", "admin", "super-admin"]],
+        },
         defaultValue: "user",
+      },
+      gender: {
+        type: DataTypes.STRING,
+        validate: {
+          isIn: [["male", "female"]],
+        },
+        allowNull: false,
       },
       otp: {
         type: DataTypes.JSONB,

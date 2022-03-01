@@ -4,5 +4,22 @@ import HandlePassword from "./handlePassword";
 import Authenticate from "./handleJwt";
 import AccessControl from "./accessControl";
 import { otp } from "./otp";
+import { validateUUID, allowedModelSchema } from "./allPurpose.schema";
+import { sendMail, sendTemplateEmail } from "./MailService";
+import { uploadMiddleware } from "./UploadService";
+import { handleFalsy } from "./handleFalsy";
 
-export { middleware, wrapCatch, Authenticate, HandlePassword, AccessControl, otp };
+export {
+  middleware,
+  wrapCatch,
+  Authenticate,
+  HandlePassword,
+  AccessControl,
+  otp,
+  validateUUID,
+  allowedModelSchema,
+  sendMail,
+  sendTemplateEmail,
+  uploadMiddleware,
+  handleFalsy,
+};

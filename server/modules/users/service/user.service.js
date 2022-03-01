@@ -1,6 +1,10 @@
 import debug from "debug";
 
 import models from "../../../models";
+import { QueryTypes } from "sequelize";
+import { handleFalsy } from "../../../utils";
+import { rawQueries } from "../../../utils/rawQueriers";
+import { paginate } from "../../helpers";
 
 const debugLog = debug("app:users-service");
 
@@ -18,49 +22,85 @@ class UsersService {
     return models.User.create(UserDTO);
   }
 
+  async noOfDistinctUsers() {
+    debugLog("returning data for different types users");
+    return models.sequelize.query(rawQueries.noOfDistinctUsers(), {
+      type: QueryTypes.SELECT,
+    });
+  }
+
+  async noOfActiveUsers() {
+    debugLog("returning data for different types users");
+    return models.sequelize.query(rawQueries.noOfActiveUsers(), {
+      type: QueryTypes.SELECT,
+    });
+  }
+
   async findByPk(id) {
     debugLog(`retrieving a user with id ${id}`);
     return models.User.findByPk(id);
   }
 
-  async findOne(email) {
-    debugLog(`retrieving a user with email ${email}`);
-    return models.User.findOne({ where: { email } });
+  async findOne(filter) {
+    debugLog(`retrieving a user with email ${JSON.stringify(filter)}`);
+    return models.User.findOne({
+      where: { ...filter },
+    });
+  }
+
+  async retrieveAll(filter, pageDetails) {
+    debugLog(`retrieving all user on the platform using ${JSON.stringify(filter)}`);
+
+    return models.User.findAndCountAll({ where: { ...filter }, ...paginate(pageDetails) });
+  }
+
+  async findMany(filter) {
+    debugLog(`retrieving all user on the platform using ${JSON.stringify(filter)}`);
+
+    return models.User.findAll({ where: { ...filter } });
   }
 
   async update(id, UserDTO, oldDetails) {
-    debugLog(`updating a user with id ${id}`);
-    const { address, guarantors, lawyer } = oldDetails;
-    const handleDocuments = () => {
-      if (UserDTO.lawyer && UserDTO.lawyer.documents) {
-        return { ...lawyer.documents, ...UserDTO.lawyer.documents };
-      } else lawyer.documents;
-    };
+    debugLog(`updating a user with id ${id} 🍋`);
+
+    const { address, guarantors, lawyer, profilePic } = oldDetails;
+    const handleDocuments = (recent, old) => ({
+      photoIDOrNIN: recent.photoIDOrNIN || old.photoIDOrNIN,
+      LLBCertificate: recent.LLBCertificate || old.LLBCertificate,
+      NBAReceipt: recent.NBAReceipt || old.NBAReceipt,
+      callToBarCertificate: recent.callToBarCertificate || old.callToBarCertificate,
+      others: recent.others || old.others,
+    });
+
     return models.User.update(
       {
-        notification: UserDTO.notification || oldDetails.notification,
-        isVerified: UserDTO.isVerified || oldDetails.isVerified,
-        isAccountSuspended: UserDTO.isAccountSuspended || oldDetails.isAccountSuspended,
+        notification: handleFalsy(UserDTO.notification, oldDetails.notification),
+        isVerified: handleFalsy(UserDTO.isVerified, oldDetails.isVerified),
+        isAccountSuspended: handleFalsy(UserDTO.isAccountSuspended, oldDetails.isAccountSuspended),
         firstName: UserDTO.firstName || oldDetails.firstName,
         lastName: UserDTO.lastName || oldDetails.lastName,
         email: UserDTO.email || oldDetails.email,
         password: UserDTO.password || oldDetails.password,
+        description: UserDTO.description || oldDetails.description,
         role: UserDTO.role || oldDetails.role,
-        isSubscribed: UserDTO.isSubscribed || oldDetails.isSubscribed,
+        gender: UserDTO.gender || oldDetails.gender,
+        isSubscribed: handleFalsy(UserDTO.isSubscribed, oldDetails.isSubscribed),
+        firebaseToken: UserDTO.firebaseToken || oldDetails.firebaseToken,
         otp: {
           value: (UserDTO.otp && UserDTO.otp.value) || oldDetails.otp.value,
           expiresIn: (UserDTO.otp && UserDTO.otp.expiresIn) || oldDetails.otp.expiresIn,
         },
         address: {
-          residential:
-            (UserDTO.address && UserDTO.address.residential) ||
-            (address && address.residential) ||
-            null,
-          work: (UserDTO.address && UserDTO.address.work) || (address && address.work) || null,
-          preferredLocation:
-            (UserDTO.address && UserDTO.address.preferredLocation) ||
-            (address && address.preferredLocation) ||
-            null,
+          country: (UserDTO.address && UserDTO.address.country) || address.country,
+          state: (UserDTO.address && UserDTO.address.state) || address.state,
+          residence: {
+            work:
+              (UserDTO.address && UserDTO.address.residence && UserDTO.address.residence.work) ||
+              address.residence.work,
+            home:
+              (UserDTO.address && UserDTO.address.residence && UserDTO.address.residence.home) ||
+              address.residence.home,
+          },
         },
         phone: UserDTO.phone || oldDetails.phone,
         dob: UserDTO.dob || oldDetails.dob,
@@ -90,6 +130,30 @@ class UsersService {
                 UserDTO.guarantors.nextOfKin.phone) ||
               (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.phone) ||
               null,
+            dob:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.nextOfKin &&
+                UserDTO.guarantors.nextOfKin.dob) ||
+              (guarantors && guarantors.dob && guarantors.nextOfKin.dob) ||
+              null,
+            address:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.nextOfKin &&
+                UserDTO.guarantors.nextOfKin.address) ||
+              (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.address) ||
+              null,
+            profilePic:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.nextOfKin &&
+                UserDTO.guarantors.nextOfKin.profilePic) ||
+              (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.profilePic) ||
+              null,
+            gender:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.nextOfKin &&
+                UserDTO.guarantors.nextOfKin.gender) ||
+              (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.gender) ||
+              null,
           },
           surety: {
             firstName:
@@ -116,15 +180,39 @@ class UsersService {
                 UserDTO.guarantors.surety.phone) ||
               (guarantors && guarantors.surety && guarantors.surety.phone) ||
               null,
+            dob:
+              (UserDTO.guarantors && UserDTO.guarantors.surety && UserDTO.guarantors.surety.dob) ||
+              (guarantors && guarantors.dob && guarantors.surety.dob) ||
+              null,
+            address:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.surety &&
+                UserDTO.guarantors.surety.address) ||
+              (guarantors && guarantors.surety && guarantors.surety.address) ||
+              null,
+            profilePic:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.surety &&
+                UserDTO.guarantors.surety.profilePic) ||
+              (guarantors && guarantors.surety && guarantors.surety.profilePic) ||
+              null,
+            gender:
+              (UserDTO.guarantors &&
+                UserDTO.guarantors.surety &&
+                UserDTO.guarantors.surety.gender) ||
+              (guarantors && guarantors.surety && guarantors.surety.gender) ||
+              null,
           },
         },
-        profilePic: UserDTO.profilePic || oldDetails.profilePic,
-        creditCard: UserDTO.creditCard || oldDetails.creditCard,
+        profilePic: UserDTO.profilePic || profilePic,
         lawyer: {
-          isVerified: (UserDTO.lawyer && UserDTO.lawyer.isVerified) || lawyer.isVerified,
-          documents: handleDocuments(),
+          isVerified: UserDTO.lawyer && handleFalsy(UserDTO.lawyer.isVerified, lawyer.isVerified),
+          documents:
+            UserDTO.lawyer && UserDTO.lawyer.documents
+              ? handleDocuments(UserDTO.lawyer.documents, lawyer.documents)
+              : lawyer.documents,
         },
-        hasAgreedToTerms: UserDTO.hasAgreedToTerms || oldDetails.hasAgreedToTerms,
+        hasAgreedToTerms: handleFalsy(UserDTO.hasAgreedToTerms, oldDetails.hasAgreedToTerms),
       },
       { where: { id }, returning: true }
     );
