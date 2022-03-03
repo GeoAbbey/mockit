@@ -1,0 +1,22 @@
+name: docker-build
+
+on:
+  push:
+    branches: [master, develop]
+
+jobs:
+  docker-build:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build staging container
+        run: docker build -t deveote/zapplayer-be:develop .
+        if: contains('refs/heads/develop',github.ref)
+      - name: Build production container
+        run: docker build -t deveote/zapplayer-be:master .
+        if: contains('refs/heads/master',github.ref)
+      - name: Reload containers
+        run: docker-compose -f /docker/compose/docker-compose.yml up -d
+
+
