@@ -10,10 +10,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Build staging container
+      - name: Build development container
         run: docker build -t deveote/zapplayer-be:develop .
         if: contains('refs/heads/develop',github.ref)
-      - name: Build production container
+      - name: Build staging container
         run: docker build -t deveote/zapplayer-be:release .
         if: contains('refs/heads/release',github.ref)
       - name: Reload containers
