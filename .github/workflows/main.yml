@@ -2,7 +2,7 @@ name: docker-build
 
 on:
   push:
-    branches: [master, develop]
+    branches: [release, develop]
 
 jobs:
   docker-build:
@@ -14,8 +14,8 @@ jobs:
         run: docker build -t deveote/zapplayer-be:develop .
         if: contains('refs/heads/develop',github.ref)
       - name: Build production container
-        run: docker build -t deveote/zapplayer-be:master .
-        if: contains('refs/heads/master',github.ref)
+        run: docker build -t deveote/zapplayer-be:release .
+        if: contains('refs/heads/release',github.ref)
       - name: Reload containers
         run: docker-compose -f /docker/compose/docker-compose.yml up -d
 
