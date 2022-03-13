@@ -5,9 +5,7 @@ export const createUserSchema = Joi.object().keys({
   lastName: Joi.string().trim().required(),
   email: Joi.string().trim().email({ minDomainSegments: 2 }).required(),
   password: Joi.string().min(6).max(30).required(),
-  phone: Joi.string(),
-  role: Joi.string().valid("user", "lawyer"),
-  gender: Joi.string().valid("male", "female").required(),
+  role: Joi.string().valid("user", "lawyer").required(),
 });
 
 export const createAnAdminSchema = createUserSchema.append({
@@ -18,6 +16,7 @@ export const createAnAdminSchema = createUserSchema.append({
 export const updateUserSchema = Joi.object().keys({
   firstName: Joi.string(),
   lastName: Joi.string(),
+  supremeCourtNumber: Joi.string(),
   notification: Joi.boolean(),
   isAccountSuspended: Joi.boolean(),
   isSubscribed: Joi.boolean(),
@@ -42,35 +41,17 @@ export const updateUserSchema = Joi.object().keys({
   },
   phone: Joi.string(),
   dob: Joi.date(),
-  guarantors: Joi.object().keys({
-    nextOfKin: Joi.object().keys({
-      firstName: Joi.string(),
-      lastName: Joi.string(),
-      email: Joi.string().email({ minDomainSegments: 2 }),
-      phone: Joi.string(),
-      dob: Joi.date(),
-      address: Joi.string(),
-      gender: Joi.string().valid("male", "female").required(),
-      profilePic: Joi.string(),
-    }),
-    surety: Joi.object().keys({
-      firstName: Joi.string(),
-      lastName: Joi.string(),
-      email: Joi.string().email({ minDomainSegments: 2 }),
-      phone: Joi.string(),
-      dob: Joi.date(),
-      address: Joi.string(),
-      gender: Joi.string().valid("male", "female").required(),
-      profilePic: Joi.string(),
-    }),
+  emergencyContact: Joi.object().keys({
+    firstName: Joi.string(),
+    lastName: Joi.string(),
+    email: Joi.string().email({ minDomainSegments: 2 }),
+    phone: Joi.string(),
   }),
   profilePic: Joi.string(),
-  creditCard: Joi.string().creditCard(),
   lawyer: Joi.object().keys({
-    isVerified: Joi.boolean(),
+    isVerified: Joi.string().valid("initiated", "in-progress", "completed"),
     documents: Joi.object(),
   }),
-
   hasAgreedToTerms: Joi.boolean(),
   role: Joi.string().valid("user", "lawyer", "admin"),
 });

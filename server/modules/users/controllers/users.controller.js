@@ -14,7 +14,6 @@ import configOptions from "../../../config/config";
 const config = configOptions[envs];
 
 import { Op } from "sequelize";
-import { process as convert } from "../../../utils/processInput";
 import { paginate as pagination } from "../../helpers";
 
 const log = debug("app:users-controller");
@@ -38,8 +37,6 @@ class UsersController {
     req.body.email = req.body.email.trim();
     req.body.firstName = req.body.firstName.trim();
     req.body.lastName = req.body.lastName.trim();
-    req.body.gender = convert(req.body.gender);
-    req.body.phone = convert(req.body.phone);
 
     const user = await UsersService.create(req.body);
     delete user.dataValues.password;
@@ -49,7 +46,7 @@ class UsersController {
 
     return res.status(201).send({
       success: true,
-      message: "user successfully created",
+      message: `${req.body.role} successfully created`,
       token,
     });
   };
@@ -128,12 +125,7 @@ class UsersController {
 
   handleUploads(req) {
     const { body } = req;
-
     const newBody = {
-      guarantors: {
-        nextOfKin: {},
-        surety: {},
-      },
       lawyer: {
         documents: {},
       },
@@ -142,16 +134,7 @@ class UsersController {
 
     if (req.files) {
       var {
-        files: {
-          profilePic,
-          nextOfKinProfilePic,
-          suretyProfilePic,
-          photoIDOrNIN,
-          NBAReceipt,
-          callToBarCertificate,
-          LLBCertificate,
-          others,
-        },
+        files: { profilePic, link },
       } = req;
     }
 
@@ -159,52 +142,9 @@ class UsersController {
       newBody.profilePic = profilePic[0].location;
     }
 
-    if (nextOfKinProfilePic && nextOfKinProfilePic[0]) {
-      newBody.guarantors.nextOfKin.profilePic = nextOfKinProfilePic[0].location;
-    }
-
-    if (others && others[0]) {
-      newBody.lawyer.documents.others = {
-        url: others[0].location,
-        name: others[0].originalname,
-        type: others[0].mimetype,
-      };
-    }
-
-    if (NBAReceipt && NBAReceipt[0]) {
-      newBody.lawyer.documents.NBAReceipt = {
-        url: NBAReceipt[0].location,
-        name: NBAReceipt[0].originalname,
-        type: NBAReceipt[0].mimetype,
-      };
-    }
-
-    if (LLBCertificate && LLBCertificate[0]) {
-      newBody.lawyer.documents.LLBCertificate = {
-        url: LLBCertificate[0].location,
-        name: LLBCertificate[0].originalname,
-        type: LLBCertificate[0].mimetype,
-      };
-    }
-
-    if (callToBarCertificate && callToBarCertificate[0]) {
-      newBody.lawyer.documents.callToBarCertificate = {
-        url: callToBarCertificate[0].location,
-        name: callToBarCertificate[0].originalname,
-        type: callToBarCertificate[0].mimetype,
-      };
-    }
-
-    if (photoIDOrNIN && photoIDOrNIN[0]) {
-      newBody.lawyer.documents.photoIDOrNIN = {
-        url: photoIDOrNIN[0].location,
-        name: photoIDOrNIN[0].originalname,
-        type: photoIDOrNIN[0].mimetype,
-      };
-    }
-
-    if (suretyProfilePic && suretyProfilePic[0]) {
-      newBody.guarantors.surety.profilePic = suretyProfilePic[0].location;
+    if (link && link[0]) {
+      newBody.lawyer.documents.link = link[0].location;
+      newBody.lawyer.isVerified = "in-progress";
     }
 
     return newBody;

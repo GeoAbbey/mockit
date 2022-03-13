@@ -12,6 +12,7 @@ const common = {
   lawyerPercentage: process.env.LAWYERS_PERCENTAGE,
   averageSpeed: process.env.AVERAGE_SPEED,
   lawyerPassword: process.env.LAWYER_PASSWORD,
+  oneTimeFee: process.env.ONE_TIME_FEE,
 };
 
 module.exports = {
@@ -21,9 +22,9 @@ module.exports = {
     password: process.env.PASSWORD,
     database: process.env.LOCAL_DATABASE,
     host: process.env.HOST,
-    mongoConnect: process.env.MONGO_DB_CONNECTION_LOCAL,
+    mongoConnect: process.env.LOCAL_MONGO_DB_CONNECTION,
     runNotificationService: true,
-    runEmailNotificationService: true,
+    runEmailNotificationService: false,
     payoutInterval: process.env.PAYOUT_INTERVAL,
     payment_base_url: process.env.MONNIFY_BASE_URL,
     payment_contract_code: process.env.MONNIFY_CONTRACT_CODE,
@@ -33,13 +34,13 @@ module.exports = {
     ...common,
   },
 
-  production: {
-    username: process.env.PROD_DB_USERNAME,
-    password: process.env.PROD_DB_PASSWORD,
+  devDeployment: {
+    username: process.env.DEV_DB_USERNAME,
+    password: process.env.DEV_DB_PASSWORD,
     clientUri: process.env.CLIENT_URI,
-    database: process.env.PROD_DB_NAME,
-    host: process.env.PROD_DB_HOSTNAME,
-    mongoConnect: process.env.MONGO_DB_CONNECTION_PROD,
+    database: process.env.DEV_DB_NAME,
+    host: process.env.DEV_DB_HOSTNAME,
+    mongoConnect: process.env.DEV_MONGO_DB_CONNECTION,
     payoutInterval: process.env.PAYOUT_INTERVAL,
     runEmailNotificationService: true,
     runNotificationService: true,
