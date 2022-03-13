@@ -74,7 +74,8 @@ export const invitationEvents = (eventEmitter) => {
 
       const initializedPayout = await PaymentsService.initializePayout(data);
 
-      initializedPayout.success && schedule.completePayout(data);
+      initializedPayout.success &&
+        schedule.completePayout({ theModel: data, lawyerInfo: decodedToken });
 
       console.log({ initializedPayout }, "🍅");
     }

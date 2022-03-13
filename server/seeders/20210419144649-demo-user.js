@@ -21,11 +21,7 @@ module.exports = {
           password: await bcrypt.hash("Password", 10),
           lawyer: JSON.stringify({
             documents: {
-              others: "",
-              NBAReceipt: "",
-              photoIDOrNIN: "",
-              LLBCertificate: "",
-              callToBarCertificate: "",
+              link: "",
             },
             isVerified: false,
             description: "",
@@ -47,7 +43,7 @@ module.exports = {
           isSubscribed: true,
           address: null,
           dob: null,
-          guarantors: null,
+          emergencyContact: null,
           firebaseToken: null,
           hasAgreedToTerms: null,
           deletedAt: null,

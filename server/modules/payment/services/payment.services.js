@@ -16,6 +16,7 @@ import PayoutsController from "../../payout/controllers/payout.controller";
 const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
 import { EVENT_IDENTIFIERS } from "../../../constants";
+import userService from "../../users/service/user.service";
 
 const config = configOptions[env];
 const getAmount = PayoutsController.getAmount;
@@ -30,6 +31,45 @@ class PaymentsService {
     }
     return PaymentsService.instance;
   }
+
+  oneTimeFee = async ({ oldAccountInfo, lawyerInfo, t }) => {
+    console.log("I was here 🥶🥁");
+    try {
+      let result = await models.sequelize.transaction(async (t) => {
+        const [, [newAccountInfo]] = await AccountInfosService.update(
+          oldAccountInfo.dataValues.id,
+          {
+            wallet: {
+              info: true,
+              operation: "deduct",
+            },
+            walletAmount: parseInt(config.oneTimeFee),
+          },
+          oldAccountInfo,
+          { transaction: t }
+        );
+
+        const receipt = await TransactionService.create(
+          {
+            ownerId: lawyerInfo.id,
+            notes: "one time fee",
+            amount: config.oneTimeFee,
+          },
+          { transaction: t }
+        );
+
+        const [, [subbed]] = await userService.update(
+          lawyerInfo.id,
+          { lawyer: { isSubscribed: true } },
+          lawyerInfo,
+          { transaction: t }
+        );
+      });
+    } catch (error) {
+      console.log({ error }, "🐒");
+      return error;
+    }
+  };
 
   async initializePayout(theModel) {
     debugLog(
@@ -74,16 +114,14 @@ class PaymentsService {
     }
   }
 
-  async completePayout(theModel) {
+  async completePayout({ theModel, lawyerInfo }) {
     debugLog(
       `Completing payment for User with ID ${theModel.assignedLawyerId} for ${theModel.type} with ID of ${theModel.id}`
     );
+    const oldAccountInfo = await AccountInfosService.find(theModel.assignedLawyerId);
+
     try {
       let result = await models.sequelize.transaction(async (t) => {
-        const oldAccountInfo = await AccountInfosService.find(theModel.assignedLawyerId, {
-          transaction: t,
-        });
-
         const oldPayout = await PayOutServices.findOne({
           ownerId: theModel.assignedLawyerId,
           modelType: theModel.type,
@@ -111,17 +149,20 @@ class PaymentsService {
 
         const thePayout = await PayOutServices.update(
           oldPayout.dataValues.id,
-          {
-            status: "completed",
-          },
+          { status: "completed" },
           oldPayout.dataValues
         );
+
+        // check if lawyer has paid for one time subscription fee
+        !lawyerInfo.lawyer.isSubscribed &&
+          this.oneTimeFee({ oldAccountInfo: newAccountInfo, lawyerInfo });
 
         return {
           success: true,
           message: `Payment has been successfully completed.`,
         };
       });
+
       return result;
     } catch (error) {
       console.log({ error }, "🐒");

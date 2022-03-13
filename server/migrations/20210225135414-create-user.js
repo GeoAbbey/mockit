@@ -54,7 +54,7 @@ module.exports = {
         allowNull: false,
         defaultValue: false,
       },
-      guarantors: {
+      emergencyContact: {
         type: Sequelize.JSONB,
       },
       lawyer: {
