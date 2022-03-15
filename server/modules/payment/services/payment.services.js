@@ -12,11 +12,12 @@ import CooperateService from "../../cooperate/services/cooperate.services";
 import CooperateAccessService from "../../cooperateAccess/services/cooperate-access.services";
 import PayOutServices from "../../payout/services/payout.services";
 import PayoutsController from "../../payout/controllers/payout.controller";
+import userService from "../../users/service/user.service";
+import { eventEmitter } from "../../../loaders/events";
 
 const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
 import { EVENT_IDENTIFIERS } from "../../../constants";
-import userService from "../../users/service/user.service";
 
 const config = configOptions[env];
 const getAmount = PayoutsController.getAmount;
@@ -32,7 +33,7 @@ class PaymentsService {
     return PaymentsService.instance;
   }
 
-  oneTimeFee = async ({ oldAccountInfo, lawyerInfo, t }) => {
+  oneTimeFee = async ({ oldAccountInfo, lawyerInfo }) => {
     console.log("I was here 🥶🥁");
     try {
       let result = await models.sequelize.transaction(async (t) => {
@@ -64,6 +65,8 @@ class PaymentsService {
           lawyerInfo,
           { transaction: t }
         );
+
+        eventEmitter.emit(EVENT_IDENTIFIERS.ONE_TIME_SUBSCRIPTION_FEE.AUTHORIZED, { lawyerInfo });
       });
     } catch (error) {
       console.log({ error }, "🐒");

@@ -1,11 +1,13 @@
 import debug from "debug";
-import { EVENT_IDENTIFIERS, TEMPLATE } from "../../constants";
+import { EVENT_IDENTIFIERS, TEMPLATE, NOTIFICATION_DATA } from "../../constants";
 import AccountInfosService from "../../modules/accountInfo/services/accountInfo.services";
 import LocationService from "../../modules/locationDetail/services/locationDetails.services";
 import { sendTemplateEmail } from "../../utils";
 const logger = debug("app:handlers:listeners:user-events");
 
 import configOptions from "../../config/config";
+import { sendNotificationToUserOrLawyer } from "./helpers";
+import { sendNotificationToClient } from "../../utils/sendNotificationToClient";
 const env = process.env.NODE_ENV || "development";
 const config = configOptions[env];
 
@@ -51,4 +53,14 @@ export const userEvents = (eventEmitter) => {
       sendTemplateEmail(email, TEMPLATE.OTP_VERIFY_EMAIL, { firstName, otp: otp.value, email });
     }
   });
+
+  eventEmitter.on(
+    `${EVENT_IDENTIFIERS.ONE_TIME_SUBSCRIPTION_FEE.AUTHORIZED}`,
+    async ({ lawyerInfo }) => {
+      logger(`${EVENT_IDENTIFIERS.ONE_TIME_SUBSCRIPTION_FEE.AUTHORIZED} events has been received`);
+      const { firebaseToken, id, email, firstName, lastName } = lawyerInfo;
+
+      //sendMail
+    }
+  );
 };

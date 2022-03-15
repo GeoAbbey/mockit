@@ -94,43 +94,51 @@ class ResponsesService {
     return models.Response.findByPk(id, t);
   }
 
-  async findMany(filter, pageDetails) {
-    debugLog(`retrieving responses with the following filter ${JSON.stringify(filter)}`);
+  async findMany(filter, pageDetails, canApply = undefined) {
+    debugLog(
+      `retrieving responses with the following filter ${JSON.stringify(filter)} and ${canApply}`
+    );
+
+    const defaultSearch = [
+      {
+        model: models.User,
+        as: "ownerProfile",
+        attributes: [
+          "firstName",
+          "lastName",
+          "email",
+          "profilePic",
+          "firebaseToken",
+          "phone",
+          "description",
+        ],
+        required: false,
+      },
+      {
+        model: models.User,
+        as: "lawyerProfile",
+        attributes: [
+          "firstName",
+          "lastName",
+          "email",
+          "profilePic",
+          "firebaseToken",
+          "phone",
+          "description",
+        ],
+        required: false,
+      },
+    ];
+
+    if (canApply) {
+      defaultSearch.push(canApply(models.EligibleLawyer));
+    }
 
     return models.Response.findAndCountAll({
       order: [["createdAt", "DESC"]],
       where: { ...filter },
       ...paginate(pageDetails),
-      include: [
-        {
-          model: models.User,
-          as: "ownerProfile",
-          attributes: [
-            "firstName",
-            "lastName",
-            "email",
-            "profilePic",
-            "firebaseToken",
-            "phone",
-            "description",
-          ],
-          required: false,
-        },
-        {
-          model: models.User,
-          as: "lawyerProfile",
-          attributes: [
-            "firstName",
-            "lastName",
-            "email",
-            "profilePic",
-            "firebaseToken",
-            "phone",
-            "description",
-          ],
-          required: false,
-        },
-      ],
+      include: defaultSearch,
     });
   }
 
