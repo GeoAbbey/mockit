@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build development container
-        run: docker build . -t deveote/zapplayer-be:develop --build-arg=NODE_ENV=develop
+        run: docker build . -t deveote/zapplayer-be:develop --build-arg=NODE_ENV=devDeployment
         if: contains('refs/heads/develop',github.ref)
       - name: Build staging container
         run: docker build . -t deveote/zapplayer-be:release --build-arg=NODE_ENV=staging
