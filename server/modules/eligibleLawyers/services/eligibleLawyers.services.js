@@ -21,6 +21,23 @@ class EligibleLawyersService {
     return models.EligibleLawyer.findAll(data);
   }
 
+  async getLawyersForResponse(responseId) {
+    debugLog(`finding all eligible lawyers with the filter ${JSON.stringify(responseId)}`);
+    return models.EligibleLawyer.findAll({
+      where: { responseId },
+      include: [
+        {
+          model: models.User,
+          as: "lawyerProfile",
+          attributes: ["id"],
+          include: {
+            model: models.LocationDetail,
+          },
+        },
+      ],
+    });
+  }
+
   async bulkCreate(EligibleLawyerDTO) {
     debugLog("creating a list of eligible lawyers for a particular response");
     return models.EligibleLawyer.bulkCreate(EligibleLawyerDTO);

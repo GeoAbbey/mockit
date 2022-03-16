@@ -106,6 +106,7 @@ class ResponsesController {
       eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, {
         response: updatedResponse,
         decodedToken,
+        io,
       });
 
     if (body.meetTime)

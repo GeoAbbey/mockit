@@ -2,10 +2,11 @@ import Joi from "joi";
 
 export const createUserSchema = Joi.object().keys({
   firstName: Joi.string().trim().required(),
+  phone: Joi.string().required(),
   lastName: Joi.string().trim().required(),
   email: Joi.string().trim().email({ minDomainSegments: 2 }).required(),
   password: Joi.string().min(6).max(30).required(),
-  role: Joi.string().valid("user", "lawyer").required(),
+  role: Joi.string().valid("user", "lawyer"),
 });
 
 export const createAnAdminSchema = createUserSchema.append({

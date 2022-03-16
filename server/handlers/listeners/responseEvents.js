@@ -14,7 +14,7 @@ const logger = debug("app:handlers:listeners:response-events");
 import { schedule } from "../../jobs/scheduler";
 
 export const responseEvents = (eventEmitter) => {
-  eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, async ({ response, decodedToken }) => {
+  eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, async ({ response, io, decodedToken }) => {
     logger(`${EVENT_IDENTIFIERS.RESPONSE.ASSIGNED} event was received`);
 
     const {
@@ -52,6 +52,19 @@ export const responseEvents = (eventEmitter) => {
       "ASSIGNED",
       "ownerId"
     );
+
+    const lawyersThatCantRespond = await EligibleLawyersService.getLawyersForResponse(response.id);
+
+    for (let lawyer of lawyersThatCantRespond) {
+      if (lawyer.dataValues.lawyerProfile.id === decodedToken.id) continue;
+      io.to(lawyer.dataValues.lawyerProfile.LocationDetail.socketId).emit(
+        "response:already:accepted",
+        {
+          response,
+          message: "the above response has already been accepted by another lawyer.",
+        }
+      );
+    }
   });
 
   eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.MEET_TIME, async ({ response, io, decodedToken }) => {
