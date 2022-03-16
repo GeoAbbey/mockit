@@ -11,10 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build development container
-        run: docker build -t deveote/zapplayer-be:develop .
+        run: docker build . -t deveote/zapplayer-be:develop --build-arg=NODE_ENV=develop
         if: contains('refs/heads/develop',github.ref)
       - name: Build staging container
-        run: docker build -t deveote/zapplayer-be:release .
+        run: docker build . -t deveote/zapplayer-be:release --build-arg=NODE_ENV=staging
+
         if: contains('refs/heads/release',github.ref)
       - name: Reload containers
         run: docker-compose -f /docker/compose/docker-compose.yml up -d
