@@ -6,7 +6,6 @@ import SmallClaimsService from "../../small-claims/services/small-claims.service
 import configOptions from "../../../config/config";
 import { paginate as pagination } from "../../helpers";
 import { Op } from "sequelize";
-import { toKobo } from "../../../utils/toKobo";
 
 const env = process.env.NODE_ENV || "development";
 const config = configOptions[env];

@@ -106,6 +106,7 @@ class ResponsesController {
       eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, {
         response: updatedResponse,
         decodedToken,
+        io,
       });
 
     if (body.meetTime)
@@ -165,13 +166,23 @@ class ResponsesController {
   async getUnassignedResponses(req, res, next) {
     log("getting all unassigned responses");
     const {
+      decodedToken: { id },
       query: { paginate = {} },
     } = req;
+
+    const canApply = (model) => ({
+      model,
+      as: "eligibleLawyers",
+      required: true,
+      where: {
+        lawyerId: id,
+      },
+    });
 
     const data = { assignedLawyerId: null };
     const { offset, limit } = pagination(paginate);
 
-    const responses = await ResponsesService.findMany(data, paginate);
+    const responses = await ResponsesService.findMany(data, paginate, canApply);
     return res.status(200).send({
       success: true,
       message: "responses successfully retrieved",
@@ -341,7 +352,7 @@ class ResponsesController {
     }
 
     if (role === "lawyer") {
-      filter = { ...filter, assignedLawyerId: id };
+      filter = { ...filter, assignedLawyerId: id, canApply };
       commonOptions();
     }
 

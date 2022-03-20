@@ -7,11 +7,10 @@ const common = {
   radius: process.env.RADIUS,
   invitationCost: process.env.INVITATION_COST,
   costOfSubscriptionUnit: process.env.SUBSCRIPTION_UNIT_COST,
-  payStackSecretKey: process.env.PAYSTACK_SECRET,
-  payStackPublicKey: process.env.PAYSTACK_PUBLIC,
   lawyerPercentage: process.env.LAWYERS_PERCENTAGE,
   averageSpeed: process.env.AVERAGE_SPEED,
   lawyerPassword: process.env.LAWYER_PASSWORD,
+  oneTimeFee: process.env.ONE_TIME_FEE,
 };
 
 module.exports = {
@@ -21,9 +20,9 @@ module.exports = {
     password: process.env.PASSWORD,
     database: process.env.LOCAL_DATABASE,
     host: process.env.HOST,
-    mongoConnect: process.env.MONGO_DB_CONNECTION_LOCAL,
-    runNotificationService: true,
-    runEmailNotificationService: true,
+    mongoConnect: process.env.LOCAL_MONGO_DB_CONNECTION,
+    runNotificationService: false,
+    runEmailNotificationService: false,
     payoutInterval: process.env.PAYOUT_INTERVAL,
     payment_base_url: process.env.MONNIFY_BASE_URL,
     payment_contract_code: process.env.MONNIFY_CONTRACT_CODE,
@@ -33,13 +32,37 @@ module.exports = {
     ...common,
   },
 
-  production: {
-    username: process.env.PROD_DB_USERNAME,
-    password: process.env.PROD_DB_PASSWORD,
+  devDeployment: {
+    username: process.env.DEV_DB_USERNAME,
+    password: process.env.DEV_DB_PASSWORD,
     clientUri: process.env.CLIENT_URI,
-    database: process.env.PROD_DB_NAME,
-    host: process.env.PROD_DB_HOSTNAME,
-    mongoConnect: process.env.MONGO_DB_CONNECTION_PROD,
+    database: process.env.DEV_DB_NAME,
+    host: process.env.DEV_DB_HOSTNAME,
+    mongoConnect: process.env.DEV_MONGO_DB_CONNECTION,
+    payoutInterval: process.env.PAYOUT_INTERVAL,
+    runEmailNotificationService: true,
+    runNotificationService: true,
+    payment_base_url: process.env.MONNIFY_PROD_BASE_URL,
+    payment_contract_code: process.env.MONNIFY_PROD_CONTRACT_CODE,
+    payment_secret_key: process.env.MONNIFY_PROD_SECRET_KEY,
+    payment_api_key: process.env.MONNIFY_PROD_API_KEY,
+    payment_source_account_number: process.env.MONNIFY_PROD_WALLET_ACCOUNT_NUMBER,
+    ...common,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false, // <<<<<<< YOU NEED THIS
+      },
+    },
+  },
+
+  staging: {
+    username: process.env.STAGE_DB_USERNAME,
+    password: process.env.STAGE_DB_PASSWORD,
+    clientUri: process.env.CLIENT_URI,
+    database: process.env.STAGE_DB_NAME,
+    host: process.env.STAGE_DB_HOSTNAME,
+    mongoConnect: process.env.STAGE_MONGO_DB_CONNECTION,
     payoutInterval: process.env.PAYOUT_INTERVAL,
     runEmailNotificationService: true,
     runNotificationService: true,

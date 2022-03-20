@@ -13,6 +13,8 @@ export const queryOptions = Joi.object().keys({
     ticketId: Joi.string(),
     code: Joi.string(),
     notes: Joi.string(),
+    from: Joi.date().less(Joi.ref("to")),
+    to: Joi.date(),
   }),
   paginate: Joi.object().keys({
     page: Joi.number().min(1),

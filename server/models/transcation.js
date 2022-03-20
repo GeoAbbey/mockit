@@ -25,10 +25,9 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: () => v4(),
       },
       ownerId: { type: DataTypes.UUID, allowNull: false },
-      performedBy: { type: DataTypes.UUID, allowNull: false },
+      performedBy: { type: DataTypes.UUID },
       modelType: {
         type: DataTypes.STRING,
-        allowNull: false,
       },
       ticketId: {
         type: DataTypes.STRING,

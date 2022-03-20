@@ -4,6 +4,7 @@ import { paginate as pagination } from "../../helpers";
 import { Op } from "sequelize";
 
 import TransactionsService from "../services/transaction.services";
+import { pgDateFormate } from "../../../utils/pgFormateDate";
 const log = debug("app:transactions-controller");
 
 class TransactionsController {
@@ -111,6 +112,15 @@ class TransactionsController {
 
       if (query.search && query.search.notes) {
         filter = { ...filter, notes: { [Op.iLike]: `%${query.search.notes}%` } };
+      }
+
+      if (query.search && query.search.to && query.search.from) {
+        filter = {
+          ...filter,
+          createdAt: {
+            [Op.between]: [pgDateFormate(query.search.from), pgDateFormate(query.search.to)],
+          },
+        };
       }
 
       if (query.search && query.search.modelType) {

@@ -11,14 +11,34 @@ class EligibleLawyersService {
     return EligibleLawyersService.instance;
   }
 
-  async find(id) {
-    debugLog(`finding an eligible lawyer with id ${id}`);
-    return models.EligibleLawyer.findByPk(id);
+  async find(responseId, lawyerId) {
+    debugLog(`finding an eligible lawyer with responseId ${responseId} and lawyerId ${lawyerId}`);
+    const search = { responseId };
+    if (lawyerId) search = { ...search, lawyerId };
+
+    return models.EligibleLawyer.findAll({ where: search });
   }
 
   async findMany(data) {
     debugLog(`finding all eligible lawyers with the filter ${JSON.stringify(data)}`);
     return models.EligibleLawyer.findAll(data);
+  }
+
+  async getLawyersForResponse(responseId) {
+    debugLog(`finding all eligible lawyers with the filter ${JSON.stringify(responseId)}`);
+    return models.EligibleLawyer.findAll({
+      where: { responseId },
+      include: [
+        {
+          model: models.User,
+          as: "lawyerProfile",
+          attributes: ["id"],
+          include: {
+            model: models.LocationDetail,
+          },
+        },
+      ],
+    });
   }
 
   async bulkCreate(EligibleLawyerDTO) {
@@ -31,10 +51,10 @@ class EligibleLawyersService {
     return models.EligibleLawyer.create(EligibleLawyerDTO);
   }
 
-  async remove(id) {
-    debugLog(`deleting the invitation with id ${id}`);
+  async remove(responseId, filter = undefined) {
+    debugLog(`deleting the lawyer with id ${responseId} and filter ${JSON.stringify(filter)} `);
     return models.EligibleLawyer.destroy({
-      where: { id },
+      where: { responseId, ...filter },
     });
   }
 }

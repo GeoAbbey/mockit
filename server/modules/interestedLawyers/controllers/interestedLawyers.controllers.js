@@ -1,7 +1,6 @@
 import debug from "debug";
 import createError from "http-errors";
 import { EVENT_IDENTIFIERS } from "../../../constants";
-import { toKobo } from "../../../utils/toKobo";
 
 import InterestedLawyersService from "../services/interestedLawyers.services";
 const logger = debug("app:small-claims-controller");

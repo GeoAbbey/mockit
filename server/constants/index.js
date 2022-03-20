@@ -225,6 +225,20 @@ export const NOTIFICATION_DATA = {
     },
   }),
 
+  ONE_TIME_SUBSCRIPTION_FEE: ({ id, amount }) => ({
+    notification: {
+      title: `One TIme Subscription`,
+      body: `A ont time subscription fee of ${amount} has been charged on your account`,
+    },
+    data: {
+      click_action: "user_requesting",
+      id,
+      status: "one time subscription fee",
+      view: "lawyer_requested_popup",
+      google_sent_time: new Date().toISOString(),
+    },
+  }),
+
   WITHDRAWAL: {
     INITIATED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
       generic({
@@ -330,6 +344,10 @@ export const EVENT_IDENTIFIERS = {
     INITIATED: "WITHDRAWAL_INITIATED",
     AUTHORIZED: "WITHDRAWAL_AUTHORIZED",
   },
+
+  ONE_TIME_SUBSCRIPTION_FEE: {
+    AUTHORIZED: "ONE_TIME_SUBSCRIPTION_FEE_AUTHORIZED",
+  },
 };
 
 export const ROLES = {
@@ -363,4 +381,10 @@ export const TEMPLATE = {
   NOTIFY_ADMIN: "Notify_Admin",
   WITHDRAWAL_INITIATED: "Withdrawal_Initiated",
   WITHDRAWAL_AUTHORIZED: "Withdrawal_Authorized",
+  ONE_TIME_SUBSCRIPTION_FEE: "One_Time_Subscription_Fee",
+  PERSONAL_WALLET_CREDITED: "Personal_Wallet_Credited",
+  COOPERATE_WALLET_CREDITED: "Cooperate_Wallet_Credited",
+  RESPONSE_SUBSCRIPTION_PAYMENT: "Response_Subscription_Payment",
+  SINGLE_INVITATION_PAYMENT: "Single_Invitation_Payment",
+  SINGLE_SMALL_CLAIM_PAYMENT: "Single_Small_Claim_Payment",
 };

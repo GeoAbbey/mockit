@@ -1,7 +1,6 @@
 "use strict";
 import { v4 } from "uuid";
 import { otp } from "../utils";
-import { someDefaults } from "../utils/processInput";
 
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
@@ -78,7 +77,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       phone: { type: DataTypes.STRING },
       dob: { type: DataTypes.STRING, isDate: true },
-      guarantors: { type: DataTypes.JSONB },
+      emergencyContact: { type: DataTypes.JSONB },
       description: { type: DataTypes.STRING },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       profilePic: {
@@ -89,13 +88,13 @@ module.exports = (sequelize, DataTypes) => {
       lawyer: {
         type: DataTypes.JSONB,
         defaultValue: {
-          isVerified: false,
+          supremeCourtNumber: "",
+          typeOfDocument: "",
+          isSubscribed: false,
+          isVerified: "initiated",
           documents: {
-            NBAReceipt: "",
-            LLBCertificate: "",
-            callToBarCertificate: "",
-            photoIDOrNIN: "",
-            others: "",
+            name: "",
+            link: "",
           },
         },
       },
@@ -113,7 +112,6 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           isIn: [["male", "female"]],
         },
-        allowNull: false,
       },
       otp: {
         type: DataTypes.JSONB,

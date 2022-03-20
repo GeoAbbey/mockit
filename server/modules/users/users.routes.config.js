@@ -48,13 +48,8 @@ export class UserRoutes extends CommonRoutesConfig {
         AccessControl.checkPermissionUserOrLawyerAccess(),
         uploadMiddleware([
           { name: "profilePic", maxCount: 1 },
-          { name: "nextOfKinProfilePic", maxCount: 1 },
-          { name: "suretyProfilePic", maxCount: 1 },
-          { name: "NBAReceipt", maxCount: 1 },
-          { name: "LLBCertificate", maxCount: 1 },
-          { name: "callToBarCertificate", maxCount: 1 },
-          { name: "photoIDOrNIN", maxCount: 1 },
-          { name: "others", maxCount: 1 },
+          { name: "link", maxCount: 1 },
+          { name: "emergencyContactProfilePic", maxCount: 1 },
         ]),
         wrapCatch(UsersController.updateUser),
       ])

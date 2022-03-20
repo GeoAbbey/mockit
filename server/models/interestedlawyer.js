@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       baseChargeInNaira: {
         type: DataTypes.VIRTUAL,
         get() {
-          return this.baseCharge / 100;
+          return this.baseCharge;
         },
         set(value) {
           throw new Error(`Do not try to set the baseChargeInNaira ${value}!`);
@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       serviceChargeInNaira: {
         type: DataTypes.VIRTUAL,
         get() {
-          return this.serviceCharge / 100;
+          return this.serviceCharge;
         },
         set(value) {
           throw new Error(`Do not try to set the serviceChargeInNaira ${value}!`);

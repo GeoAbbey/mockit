@@ -9,3 +9,8 @@ export const queryOptions = Joi.object().keys({
     pageSize: Joi.number().max(20),
   }),
 });
+
+export const dateOptions = Joi.object({
+  from: Joi.date().less(Joi.ref("to")),
+  to: Joi.date(),
+});
