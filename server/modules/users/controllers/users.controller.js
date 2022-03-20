@@ -129,17 +129,22 @@ class UsersController {
       lawyer: {
         documents: {},
       },
+      emergencyContact: {},
       ...body,
     };
 
     if (req.files) {
       var {
-        files: { profilePic, link },
+        files: { profilePic, link, emergencyContactProfilePic },
       } = req;
     }
 
     if (profilePic && profilePic[0]) {
       newBody.profilePic = profilePic[0].location;
+    }
+
+    if (emergencyContactProfilePic && emergencyContactProfilePic[0]) {
+      newBody.emergencyContact.profilePic = emergencyContactProfilePic[0].location;
     }
 
     if (link && link[0]) {

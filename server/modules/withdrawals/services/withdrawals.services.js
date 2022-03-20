@@ -6,7 +6,6 @@ const debugLog = debug("app:withdrawals-service");
 
 import { payStack } from "../../../utils/paymentService";
 import RecipientServices from "../../recipient/services/recipient.services";
-import { toKobo } from "../../../utils/toKobo";
 import AccountInfoServices from "../../accountInfo/services/accountInfo.services";
 import { exceptionHandler } from "../../../utils/exceptionHandler";
 import { paginate } from "../../helpers";

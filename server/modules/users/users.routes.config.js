@@ -49,6 +49,7 @@ export class UserRoutes extends CommonRoutesConfig {
         uploadMiddleware([
           { name: "profilePic", maxCount: 1 },
           { name: "link", maxCount: 1 },
+          { name: "emergencyContactProfilePic", maxCount: 1 },
         ]),
         wrapCatch(UsersController.updateUser),
       ])

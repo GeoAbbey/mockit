@@ -102,6 +102,10 @@ class UsersService {
         phone: UserDTO.phone || oldDetails.phone,
         dob: UserDTO.dob || oldDetails.dob,
         emergencyContact: {
+          profilePic:
+            (UserDTO.emergencyContact && UserDTO.emergencyContact.profilePic) ||
+            (emergencyContact && emergencyContact.profilePic) ||
+            null,
           firstName:
             (UserDTO.emergencyContact && UserDTO.emergencyContact.firstName) ||
             (emergencyContact && emergencyContact.firstName) ||
