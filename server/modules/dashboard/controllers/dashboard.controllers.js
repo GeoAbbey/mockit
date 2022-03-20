@@ -1,5 +1,6 @@
 import debug from "debug";
 import createError from "http-errors";
+import { pgDateFormate } from "../../../utils/pgFormateDate";
 
 import DashboardsService from "../services/dashboard.services";
 const log = debug("dashboard:services:dashboard.services");
@@ -25,6 +26,19 @@ class DashboardsController {
     });
   }
 
+  async cashInAndOut(req, res, next) {
+    log(`retrieving data for cash in and out of the system`);
+    const { filter } = req;
+
+    const dataSet = await DashboardsService.totalDebitAndCredit(filter);
+
+    return res.status(200).send({
+      success: true,
+      message: "data successfully retrieved",
+      dataSet,
+    });
+  }
+
   async getFulfilled(req, res, next) {
     log(`retrieving data for histogram and fulfilled`);
     const {
@@ -42,6 +56,22 @@ class DashboardsController {
       message: "data successfully retrieved",
       dataSet,
     });
+  }
+
+  async dateOptions(req, res, next) {
+    log(`retrieving data for payIn and payOut`);
+    const {
+      query: { to, from },
+    } = req;
+
+    if (to && from) {
+      req.filter = {
+        to: pgDateFormate(to),
+        from: pgDateFormate(from),
+      };
+    }
+
+    return next();
   }
 
   checkAccessAdmin(context) {

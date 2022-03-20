@@ -25,7 +25,8 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       amount: {
-        type: DataTypes.DECIMAL(10, 2),
+        type: DataTypes.FLOAT,
+        allowNull: false,
       },
       ticketId: {
         type: DataTypes.STRING,

@@ -47,11 +47,6 @@ class TransactionsService {
     });
   }
 
-  // async usageHistory(code) {
-  //   debugLog(`getting a list of transaction with for user with code ${code}`);
-  //   return models.Transaction.findAndCountAll({ where: { code } });
-  // }
-
   async remove(id) {
     debugLog(`deleting a review with ${id}`);
     return models.Transaction.destroy({ where: { id } });

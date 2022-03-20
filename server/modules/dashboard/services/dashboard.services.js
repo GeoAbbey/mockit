@@ -79,6 +79,37 @@ class DashboardsService {
 
     return { invitations, responses, smallClaims };
   }
+
+  async totalDebitAndCredit(filter) {
+    debugLog(
+      `retrieving total debit and credit over the following period ${JSON.stringify(filter)}`
+    );
+
+    let duration = (tableName) => "";
+
+    if (filter && filter.to && filter.from) {
+      duration = (tableName) =>
+        `WHERE "${tableName}"."createdAt" BETWEEN '${filter.from}' AND '${filter.to}';`;
+    }
+
+    const payIns = await models.sequelize.query(
+      `SELECT SUM(amount) FROM "PayIns" ${duration("PayIns")}`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    const payOuts = await models.sequelize.query(
+      `SELECT SUM(amount) FROM "Withdrawals" ${duration("Withdrawals")}`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    return { payIns, payOuts };
+  }
 }
 
 export default DashboardsService.getInstance();
