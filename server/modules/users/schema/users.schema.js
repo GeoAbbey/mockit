@@ -50,7 +50,7 @@ export const updateUserSchema = Joi.object().keys({
   }),
   profilePic: Joi.string(),
   lawyer: Joi.object().keys({
-    isVerified: Joi.string().valid("initiated", "in-progress", "completed"),
+    isVerified: Joi.string().valid("initiated", "in-progress", "completed", "declined"),
     documents: Joi.object(),
   }),
   hasAgreedToTerms: Joi.boolean(),
