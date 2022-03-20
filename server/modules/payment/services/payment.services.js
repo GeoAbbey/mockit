@@ -218,7 +218,7 @@ class PaymentsService {
     debugLog("processing a payment handleSingleInvitation");
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const { metaData: metadata, amount, transactionReference: reference } = data;
+      const { metaData: metadata, amountPaid: amount, transactionReference: reference } = data;
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
         transaction: t,
       });
@@ -251,7 +251,7 @@ class PaymentsService {
       const receipt = await PayInServices.create(
         {
           for: metadata.type,
-          amount,
+          amount: parseFloat(amount),
           reference,
           ownerId: metadata.id,
         },
@@ -299,7 +299,7 @@ class PaymentsService {
 
     let result = await models.sequelize.transaction(async (t) => {
       // increase the unit of the subscription purchased
-      const { metaData: metadata, amount, transactionReference: reference } = data;
+      const { metaData: metadata, amountPaid: amount, transactionReference: reference } = data;
 
       const referenceIsAlreadyUsed = await PayInServices.find(reference, metadata.id, {
         transaction: t,
@@ -331,7 +331,7 @@ class PaymentsService {
       const receipt = await PayInServices.create(
         {
           for: metadata.type,
-          amount,
+          amount: parseFloat(amount),
           reference,
           ownerId: metadata.id,
           modelId: metadata.modelId,
@@ -482,7 +482,7 @@ class PaymentsService {
       const receipt = await PayInServices.create(
         {
           for: metadata.type,
-          amount,
+          amount: Number(amount),
           reference,
           ownerId: metadata.id,
         },
@@ -554,7 +554,7 @@ class PaymentsService {
       const receipt = await PayInServices.create(
         {
           for: metadata.type,
-          amount,
+          amount: Number(amount),
           reference,
           subQuantity: {
             count: parseInt(amount / parseInt(config.costOfSubscriptionUnit)),

@@ -7,8 +7,6 @@ const common = {
   radius: process.env.RADIUS,
   invitationCost: process.env.INVITATION_COST,
   costOfSubscriptionUnit: process.env.SUBSCRIPTION_UNIT_COST,
-  payStackSecretKey: process.env.PAYSTACK_SECRET,
-  payStackPublicKey: process.env.PAYSTACK_PUBLIC,
   lawyerPercentage: process.env.LAWYERS_PERCENTAGE,
   averageSpeed: process.env.AVERAGE_SPEED,
   lawyerPassword: process.env.LAWYER_PASSWORD,
