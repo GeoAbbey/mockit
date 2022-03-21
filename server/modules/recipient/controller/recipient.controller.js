@@ -52,7 +52,7 @@ class RecipientsController {
   makeRecipient = async (req, res, next) => {
     const {
       decodedToken: { id },
-      body: { account_number, bank_code, account_name },
+      body: { account_number, bank_code, account_name, bank_name },
     } = req;
 
     log(`creating a recipient for user with id ${id}`);
@@ -69,6 +69,7 @@ class RecipientsController {
         accountNumber: account_number,
         bankCode: bank_code,
         accountName: account_name,
+        bankName: bank_name,
       },
     });
 
