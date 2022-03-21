@@ -82,9 +82,9 @@ class RecipientsController {
 
   async getRecipients(req, res, next) {
     const {
-      decodedToken: { id },
+      decodedToken: { id: lawyerId },
     } = req;
-    const recipient = await RecipientsService.find(id);
+    const recipient = await RecipientsService.find({ lawyerId });
 
     if (!recipient)
       return next(createError(404, `You don't have a recipient account kindly create one`));
@@ -98,10 +98,10 @@ class RecipientsController {
 
   async recipientExists(req, res, next) {
     const {
-      decodedToken: { id },
-      params: { code },
+      decodedToken: { id: lawyerId },
+      params: { id },
     } = req;
-    const recipient = await RecipientsService.findByCode({ lawyerId: id, code });
+    const recipient = await RecipientsService.find({ lawyerId, id });
 
     if (!recipient)
       return next(
@@ -114,11 +114,10 @@ class RecipientsController {
 
   async deleteRecipient(req, res, next) {
     const {
-      decodedToken: { id },
-      oldRecipient,
+      params: { id },
     } = req;
 
-    const recipient = await RecipientsService.delete(id, oldRecipient);
+    const recipient = await RecipientsService.delete(id);
 
     return res.status(200).send({
       success: true,

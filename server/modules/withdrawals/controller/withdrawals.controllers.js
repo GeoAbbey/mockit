@@ -23,7 +23,7 @@ class WithdrawalsController {
     const {
       decodedToken: { firstName, lastName, id, email },
       body: { amount },
-      params: { accountCode },
+      params: { accountID },
     } = req;
     log(`creating a withdrawal for user with id ${id}`);
 
@@ -32,7 +32,7 @@ class WithdrawalsController {
       amount,
       id,
       email,
-      accountCode,
+      accountID,
     });
 
     response.success &&
