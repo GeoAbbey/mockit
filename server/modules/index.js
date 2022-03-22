@@ -21,6 +21,7 @@ import { CooperateAccessRoutes } from "./cooperateAccess/cooperateAccess.routes.
 import { DashboardRoutes } from "./dashboard/dashboard.routes.config";
 import { WithdrawalRoutes } from "./withdrawals/withdrawals.routes.config.js";
 import { PayoutsAndWithdrawalRoutes } from "./payoutAndWithdrawals/payoutAndWithdrawals.routes.config";
+import { PayInRoutes } from "./payIn/pay-in.routes.config";
 
 const routes = [
   UserRoutes,
@@ -46,6 +47,7 @@ const routes = [
   DashboardRoutes,
   WithdrawalRoutes,
   PayoutsAndWithdrawalRoutes,
+  PayInRoutes,
 ];
 
 export const initializeRoutes = ({ app, path }) => {
