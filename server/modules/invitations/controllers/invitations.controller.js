@@ -128,17 +128,22 @@ class InvitationsController {
     const {
       query: { paginate = {} },
       decodedToken: {
+        id,
         address: { country, state },
       },
     } = req;
 
     const data = {
-      assignedLawyerId: null,
-      paid: true,
-      venue: {
-        country,
-        state,
-      },
+      [Op.or]: [
+        {
+          assignedLawyerId: id,
+        },
+        {
+          assignedLawyerId: null,
+          paid: true,
+          venue: { country, state },
+        },
+      ],
     };
 
     const invitations = await InvitationsService.findMany(data, paginate);
