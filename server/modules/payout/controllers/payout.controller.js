@@ -125,6 +125,14 @@ class PayoutsController {
       if (query.search && query.search.ticketId) {
         filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
       }
+      if (query.search && query.search.to && query.search.from) {
+        filter = {
+          ...filter,
+          createdAt: {
+            [Op.between]: [pgDateFormate(query.search.from), pgDateFormate(query.search.to)],
+          },
+        };
+      }
     };
 
     if (role === "admin" || role === "super-admin") {
