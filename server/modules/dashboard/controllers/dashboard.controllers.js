@@ -16,8 +16,10 @@ class DashboardsController {
 
   async getHistogram(req, res, next) {
     log(`retrieving data for histogram`);
+    const { filter } = req;
+    console.log({ filter });
 
-    const dataSet = await DashboardsService.histogramChat();
+    const dataSet = await DashboardsService.histogramChat(filter);
 
     return res.status(200).send({
       success: true,
