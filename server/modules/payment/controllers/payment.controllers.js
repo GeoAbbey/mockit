@@ -137,9 +137,7 @@ class PaymentsController {
       response: { responseBody: data },
     } = result;
 
-    console.log({ result: data });
-
-    if (!success)
+    if (data && data.paymentStatus !== "PAID")
       return next(createError(400, "There was an error processing your payment kindly try again"));
 
     const paymentResult = await PaymentsService.processPayIn({

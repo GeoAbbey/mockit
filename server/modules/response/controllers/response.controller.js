@@ -352,7 +352,7 @@ class ResponsesController {
     }
 
     if (role === "lawyer") {
-      filter = { ...filter, assignedLawyerId: id, canApply };
+      filter = { ...filter, assignedLawyerId: id };
       commonOptions();
     }
 

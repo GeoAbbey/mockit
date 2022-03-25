@@ -22,14 +22,11 @@ class RecipientsService {
     return models.Recipient.create(RecipientDTO);
   }
 
-  async find(id) {
-    debugLog(`retrieving recipient with ${id}`);
-    return models.Recipient.findAll({ where: { lawyerId: id } });
-  }
-
-  async findByCode(filter) {
-    debugLog(`retrieving recipient  account with code ${JSON.stringify(filter)}`);
-    return models.Recipient.findOne({ where: { ...filter } });
+  async find({ lawyerId, id }) {
+    debugLog(`retrieving recipient with lawyerId ${lawyerId}`);
+    let search = { lawyerId };
+    if (id) search = { ...search, id };
+    return models.Recipient.findAll({ where: search });
   }
 
   async findOne({ bank_code, account_number, id }) {
@@ -50,9 +47,9 @@ class RecipientsService {
     return payment.getBankCodes(data);
   }
 
-  async delete(id, oldRecipient) {
+  async delete(id) {
     return models.Recipient.destroy({
-      where: { lawyerId: id, code: oldRecipient.code },
+      where: { id },
     });
   }
 }

@@ -20,7 +20,7 @@ export class RecipientRoutes extends CommonRoutesConfig {
       .get([wrapCatch(RecipientsController.getRecipients)]);
 
     this.app
-      .route(`${this.path}/recipients/:code`)
+      .route(`${this.path}/recipients/:id`)
       .all([Authenticate.verifyToken(), RecipientsController.checkAccessLawyer()])
       .delete([
         wrapCatch(RecipientsController.recipientExists),
