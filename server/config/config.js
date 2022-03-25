@@ -59,6 +59,7 @@ module.exports = {
   staging: {
     username: process.env.STAGE_DB_USERNAME,
     password: process.env.STAGE_DB_PASSWORD,
+    port: process.env.STAGE_DB_PORT,
     clientUri: process.env.CLIENT_URI,
     database: process.env.STAGE_DB_NAME,
     host: process.env.STAGE_DB_HOSTNAME,
