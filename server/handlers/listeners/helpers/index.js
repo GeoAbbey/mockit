@@ -15,7 +15,7 @@ export const sendNotificationToLawyers = async (events, data, decodedToken, mode
   console.log(data.venue.country, "🤬");
 
   const allLawyers = await userService.findMany({
-    role: ROLES.ADMIN,
+    role: ROLES.LAWYER,
     address: { country: data.venue.country, state: data.venue.state },
   });
 
