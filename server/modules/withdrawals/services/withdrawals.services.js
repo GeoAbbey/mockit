@@ -140,6 +140,22 @@ class WithdrawalsService {
       where: { ...filter },
       ...paginate(pageDetails),
       ...paranoid,
+      include: [
+        {
+          model: models.User,
+          as: "lawyerProfile",
+          attributes: [
+            "firstName",
+            "lastName",
+            "email",
+            "profilePic",
+            "firebaseToken",
+            "phone",
+            "description",
+          ],
+          required: false,
+        },
+      ],
     });
   }
 
