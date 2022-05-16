@@ -24,7 +24,7 @@ class CooperateAccessService {
   async findOrCreate({ ownerId, userEmail }) {
     const foundUser = await UsersService.findOne({ email: userEmail, role: ROLES.USER });
     if (!foundUser)
-      return { success: false, message: `No with the provided email address ${userEmail} ` };
+      return { success: false, message: `No user with the provided email address ${userEmail} ` };
 
     const [data, isCreated] = await models.CooperateAccess.findOrCreate({
       where: { ownerId, userAccessId: foundUser.dataValues.id },

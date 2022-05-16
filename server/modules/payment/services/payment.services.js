@@ -603,7 +603,9 @@ class PaymentsService {
 
     if (!oldCooperateInfo)
       return {
-        message: `The cooperate code ${args.code} is invalid`,
+        message: args.code
+          ? `The corporate code ${args.code} is invalid`
+          : "corporate code can not be empty.",
         success: false,
       };
 
@@ -614,7 +616,7 @@ class PaymentsService {
 
     if (!hasAccess)
       return {
-        message: "You do not have access to use this cooperate code",
+        message: "You do not have access to use this corporate code",
         success: false,
       };
 
@@ -698,7 +700,7 @@ class PaymentsService {
   }
 
   async handleInvitationWithCooperate(args, emitter, decodedToken) {
-    debugLog("I am handling a police invitation with a cooperate reference");
+    debugLog("I am handling a police invitation with a corporate reference");
 
     try {
       let result = await models.sequelize.transaction(async (t) => {
@@ -895,7 +897,7 @@ class PaymentsService {
   }
 
   async handleCooperateTransfer(args, emitter, decodedToken) {
-    debugLog("Transferring funds from personal wallet to cooperate wallet");
+    debugLog("Transferring funds from personal wallet to corporate wallet");
 
     //find the personal wallet and check that he has above the specified amount
     const oldAccountInfo = await AccountInfosService.find(args.id);
