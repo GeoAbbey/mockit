@@ -46,7 +46,7 @@ class CooperateController {
       if (context) {
         return res.status(200).send({
           success: true,
-          message: "cooperate info has been successfully retrieved.",
+          message: "corporate info has been successfully retrieved.",
           cooperateInfo,
         });
       }
@@ -68,7 +68,7 @@ class CooperateController {
 
     return res.status(200).send({
       success: true,
-      message: "cooperate info has been successfully retrieved.",
+      message: "corporate info has been successfully retrieved.",
       history: {
         currentPage: offset / limit + 1,
         pageSize: limit,
@@ -88,7 +88,7 @@ class CooperateController {
 
     return res.status(200).send({
       success: true,
-      message: "cooperate info has been successfully updated.",
+      message: "corporate info has been successfully updated.",
       updatedDetails,
     });
   }
