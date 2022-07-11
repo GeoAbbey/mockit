@@ -6,8 +6,6 @@ import { sendTemplateEmail } from "../../utils";
 const logger = debug("app:handlers:listeners:user-events");
 
 import configOptions from "../../config/config";
-import { sendNotificationToUserOrLawyer } from "./helpers";
-import { sendNotificationToClient } from "../../utils/sendNotificationToClient";
 const env = process.env.NODE_ENV || "development";
 const config = configOptions[env];
 

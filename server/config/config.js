@@ -22,7 +22,7 @@ module.exports = {
     host: process.env.HOST,
     mongoConnect: process.env.LOCAL_MONGO_DB_CONNECTION,
     runNotificationService: true,
-    runEmailNotificationService: false,
+    runEmailNotificationService: true,
     payoutInterval: process.env.PAYOUT_INTERVAL,
     payment_base_url: process.env.MONNIFY_BASE_URL,
     payment_contract_code: process.env.MONNIFY_CONTRACT_CODE,
