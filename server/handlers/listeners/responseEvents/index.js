@@ -1,17 +1,21 @@
 import debug from "debug";
-import { EVENT_IDENTIFIERS } from "../../constants";
-import LocationServices from "../../modules/locationDetail/services/locationDetails.services";
-import PaymentsService from "../../modules/payment/services/payment.services";
-import EligibleLawyersService from "../../modules/eligibleLawyers/services/eligibleLawyers.services";
+import { EVENT_IDENTIFIERS, TEMPLATE } from "../../../constants";
+import LocationServices from "../../../modules/locationDetail/services/locationDetails.services";
+import PaymentsService from "../../../modules/payment/services/payment.services";
+import EligibleLawyersService from "../../../modules/eligibleLawyers/services/eligibleLawyers.services";
+import UserService from "../../../modules/users/service/user.service";
 
 const env = process.env.NODE_ENV || "development";
-import configOptions from "../../config/config.js";
+import configOptions from "../../../config/config.js";
 const config = configOptions[env];
 
-import { sendNotificationToUserOrLawyer, sendNotificationToEligibleLawyers } from "./helpers";
+import { sendNotificationToEligibleLawyers } from "../helpers";
 const logger = debug("app:handlers:listeners:response-events");
 
-import { schedule } from "../../jobs/scheduler";
+import { schedule } from "../../../jobs/scheduler";
+import { data } from "./data";
+import { notifyPeople } from "../helpers/notifyPeople";
+import { sendTemplateEmail } from "../../../utils";
 
 export const responseEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, async ({ response, io, decodedToken }) => {
@@ -44,13 +48,26 @@ export const responseEvents = (eventEmitter) => {
       ),
     ]);
 
-    await sendNotificationToUserOrLawyer(
-      EVENT_IDENTIFIERS.RESPONSE.ASSIGNED,
-      response,
-      decodedToken,
-      "RESPONSE",
-      "ASSIGNED",
-      "ownerId"
+    const userToken = await UserService.findByPk(response.ownerId);
+
+    const notificationData = data.ASSIGNED({
+      sender_id: decodedToken.id,
+      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+      status_id: response.id,
+      sender_firebase_token: decodedToken.firebaseToken,
+    });
+
+    notifyPeople({
+      event: EVENT_IDENTIFIERS.RESPONSE.ASSIGNED,
+      people: [userToken],
+      notificationData,
+    });
+
+    sendTemplateEmail(
+      userToken.dataValues.email,
+      TEMPLATE.RESPONSE_LAWYER_ASSIGNED,
+      { firstName: userToken.dataValues.firstName },
+      response.ticketId
     );
 
     const lawyersThatCantRespond = await EligibleLawyersService.getLawyersForResponse(response.id);
@@ -104,13 +121,26 @@ export const responseEvents = (eventEmitter) => {
       message: "lawyer has acknowledged that he has meet with you.",
     });
 
-    await sendNotificationToUserOrLawyer(
-      EVENT_IDENTIFIERS.RESPONSE.MEET_TIME,
-      response,
-      decodedToken,
-      "RESPONSE",
-      "MEET_TIME",
-      "ownerId"
+    const userToken = await UserService.findByPk(response.ownerId);
+
+    const notificationData = data.MEET_TIME({
+      sender_id: decodedToken.id,
+      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+      status_id: response.id,
+      sender_firebase_token: decodedToken.firebaseToken,
+    });
+
+    notifyPeople({
+      event: EVENT_IDENTIFIERS.RESPONSE.MEET_TIME,
+      people: [userToken],
+      notificationData,
+    });
+
+    sendTemplateEmail(
+      userToken.dataValues.email,
+      TEMPLATE.RESPONSE_MEET_TIME,
+      { firstName: userToken.dataValues.firstName },
+      response.ticketId
     );
   });
 
@@ -173,24 +203,37 @@ export const responseEvents = (eventEmitter) => {
     async ({ response, decodedToken }) => {
       logger(`${EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED} event was received`);
 
-      sendNotificationToUserOrLawyer(
-        EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED,
-        response,
-        decodedToken,
-        "RESPONSE",
-        "MARK_AS_COMPLETED",
-        "ownerId"
+      const userToken = await UserService.findByPk(response.ownerId);
+
+      const notificationData = data.MARK_AS_COMPLETED({
+        sender_id: decodedToken.id,
+        sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+        status_id: response.id,
+        sender_firebase_token: decodedToken.firebaseToken,
+      });
+
+      notifyPeople({
+        event: EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED,
+        people: [userToken],
+        notificationData,
+      });
+
+      sendTemplateEmail(
+        userToken.dataValues.email,
+        TEMPLATE.RESPONSE_COMPLETED,
+        { firstName: userToken.dataValues.firstName },
+        response.ticketId
       );
 
-      const data = {
+      const theData = {
         ...response.dataValues,
         type: "response",
       };
 
-      const initializedPayout = await PaymentsService.initializePayout(data);
+      const initializedPayout = await PaymentsService.initializePayout(theData);
 
       initializedPayout.success &&
-        schedule.completePayout({ theModel: data, lawyerInfo: decodedToken });
+        schedule.completePayout({ theModel: theData, lawyerInfo: decodedToken });
 
       console.log({ initializedPayout }, "🍅");
     }
