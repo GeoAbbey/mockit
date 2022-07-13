@@ -35,7 +35,7 @@ export const startServer = async () => {
             new Error("Invalid Email or Password, Kindly contact the admin if this is an anomaly")
           );
 
-        if (theUser.dataValues.isAccountSuspended)
+        if (theUser.dataValues.settings.isSuspended)
           return next(new Error("You account has been suspended kindly contact the admin"));
         return next();
       });

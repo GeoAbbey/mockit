@@ -42,7 +42,7 @@ class Authenticate {
         if (theUser.dataValues.isAccountSuspended)
           return next(createError(401, "You account has been suspended kindly contact the admin"));
 
-        if (context !== "verify" && !theUser.dataValues.isVerified)
+        if (context !== "verify" && !theUser.dataValues.settings.isEmailVerified)
           return next(createError(401, "Kindly verify your email address to continue"));
         req.userToken = token;
         req.decodedToken = theUser.dataValues;

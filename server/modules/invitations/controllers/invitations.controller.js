@@ -192,29 +192,40 @@ class InvitationsController {
     });
   }
 
-  async marKAsCompleted(req, res, next) {
+  async updateStatus(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
+
+    const statusMapper = {
+      completed: { status: "completed" },
+      cancel: { status: "initiated", assignedLawyerId: null },
+    };
+
+    const eventMapper = {
+      completed: "INVITATION_MARK_AS_COMPLETED",
+      cancel: "INVITATION_CANCELLED",
+    };
 
     const {
       params: { id },
+      body: { status },
       decodedToken,
       oldInvitation,
     } = req;
 
     const [, [updatedInvitation]] = await InvitationsService.update(
       id,
-      { status: "completed" },
+      statusMapper[status],
       oldInvitation
     );
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.MARK_AS_COMPLETED, {
+    eventEmitter.emit(eventMapper[status], {
       invitation: updatedInvitation,
       decodedToken,
     });
 
     return res.status(200).send({
       success: true,
-      message: "You have successfully completed this invitation",
+      message: `You have successfully ${status} this invitation`,
       invitation: updatedInvitation,
     });
   }
@@ -262,9 +273,11 @@ class InvitationsController {
       if (role === "admin" || role === "super-admin") return next();
       if (role !== "lawyer")
         return next(createError(401, "You do not have access to perform this operation"));
-      if (context === "markAsComplete") {
+      if (context === "updateStatus") {
         if (oldInvitation.status === "completed")
           return next(createError(401, "This invitation is already completed"));
+        if (oldInvitation.status === "initiated" && req.body.status === "cancel")
+          return next(createError(401, "This invitation has been successfully cancelled"));
         if (id !== oldInvitation.assignedLawyerId)
           return next(createError(401, "You do not have access to perform this operation"));
       }

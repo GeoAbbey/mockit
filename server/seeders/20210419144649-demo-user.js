@@ -15,8 +15,6 @@ module.exports = {
       "Users",
       [
         {
-          notification: true,
-          isAccountSuspended: false,
           profilePic: "https://zapplawyer.s3.us-west-2.amazonaws.com/attachments/user.png",
           password: await bcrypt.hash("Password", 10),
           lawyer: JSON.stringify({
@@ -30,6 +28,18 @@ module.exports = {
             value: "900754",
             expiresIn: new Date(),
           }),
+          settings: JSON.stringify({
+            isSuspended: false,
+            hasAgreedToTerms: false,
+            isEmailVerified: true,
+            isPhoneVerified: false,
+            oneTimeSubscription: false,
+            notification: {
+              email: true,
+              phone: true,
+              inApp: true,
+            },
+          }),
           id: "a2e2c494-0be4-4b7f-92bb-aeaa3d6a431b",
           firstName: "Benjamin",
           lastName: "Alamu",
@@ -37,15 +47,12 @@ module.exports = {
           gender: "male",
           phone: "08162561265",
           role: "super-admin",
-          isVerified: true,
           createdAt: new Date(),
           updatedAt: new Date(),
-          isSubscribed: true,
           address: null,
           dob: null,
           emergencyContact: null,
           firebaseToken: null,
-          hasAgreedToTerms: null,
           deletedAt: null,
         },
       ],

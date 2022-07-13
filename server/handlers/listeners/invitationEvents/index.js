@@ -63,6 +63,15 @@ export const invitationEvents = (eventEmitter) => {
     });
   });
 
+  eventEmitter.on(EVENT_IDENTIFIERS.INVITATION.CANCELLED, async ({ invitation, decodedToken }) => {
+    logger(`${EVENT_IDENTIFIERS.INVITATION.CANCELLED} has been received`);
+
+    eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
+      invitation,
+      decodedToken,
+    });
+  });
+
   eventEmitter.on(EVENT_IDENTIFIERS.INVITATION.ASSIGNED, async ({ invitation, decodedToken }) => {
     logger(`${EVENT_IDENTIFIERS.INVITATION.ASSIGNED} has been received`);
 
@@ -104,7 +113,7 @@ export const invitationEvents = (eventEmitter) => {
       });
 
       notifyPeople({
-        event: EVENT_IDENTIFIERS.INVITATION.ASSIGNED,
+        event: EVENT_IDENTIFIERS.INVITATION.MARK_AS_COMPLETED,
         people: [userToken],
         notificationData,
       });

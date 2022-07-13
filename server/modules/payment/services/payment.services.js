@@ -61,7 +61,7 @@ class PaymentsService {
 
         const [, [subbed]] = await userService.update(
           lawyerInfo.id,
-          { lawyer: { isSubscribed: true } },
+          { lawyer: { oneTimeSubscription: true } },
           lawyerInfo,
           { transaction: t }
         );
@@ -157,7 +157,7 @@ class PaymentsService {
         );
 
         // check if lawyer has paid for one time subscription fee
-        !lawyerInfo.lawyer.isSubscribed &&
+        !lawyerInfo.lawyer.oneTimeSubscription &&
           this.oneTimeFee({ oldAccountInfo: newAccountInfo, lawyerInfo });
 
         return {

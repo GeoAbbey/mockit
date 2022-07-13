@@ -20,8 +20,13 @@ export const updatedInvitationSchema = Joi.object().keys({
   }),
   attachments: [Joi.array().items(Joi.string()), Joi.number()],
   assignedLawyerId: Joi.string().guid({ version: "uuidv4" }),
-  status: Joi.string().valid("in-progress", "completed"),
+  status: Joi.string().valid("in-progress", "completed", "cancel"),
   dateOfVisit: Joi.date(),
+});
+
+export const updateStatusSchema = Joi.object().keys({
+  assignedLawyerId: Joi.string().guid({ version: "uuidv4" }),
+  status: Joi.string().valid("in-progress", "completed", "cancel"),
 });
 
 export const queryOptions = Joi.object().keys({
