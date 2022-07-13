@@ -1,12 +1,11 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
 import InvitationsController from "./controllers/invitations.controller";
 import {
-  createInvitationSchema,
+  updateStatusSchema,
   updatedInvitationSchema,
   queryOptions,
 } from "./schema/invitation.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID, uploadMiddleware } from "../../utils";
-import { queryContextParams } from "../../utils/allPurpose.schema";
 
 export class InvitationRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {
@@ -45,8 +44,9 @@ export class InvitationRoutes extends CommonRoutesConfig {
         wrapCatch(InvitationsController.modifyInvite),
       ])
       .post([
-        InvitationsController.checkAccessLawyer("markAsComplete"),
-        wrapCatch(InvitationsController.marKAsCompleted),
+        middleware({ schema: updateStatusSchema, property: "body" }),
+        InvitationsController.checkAccessLawyer("updateStatus"),
+        wrapCatch(InvitationsController.updateStatus),
       ])
       .delete([
         InvitationsController.checkAccessUser("delete"),

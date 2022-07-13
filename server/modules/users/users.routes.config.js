@@ -10,6 +10,7 @@ import {
   queryOptions,
   changePasswordSchema,
   createAnAdminSchema,
+  adminUpdateUser,
 } from "./schema/users.schema";
 import {
   middleware,
@@ -44,12 +45,11 @@ export class UserRoutes extends CommonRoutesConfig {
       .route(`${this.path}/users/profile`)
       .all([Authenticate.verifyToken()])
       .patch([
+        middleware({ schema: updateUserSchema, property: "body" }),
         UsersController.userExistMiddleware(),
-        AccessControl.checkPermissionUserOrLawyerAccess(),
         uploadMiddleware([
           { name: "profilePic", maxCount: 1 },
           { name: "link", maxCount: 1 },
-          { name: "emergencyContactProfilePic", maxCount: 1 },
         ]),
         wrapCatch(UsersController.updateUser),
       ])
@@ -74,6 +74,15 @@ export class UserRoutes extends CommonRoutesConfig {
         AccessControl.checkPermissionUserOrLawyerAccess(),
         wrapCatch(UsersController.validateOTP),
         wrapCatch(UsersController.verifyEmail),
+      ]);
+
+    this.app
+      .route(`${this.path}/users/verify-phone`)
+      .all([Authenticate.verifyToken("verify"), UsersController.userExistMiddleware()])
+      .patch([
+        middleware({ schema: validOTP, property: "body" }),
+        AccessControl.checkPermissionUserOrLawyerAccess(),
+        wrapCatch(UsersController.verifyPhoneNumber),
       ]);
 
     this.app
@@ -122,11 +131,11 @@ export class UserRoutes extends CommonRoutesConfig {
       .all([
         Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
-        UsersController.userExistMiddleware(),
       ])
       .put([
         AccessControl.checkPermissionAdminAccess(),
-        middleware({ schema: updateUserSchema, property: "body" }),
+        UsersController.userExistMiddleware(),
+        middleware({ schema: adminUpdateUser, property: "body" }),
         wrapCatch(UsersController.updateUser),
       ])
       .get([wrapCatch(UsersController.getUser)]);

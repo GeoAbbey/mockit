@@ -129,22 +129,17 @@ class UsersController {
       lawyer: {
         documents: {},
       },
-      emergencyContact: {},
       ...body,
     };
 
     if (req.files) {
       var {
-        files: { profilePic, link, emergencyContactProfilePic },
+        files: { profilePic, link },
       } = req;
     }
 
     if (profilePic && profilePic[0]) {
       newBody.profilePic = profilePic[0].location;
-    }
-
-    if (emergencyContactProfilePic && emergencyContactProfilePic[0]) {
-      newBody.emergencyContact.profilePic = emergencyContactProfilePic[0].location;
     }
 
     if (link && link[0]) {
@@ -180,13 +175,39 @@ class UsersController {
     } = req;
     log(`verifying otp details of user with id ${id}`);
 
-    body.isVerified = true;
-    const [, [User]] = await UsersService.update(id, body, user);
+    let data = {
+      settings: {
+        isEmailVerified: true,
+      },
+    };
+    const [, [User]] = await UsersService.update(id, data, user);
     delete User.dataValues.password;
     const token = await Authenticate.signToken(User.dataValues);
     return res.status(200).send({
       success: true,
       message: "email successfully verified",
+      token,
+    });
+  }
+
+  async verifyPhoneNumber(req, res, next) {
+    log(`verifying phone otp details of user with id ${id}`);
+
+    const {
+      params: { id = req.decodedToken.id },
+      user,
+      body,
+    } = req;
+    log(`verifying otp details of user with id ${id}`);
+    // some code to communicate with infobip
+
+    body.isPhoneVerified = true;
+    const [, [User]] = await UsersService.update(id, body, user);
+    delete User.dataValues.password;
+    const token = await Authenticate.signToken(User.dataValues);
+    return res.status(200).send({
+      success: true,
+      message: "phone successfully verified",
       token,
     });
   }

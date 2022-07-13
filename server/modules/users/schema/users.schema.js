@@ -6,6 +6,7 @@ export const createUserSchema = Joi.object().keys({
   lastName: Joi.string().trim().required(),
   email: Joi.string().trim().email({ minDomainSegments: 2 }).required(),
   password: Joi.string().min(6).max(30).required(),
+  gender: Joi.string().valid("male", "female"),
   role: Joi.string().valid("user", "lawyer"),
 });
 
@@ -14,33 +15,38 @@ export const createAnAdminSchema = createUserSchema.append({
   password: Joi.string().min(6).max(30),
 });
 
+export const adminUpdateUser = Joi.object().keys({
+  role: Joi.string().valid("user", "lawyer", "admin"),
+  lawyer: Joi.object().keys({
+    isVerified: Joi.string().valid("initiated", "in-progress", "completed", "declined"),
+  }),
+  settings: Joi.object().keys({
+    isSuspended: Joi.boolean(),
+  }),
+});
+
 export const updateUserSchema = Joi.object().keys({
   firstName: Joi.string(),
   lastName: Joi.string(),
-  supremeCourtNumber: Joi.string(),
-  notification: Joi.boolean(),
-  isAccountSuspended: Joi.boolean(),
-  isSubscribed: Joi.boolean(),
+  settings: Joi.object().keys({
+    hasAgreedToTerms: Joi.boolean(),
+    notification: Joi.object().keys({
+      email: Joi.boolean(),
+      inApp: Joi.boolean(),
+      phone: Joi.boolean(),
+    }),
+  }),
+  gender: Joi.string().valid("male", "female"),
   firebaseToken: Joi.string(),
   description: Joi.string(),
   address: {
-    residential: Joi.object().keys({
-      country: Joi.string(),
-      state: Joi.string(),
-      street: Joi.string(),
-    }),
-    work: Joi.object().keys({
-      country: Joi.string(),
-      state: Joi.string(),
-      street: Joi.string(),
-    }),
-    preferredLocation: Joi.object().keys({
-      country: Joi.string(),
-      state: Joi.string(),
-      street: Joi.string(),
+    state: Joi.string(),
+    country: Joi.string(),
+    residence: Joi.object().keys({
+      home: Joi.string(),
+      work: Joi.string(),
     }),
   },
-  phone: Joi.string(),
   dob: Joi.date(),
   emergencyContact: Joi.object().keys({
     firstName: Joi.string(),
@@ -52,9 +58,9 @@ export const updateUserSchema = Joi.object().keys({
   lawyer: Joi.object().keys({
     isVerified: Joi.string().valid("initiated", "in-progress", "completed", "declined"),
     documents: Joi.object(),
+    typeOfDocument: Joi.string(),
+    supremeCourtNumber: Joi.string(),
   }),
-  hasAgreedToTerms: Joi.boolean(),
-  role: Joi.string().valid("user", "lawyer", "admin"),
 });
 
 export const validOTP = Joi.object().keys({
