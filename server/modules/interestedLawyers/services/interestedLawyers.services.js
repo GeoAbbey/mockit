@@ -14,8 +14,8 @@ class InterestedLawyersService {
 
   async create(lawyerDTO) {
     debugLog(`trying to create interest for lawyer with ${JSON.stringify(lawyerDTO)}`);
-    const { modelType, modelId } = lawyerDTO;
-    const verifyRecordExist = await models[modelType].findOne({
+    const { modelId } = lawyerDTO;
+    const verifyRecordExist = await models.SmallClaim.findOne({
       where: {
         id: modelId,
       },
@@ -37,12 +37,11 @@ class InterestedLawyersService {
 
   async update(id, interestDTO, oldInterest) {
     debugLog(`updating an interest with the following ${id}`);
-    const { baseCharge, serviceCharge } = oldInterest;
+    const { serviceCharge } = oldInterest;
 
     return models.InterestedLawyer.update(
       {
         serviceCharge: interestDTO.serviceCharge || serviceCharge,
-        baseCharge: interestDTO.baseCharge || baseCharge,
       },
       { where: { id }, returning: true }
     );

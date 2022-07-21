@@ -140,11 +140,7 @@ class SmallClaimsController {
       { status: "completed" },
       oldSmallClaim
     );
-    eventEmitter.emit(
-      EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED,
-      updatedSmallClaim,
-      decodedToken
-    );
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.COMPLETED, updatedSmallClaim, decodedToken);
 
     return res.status(200).send({
       success: true,
@@ -153,22 +149,23 @@ class SmallClaimsController {
     });
   }
 
-  async updateToInProgress(req, res, next) {
+  async updateToNewState(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
 
     const {
       params: { id },
+      body: { status },
       decodedToken,
       oldSmallClaim,
     } = req;
 
     const [, [updatedSmallClaim]] = await SmallClaimsService.update(
       id,
-      { status: "in-progress" },
+      { status: status },
       oldSmallClaim
     );
     eventEmitter.emit(
-      EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS,
+      EVENT_IDENTIFIERS.SMALL_CLAIM[status.toUpperCase()],
       updatedSmallClaim,
       decodedToken
     );
@@ -176,59 +173,6 @@ class SmallClaimsController {
     return res.status(200).send({
       success: true,
       message: "You have successfully started this claim",
-      smallClaim: updatedSmallClaim,
-    });
-  }
-
-  async marKInterest(req, res, next) {
-    const eventEmitter = req.app.get("eventEmitter");
-
-    const {
-      params: { id },
-      body: { baseCharge, serviceCharge },
-      oldSmallClaim,
-      decodedToken: { id: lawyerId },
-    } = req;
-
-    const [, [updatedSmallClaim]] = await SmallClaimsService.update(
-      id,
-      { baseCharge, serviceCharge, lawyerId },
-      oldSmallClaim
-    );
-
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, {
-      data: updatedSmallClaim,
-      decodedToken: req.decodedToken,
-    });
-
-    return res.status(200).send({
-      success: true,
-      message: "You have successfully indicated interest in this small claim",
-      smallClaim: updatedSmallClaim,
-    });
-  }
-
-  async assignALawyer(req, res, next) {
-    const eventEmitter = req.app.get("eventEmitter");
-
-    const {
-      params: { id },
-      body: { assignedLawyerId },
-      decodedToken,
-      oldSmallClaim,
-    } = req;
-
-    const [, [updatedSmallClaim]] = await SmallClaimsService.update(
-      id,
-      { assignedLawyerId },
-      oldSmallClaim
-    );
-
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.ASSIGNED, updatedSmallClaim, decodedToken);
-
-    return res.status(200).send({
-      success: true,
-      message: "You have successfully assigned a lawyer to this small claim kindly make payment",
       smallClaim: updatedSmallClaim,
     });
   }
@@ -262,6 +206,7 @@ class SmallClaimsController {
       }
 
       if ((context === "delete" || context === "modify") && status !== "initiated") {
+        if (req.body.status === "closed") return next();
         return next(
           createError(401, `You can not ${context} a small claim once it has been assigned`)
         );
@@ -306,7 +251,13 @@ class SmallClaimsController {
         if (id !== oldSmallClaim.assignedLawyerId)
           return next(createError(401, "You do not have access to perform this operation"));
         if (!oldSmallClaim.paid)
-          return next(createError(401, "You can not start a claim that hasn't been paid for"));
+          return next(
+            createError(401, "You can not update the status of a claim that hasn't been paid for")
+          );
+        if (oldSmallClaim.status === req.body.status)
+          return next(
+            createError(401, `status of the claim that has already been ${req.body.status}`)
+          );
       }
       return next();
     };

@@ -57,8 +57,8 @@ export const data = {
     }),
   PAID: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
     generic({
-      title: "Paid Claim",
-      body: "Claim has have been paid for kindly proceed with it execution",
+      title: "Consultation Paid",
+      body: "Consultation has have been paid for kindly proceed with the execution",
       sender_firebase_token,
       sender_id,
       status_id,
@@ -68,10 +68,23 @@ export const data = {
       status: "small_claim",
       click_action: "user_choose_me_for_claim",
     }),
-  MARK_AS_IN_PROGRESS: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
+  CONSULTATION_COMPLETED: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
     generic({
-      title: "Claim Started",
-      body: "Claim has have been started by assigned lawyer",
+      title: "Consultation Completed",
+      body: "Lawyer has completed consultation on claim kindly review the service rendered",
+      sender_firebase_token,
+      sender_id,
+      status_id,
+      sender_name,
+      receiver_role: "user",
+      view: "lawyer_small_claim_detail_screen",
+      status: "small_claim",
+      click_action: "lawyer_complete_consultation",
+    }),
+  CANCELLED: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
+    generic({
+      title: "Claim Cancelled",
+      body: "Consultation has have been paid for kindly proceed with the execution",
       sender_firebase_token,
       sender_id,
       status_id,

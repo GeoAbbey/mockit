@@ -21,7 +21,16 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          isIn: [["singleSmallClaim", "singleInvitation", "wallet", "subscription", "cooperate"]],
+          isIn: [
+            [
+              "singleSmallClaim",
+              "singleInvitation",
+              "wallet",
+              "subscription",
+              "cooperate",
+              "mileStone",
+            ],
+          ],
         },
       },
       amount: {

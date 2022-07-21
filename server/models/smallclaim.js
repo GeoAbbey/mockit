@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       this.hasMany(models.Review, { as: "reviews", foreignKey: "modelId" });
       this.hasMany(models.InterestedLawyer, { as: "interestedLawyers", foreignKey: "modelId" });
+      this.hasMany(models.MileStone, { foreignKey: "claimId" });
     }
   }
   SmallClaim.init(
@@ -53,7 +54,17 @@ module.exports = (sequelize, DataTypes) => {
       status: {
         type: DataTypes.STRING,
         validate: {
-          isIn: [["initiated", "in-progress", "completed"]],
+          isIn: [
+            [
+              "initiated",
+              "consultation_in_progress",
+              "consultation_completed",
+              "completed",
+              "cancelled",
+              "closed",
+              "engagement",
+            ],
+          ],
         },
         defaultValue: "initiated",
       },

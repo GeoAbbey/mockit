@@ -18,18 +18,16 @@ class InterestedLawyersController {
     const eventEmitter = req.app.get("eventEmitter");
 
     const {
-      params: { id, modelType },
-      body: { baseCharge, serviceCharge },
+      params: { id },
+      body: { serviceCharge },
       decodedToken: { id: lawyerId },
     } = req;
 
-    logger(`creating an interest for lawyer with ID ${lawyerId} on ${modelType} with ID ${id}`);
+    logger(`creating an interest for lawyer with ID ${lawyerId} with ID ${id}`);
 
     const interest = await InterestedLawyersService.create({
-      baseCharge: baseCharge,
-      serviceCharge: serviceCharge,
+      serviceCharge,
       lawyerId,
-      modelType,
       modelId: id,
     });
 
@@ -47,7 +45,7 @@ class InterestedLawyersController {
   interestExits(context) {
     return async (req, res, next) => {
       const {
-        params: { id: modelId, modelType },
+        params: { id: modelId },
         decodedToken: { id: lawyerId },
       } = req;
       if (context !== "create") {
@@ -56,10 +54,10 @@ class InterestedLawyersController {
         req.oldInterest = interest;
         return next();
       } else {
-        const interest = await InterestedLawyersService.findOne({ modelId, modelType, lawyerId });
+        const interest = await InterestedLawyersService.findOne({ modelId, lawyerId });
         if (interest)
           return next(
-            createError(403, `You can only indicate interest once per ${modelType} with ${modelId}`)
+            createError(403, `You can only indicate interest once per small claim with ${modelId}`)
           );
         return next();
       }
@@ -73,11 +71,16 @@ class InterestedLawyersController {
       params: { id },
       body,
       oldInterest,
+      decodedToken,
     } = req;
 
     const [, [updatedInterest]] = await InterestedLawyersService.update(id, body, oldInterest);
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, updatedInterest);
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.EDIT_INTEREST, {
+      updatedInterest,
+      oldInterest,
+      decodedToken,
+    });
 
     return res.status(200).send({
       success: true,

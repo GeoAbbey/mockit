@@ -1,7 +1,6 @@
 import Joi from "joi";
 
 export const markInterestSchema = Joi.object().keys({
-  baseCharge: Joi.number().min(0).required(),
   serviceCharge: Joi.number().min(0).required(),
 });
 
@@ -11,6 +10,5 @@ export const allowedModelSchema = Joi.object().keys({
 });
 
 export const updateMarkInterestSchema = Joi.object().keys({
-  baseCharge: Joi.number().min(0),
   serviceCharge: Joi.number().min(0),
 });
