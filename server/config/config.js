@@ -11,6 +11,9 @@ const common = {
   averageSpeed: process.env.AVERAGE_SPEED,
   lawyerPassword: process.env.LAWYER_PASSWORD,
   oneTimeFee: process.env.ONE_TIME_FEE,
+  consultationFee: process.env.CONSULTATION_FEE,
+  lawyerConsultationPercentage: process.env.LAWYER_CONSULTATION_PERCENTAGE,
+  administrationPercentage: process.env.ADMINISTRATION_PERCENTAGE,
 };
 
 module.exports = {

@@ -30,6 +30,22 @@ export const generic = ({
 });
 
 export const NOTIFICATION_DATA = {
+  SMALL_CLAIM: {
+    MARK_INTEREST: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+      generic({
+        title: "Lawyer Indicated Interest",
+        body:
+          "A Lawyer has indicated interest to the small claim you created kindly check review, and assign the case",
+        sender_firebase_token,
+        sender_id,
+        status_id,
+        sender_name,
+        receiver_role: "user",
+        status: "small_claim",
+        view: "user_small_claim_detail_screen",
+        click_action: "lawyer_shown_interest",
+      }),
+  },
   RESPONSE: {
     CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token, ...rest }) =>
       generic({
@@ -89,13 +105,20 @@ export const EVENT_IDENTIFIERS = {
     EDITED: "REVIEW_EDITED",
     DELETED: "REVIEW_DELETED",
   },
+  MILESTONE: {
+    CREATED: "MILESTONE_CREATED",
+    PAID: "MILESTONE_PAID",
+    COMPLETED: "MILESTONE_COMPLETED",
+  },
   SMALL_CLAIM: {
     CREATED: "SMALL_CLAIM_CREATED",
     PAID: "SMALL_CLAIM_PAID",
-    ASSIGNED: "SMALL_CLAIM_ASSIGNED",
     MARK_INTEREST: "SMALL_CLAIM_MARK_INTEREST",
-    MARK_AS_IN_PROGRESS: "SMALL_CLAIM_MARK_AS_IN_PROGRESS",
-    MARK_AS_COMPLETED: "SMALL_CLAIM_MARK_AS_COMPLETED",
+    EDIT_INTEREST: "SMALL_CLAIM_EDIT_INTEREST",
+    CONSULTATION_COMPLETED: "SMALL_CLAIM_CONSULTATION_COMPLETED",
+    CANCELLED: "SMALL_CLAIM_CANCELLED",
+    COMPLETED: "SMALL_CLAIM_COMPLETED",
+    CLOSED: "SMALL_CLAIM_CLOSED",
   },
   RESPONSE: {
     CREATED: "RESPONSE_CREATED",

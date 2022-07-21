@@ -17,8 +17,7 @@
     "down:up": "npm run db:migrate:undo:all && npm run db:migrate && npm run seed:up",
     "seed:up": "npx sequelize-cli db:seed:all",
     "seed:down:prod": "export NODE_ENV=devDeployment && npx sequelize-cli db:seed:undo:all",
-    "seed:down": "npx sequelize-cli db:seed:undo:all",
-    "create:template": "node /Users/gbolahanolagunju/Documents/zapplawyer/server/utils/emailTemplates.js"
+    "seed:down": "npx sequelize-cli db:seed:undo:all"
   },
   "repository": {
     "type": "git",

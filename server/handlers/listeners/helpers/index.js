@@ -14,7 +14,7 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (
 ) => {
   logger(`${events} events has been received`);
 
-  const caseOfInterest = await models[data.modelType].findByPk(data.modelId, {
+  const caseOfInterest = await models.SmallClaim.findByPk(data.modelId, {
     include: [
       {
         model: models.User,
@@ -35,7 +35,7 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (
 
   const notice = [
     {
-      for: EVENT_IDENTIFIERS.SMALL_CLAIM[action],
+      for: EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST,
       ownerId: ownerProfile.id,
       content: JSON.stringify(
         NOTIFICATION_DATA.SMALL_CLAIM[action]({

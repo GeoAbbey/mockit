@@ -14,7 +14,7 @@ import { sendBulkTemplatedEmail } from "../../../utils/MailService";
 
 export const smallClaimEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, async (claim, decodedToken) => {
-    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED} has been received`);
+    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED} event has been received`);
 
     const notificationData = data.CREATED({
       sender_id: decodedToken.id,
@@ -43,7 +43,7 @@ export const smallClaimEvents = (eventEmitter) => {
   });
 
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, async (claim, decodedToken) => {
-    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST} has been received`);
+    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST} event has been received`);
 
     layerMarkInterestOrUpdateStatusForClaim(
       EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST,
@@ -53,34 +53,20 @@ export const smallClaimEvents = (eventEmitter) => {
     );
   });
 
-  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.ASSIGNED, async (claim, decodedToken) => {
-    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.ASSIGNED} has been received`);
+  eventEmitter.on(
+    EVENT_IDENTIFIERS.SMALL_CLAIM.EDIT_INTEREST,
+    async (updatedInterest, oldInterest, decodedToken) => {
+      logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.EDIT_INTEREST} event has been received`);
+      console.log(updatedInterest, oldInterest, decodedToken);
+    }
+  );
 
-    const lawyerToken = await UserService.findByPk(claim.assignedLawyerId);
-
-    const notificationData = data.ASSIGNED({
-      sender_id: decodedToken.id,
-      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
-      status_id: claim.id,
-      sender_firebase_token: decodedToken.firebaseToken,
-    });
-
-    notifyPeople({
-      event: EVENT_IDENTIFIERS.SMALL_CLAIM.ASSIGNED,
-      people: [lawyerToken],
-      notificationData,
-    });
-
-    sendTemplateEmail(
-      lawyerToken.dataValues.email,
-      TEMPLATE.SMALL_CLAIM_ASSIGNED,
-      { firstName: lawyerToken.dataValues.firstName },
-      claim.ticketId
-    );
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CLOSED, async (claim, decodedToken) => {
+    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.CLOSED} event has been received`);
   });
 
-  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED, async (claim, decodedToken) => {
-    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED} has been received`);
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.COMPLETED, async (claim, decodedToken) => {
+    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.COMPLETED} event  has been received`);
 
     const userToken = await UserService.findByPk(claim.ownerId);
 
@@ -92,7 +78,7 @@ export const smallClaimEvents = (eventEmitter) => {
     });
 
     notifyPeople({
-      event: EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED,
+      event: EVENT_IDENTIFIERS.SMALL_CLAIM.COMPLETED,
       people: [userToken],
       notificationData,
     });
@@ -118,13 +104,13 @@ export const smallClaimEvents = (eventEmitter) => {
   });
 
   eventEmitter.on(
-    EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS,
+    EVENT_IDENTIFIERS.SMALL_CLAIM.CONSULTATION_COMPLETED,
     async (claim, decodedToken) => {
-      logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS} has been received`);
+      logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.CONSULTATION_COMPLETED} event has been received`);
 
       const userToken = await UserService.findByPk(claim.ownerId);
 
-      const notificationData = data.MARK_AS_IN_PROGRESS({
+      const notificationData = data.CONSULTATION_COMPLETED({
         sender_id: decodedToken.id,
         sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
         status_id: claim.id,
@@ -132,7 +118,7 @@ export const smallClaimEvents = (eventEmitter) => {
       });
 
       notifyPeople({
-        event: EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS,
+        event: EVENT_IDENTIFIERS.SMALL_CLAIM.CONSULTATION_COMPLETED,
         people: [userToken],
         notificationData,
       });
@@ -147,7 +133,7 @@ export const smallClaimEvents = (eventEmitter) => {
   );
 
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, async (claim, decodedToken) => {
-    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS} has been received`);
+    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.PAID} event has been received`);
 
     const lawyerToken = await UserService.findByPk(claim.assignedLawyerId);
 
@@ -160,6 +146,32 @@ export const smallClaimEvents = (eventEmitter) => {
 
     notifyPeople({
       event: EVENT_IDENTIFIERS.SMALL_CLAIM.PAID,
+      people: [lawyerToken],
+      notificationData,
+    });
+
+    sendTemplateEmail(
+      lawyerToken.dataValues.email,
+      TEMPLATE.SMALL_CLAIM_ASSIGNED,
+      { firstName: lawyerToken.dataValues.firstName },
+      claim.ticketId
+    );
+  });
+
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CANCELLED, async (claim, decodedToken) => {
+    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.CANCELLED} event has been received`);
+
+    const lawyerToken = await UserService.findByPk(claim.assignedLawyerId);
+
+    const notificationData = data.CANCELLED({
+      sender_id: decodedToken.id,
+      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+      status_id: claim.id,
+      sender_firebase_token: decodedToken.firebaseToken,
+    });
+
+    notifyPeople({
+      event: EVENT_IDENTIFIERS.SMALL_CLAIM.CANCELLED,
       people: [lawyerToken],
       notificationData,
     });

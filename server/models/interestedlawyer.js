@@ -17,17 +17,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   InterestedLawyer.init(
     {
-      baseCharge: { type: DataTypes.NUMBER, allowNull: false },
       serviceCharge: { type: DataTypes.NUMBER, allowNull: false },
-      baseChargeInNaira: {
-        type: DataTypes.VIRTUAL,
-        get() {
-          return this.baseCharge;
-        },
-        set(value) {
-          throw new Error(`Do not try to set the baseChargeInNaira ${value}!`);
-        },
-      },
       serviceChargeInNaira: {
         type: DataTypes.VIRTUAL,
         get() {
@@ -37,7 +27,6 @@ module.exports = (sequelize, DataTypes) => {
           throw new Error(`Do not try to set the serviceChargeInNaira ${value}!`);
         },
       },
-      modelType: { type: DataTypes.STRING, allowNull: false },
       lawyerId: { type: DataTypes.UUID, allowNull: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       modelId: { type: DataTypes.UUID, allowNull: false },

@@ -1,15 +1,12 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("InterestedLawyers", {
+    await queryInterface.createTable("MileStones", {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-      },
-      serviceCharge: {
-        type: Sequelize.INTEGER,
       },
       lawyerId: {
         type: Sequelize.UUID,
@@ -19,20 +16,28 @@ module.exports = {
           as: "lawyerId",
         },
       },
-      meta: {
-        type: Sequelize.JSONB,
-      },
-      modelId: {
+      claimId: {
         type: Sequelize.UUID,
-        onDelete: "CASCADE",
         references: {
           model: "SmallClaims",
           key: "id",
-          as: "modelId",
+          as: "claimId",
         },
       },
-      modelType: {
+      title: {
         type: Sequelize.STRING,
+      },
+      status: {
+        type: Sequelize.STRING,
+      },
+      paid: {
+        type: Sequelize.BOOLEAN,
+      },
+      content: {
+        type: Sequelize.TEXT,
+      },
+      percentage: {
+        type: Sequelize.INTEGER,
       },
       createdAt: {
         allowNull: false,
@@ -45,6 +50,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("InterestedLawyers");
+    await queryInterface.dropTable("MileStones");
   },
 };

@@ -5,6 +5,8 @@ import SmallClaimsService from "../../small-claims/services/small-claims.service
 
 const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
+import milestoneService from "../../mileStone/service/milestone.service";
+import interestedLawyersServices from "../../interestedLawyers/services/interestedLawyers.services";
 
 const config = configOptions[env];
 const logger = debug("app:modules:payment:controllers:helpers");
@@ -14,7 +16,7 @@ const common = (args) => ({
   contractCode: config.payment_contract_code,
   currencyCode: "NGN",
   customerName: `${args.firstName} ${args.lastName}`,
-  paymentMethods: ["CARD", "ACCOUNT_TRANSFER"],
+  paymentMethods: ["CARD"],
   redirectUrl: args.callback_url,
   monnifyToken: args.monnifyToken,
   paymentReference: `ARC-${nanoid(12)}`,
@@ -43,6 +45,31 @@ export const subscriptionPay = (args) => {
     metaData: { id: args.id, type: args.type },
     amount: args.quantity * parseInt(config.costOfSubscriptionUnit),
     paymentDescription: `${args.quantity} of subscription has been purchased by user ${args.id}`,
+  };
+};
+
+export const mileStonePay = async (args) => {
+  if (!args.modelId) return { success: false, message: "modelId is required to prosecute payment" };
+
+  const theMileStone = await milestoneService.find(args.modelId);
+  if (!theMileStone) return { success: false, message: "mile stone can not be found" };
+
+  const { lawyerId, claimId, percentage } = theMileStone;
+
+  const { serviceCharge } = await interestedLawyersServices.findOne({ lawyerId, modelId: claimId });
+
+  const amountToPay =
+    ((serviceCharge + (config.administrationPercentage / 100) * serviceCharge) *
+      parseInt(percentage)) /
+    100;
+
+  console.log({ amountToPay });
+
+  return {
+    ...common(args),
+    metaData: { id: args.id, type: args.type, modelId: args.modelId },
+    amount: amountToPay,
+    paymentDescription: `of subscription has been purchased by user ${args.id}`,
   };
 };
 
@@ -95,16 +122,10 @@ export const singleSmallClaimPay = async (args) => {
       message: "The lawyer selected didn't mark interest in this particular small claim",
     };
 
-  const {
-    dataValues: { baseCharge, serviceCharge },
-  } = lawyerOfInterest;
-
-  const totalCostOfService = baseCharge + serviceCharge;
-
   return {
     ...common(args),
-    amount: totalCostOfService,
-    paymentDescription: `amount of ${totalCostOfService} is paid for single small claim with ${args.modelId} by user ${args.id}`,
+    amount: config.consultationFee,
+    paymentDescription: `amount of ${config.consultationFee} is paid for single small claim with ${args.modelId} by user ${args.id}`,
     metaData: {
       id: args.id,
       type: args.type,
