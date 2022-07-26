@@ -110,6 +110,8 @@ class PaymentsService {
   };
 
   async initializePayout(theModel) {
+    console.log({ theModel });
+
     debugLog(
       `Initializing payment for User with ID ${
         theModel.assignedLawyerId || theModel.lawyerId
@@ -138,7 +140,7 @@ class PaymentsService {
         );
 
         const thePayout = await PayOutServices.create({
-          ownerId: theModel.assignedLawyerId,
+          ownerId: theModel.assignedLawyerId || theModel.lawyerId,
           modelType: theModel.type,
           modelId: theModel.id,
           ticketId: theModel.ticketId,
@@ -159,14 +161,18 @@ class PaymentsService {
 
   async completePayout({ theModel, lawyerInfo }) {
     debugLog(
-      `Completing payment for User with ID ${theModel.assignedLawyerId} for ${theModel.type} with ID of ${theModel.id}`
+      `Completing payment for User with ID ${theModel.assignedLawyerId || theModel.lawyerId} for ${
+        theModel.type
+      } with ID of ${theModel.id}`
     );
-    const oldAccountInfo = await AccountInfosService.find(theModel.assignedLawyerId);
+    const oldAccountInfo = await AccountInfosService.find(
+      theModel.assignedLawyerId || theModel.lawyerId
+    );
 
     try {
       let result = await models.sequelize.transaction(async (t) => {
         const oldPayout = await PayOutServices.findOne({
-          ownerId: theModel.assignedLawyerId,
+          ownerId: theModel.assignedLawyerId || theModel.lawyerId,
           modelType: theModel.type,
           modelId: theModel.id,
           ticketId: theModel.ticketId,

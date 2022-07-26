@@ -10,7 +10,7 @@ import { data } from "./data";
 import { notifyAdminOfNoLawyer } from "../helpers/notifyAdminOfNoLawyer";
 import { updateModelInstance } from "../helpers/updateModelInstance";
 import { notifyPeople } from "../helpers/notifyPeople";
-import { sendBulkTemplatedEmail } from "../../../utils/MailService";
+import { sendBulkTemplatedEmail, sendTemplateEmail } from "../../../utils/MailService";
 
 export const smallClaimEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, async (claim, decodedToken) => {
@@ -89,18 +89,6 @@ export const smallClaimEvents = (eventEmitter) => {
       { firstName: userToken.dataValues.firstName },
       claim.ticketId
     );
-
-    const theData = {
-      ...claim.dataValues,
-      type: "smallClaim",
-    };
-
-    const initializedPayout = await PaymentsService.initializePayout(theData);
-
-    initializedPayout.success &&
-      schedule.completePayout({ theModel: theData, lawyerInfo: decodedToken });
-
-    console.log({ initializedPayout }, "🍅");
   });
 
   eventEmitter.on(
@@ -129,6 +117,18 @@ export const smallClaimEvents = (eventEmitter) => {
         { firstName: userToken.dataValues.firstName },
         claim.ticketId
       );
+
+      const theData = {
+        ...claim.dataValues,
+        type: "smallClaim",
+      };
+
+      const initializedPayout = await PaymentsService.initializePayout(theData);
+
+      initializedPayout.success &&
+        schedule.completePayout({ theModel: theData, lawyerInfo: decodedToken });
+
+      console.log({ initializedPayout }, "🍅");
     }
   );
 

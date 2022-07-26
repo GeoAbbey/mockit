@@ -19,6 +19,11 @@ class MileStonesService {
     return models.MileStone.findByPk(id, t);
   }
 
+  async findOne({ claimId }) {
+    debugLog(`looking for an mile stone with claimId ${claimId}`);
+    return models.MileStone.findOne({ where: { claimId } });
+  }
+
   async bulkCreate(MileStoneDTO) {
     debugLog("creating a series of mile stones");
     const lawyerId = MileStoneDTO[0].lawyerId;

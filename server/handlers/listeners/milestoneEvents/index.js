@@ -1,5 +1,6 @@
 import debug from "debug";
 import { EVENT_IDENTIFIERS } from "../../../constants";
+import { schedule } from "../../../jobs/scheduler";
 import paymentServices from "../../../modules/payment/services/payment.services";
 
 const logger = debug("app:handlers:listeners:MileStone-events");
@@ -7,22 +8,15 @@ const logger = debug("app:handlers:listeners:MileStone-events");
 export const mileStoneEvents = (eventEmitter) => {
   eventEmitter.on(
     `${EVENT_IDENTIFIERS.MILESTONE.CREATED}`,
-    async ({ data: mileStone, decodedToken }) => {
+    async ({ data: mileStones, decodedToken }) => {
       logger(`${EVENT_IDENTIFIERS.MILESTONE.CREATED} events has been received`);
     }
   );
 
   eventEmitter.on(
     `${EVENT_IDENTIFIERS.MILESTONE.COMPLETED}`,
-    async ({ data: mileStone, decodedToken }) => {
+    async ({ mileStone, decodedToken }) => {
       logger(`${EVENT_IDENTIFIERS.MILESTONE.COMPLETED} events has been received`);
-    }
-  );
-
-  eventEmitter.on(
-    `${EVENT_IDENTIFIERS.MILESTONE.PAID}`,
-    async ({ data: mileStone, decodedToken }) => {
-      logger(`${EVENT_IDENTIFIERS.MILESTONE.PAID} events has been received`);
 
       const theData = {
         ...mileStone.dataValues,
@@ -36,5 +30,10 @@ export const mileStoneEvents = (eventEmitter) => {
 
       console.log({ initializedPayout }, "🍅");
     }
+  );
+
+  eventEmitter.on(
+    `${EVENT_IDENTIFIERS.MILESTONE.PAID}`,
+    async ({ data: mileStone, decodedToken }) => {}
   );
 };
