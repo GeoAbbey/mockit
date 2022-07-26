@@ -36,6 +36,11 @@ module.exports = {
       content: {
         type: Sequelize.TEXT,
       },
+      ticketId: {
+        type: Sequelize.STRING,
+        unique: true,
+        allowNull: false,
+      },
       percentage: {
         type: Sequelize.INTEGER,
       },

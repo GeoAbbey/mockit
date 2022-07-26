@@ -14,12 +14,13 @@ export class MileStoneRoutes extends CommonRoutesConfig {
       .all([Authenticate.verifyToken(), wrapCatch(MileStonesController.checkAccessLawyer())])
       .post([
         middleware({ schema: createMileStoneSchema, property: "body" }),
+        wrapCatch(MileStonesController.mileStoneExits("create")),
         wrapCatch(MileStonesController.makeMileStones),
       ]);
 
     this.app
       .route(`${this.path}/milestones/:id`)
-      .all([Authenticate.verifyToken(), wrapCatch(MileStonesController.checkAccessLawyer())])
+      .all([Authenticate.verifyToken()])
       .put([
         middleware({ schema: validateUUID("id"), property: "params" }),
         middleware({ schema: modifyMileStoneSchema, property: "body" }),

@@ -46,25 +46,24 @@ class PayoutsController {
   };
 
   async getAmount(model) {
-    const mapper = {
-      invitation: config.invitationCost * (config.lawyerPercentage / 100),
-      response: config.costOfSubscriptionUnit * (config.lawyerPercentage / 100),
-      smallClaim: config.consultationFee * (config.lawyerConsultationPercentage / 100),
-      mileStone: calAmount(model),
-    };
-
     const calAmount = async (model) => {
       const { claimId, lawyerId, percentage } = model;
       const { serviceCharge } = await interestedLawyersServices.findOne({
         modelId: claimId,
         lawyerId,
       });
-    };
-    const oldClaim = await SmallClaimsService.find(modelId, true);
 
-    // const {
-    //   dataValues: { serviceCharge },
-    // } = oldClaim.dataValues.interestedLawyers.find((lawyer) => lawyer.lawyerId === lawyerId);
+      return serviceCharge * (percentage / 100);
+    };
+
+    const mapper = {
+      invitation: () => config.invitationCost * (config.lawyerPercentage / 100),
+      response: () => config.costOfSubscriptionUnit * (config.lawyerPercentage / 100),
+      smallClaim: () => config.consultationFee * (config.lawyerConsultationPercentage / 100),
+      mileStone: () => calAmount(model),
+    };
+
+    return mapper[model.type]();
   }
 
   async getHistory(req, res, next) {

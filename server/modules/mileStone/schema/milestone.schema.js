@@ -16,4 +16,5 @@ export const createMileStoneSchema = Joi.object().keys({
 export const modifyMileStoneSchema = Joi.object().keys({
   title: Joi.string(),
   content: Joi.string(),
+  status: Joi.string().valid("completed"),
 });
