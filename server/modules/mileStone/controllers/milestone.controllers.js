@@ -119,8 +119,8 @@ class mileStonesController {
 
     if (role === "user") {
       if (!filter.claimId) return next(createError(404, "small claims ID is required"));
-      const smallClaim = await smallClaimsService.find(claimId);
-      if (smallClaim.ownerId !== id)
+      const smallClaim = await smallClaimsService.find(filter.claimId);
+      if (!smallClaim || smallClaim.ownerId !== id)
         return next(createError(404, "You do not have permission to access this resource"));
     }
     const mileStones = await mileStonesService.findMany(filter, paginate);
@@ -200,6 +200,8 @@ class mileStonesController {
 
       commonOptions();
     }
+
+    commonOptions();
 
     req.filter = filter;
     return next();
