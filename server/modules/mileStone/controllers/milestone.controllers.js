@@ -1,8 +1,11 @@
 import debug from "debug";
 import createError from "http-errors";
 import { EVENT_IDENTIFIERS } from "../../../constants";
+import { paginate as pagination } from "../../helpers";
+import { Op } from "sequelize";
 
 import mileStonesService from "../service/milestone.service";
+import smallClaimsService from "../../small-claims/services/small-claims.service";
 
 const log = debug("app:mileStones-controller");
 class mileStonesController {
@@ -95,6 +98,45 @@ class mileStonesController {
     });
   }
 
+  getMileStone(req, res, next) {
+    const { oldMileStone } = req;
+
+    return res.status(200).send({
+      success: true,
+      message: "mileStone successfully retrieved",
+      mileStone: oldMileStone,
+    });
+  }
+
+  async getAllMileStones(req, res, next) {
+    log("getting all invitations");
+
+    const {
+      filter,
+      decodedToken: { role, id },
+      query: { paginate = {} },
+    } = req;
+
+    if (role === "user") {
+      if (!filter.claimId) return next(createError(404, "small claims ID is required"));
+      const smallClaim = await smallClaimsService.find(claimId);
+      if (smallClaim.ownerId !== id)
+        return next(createError(404, "You do not have permission to access this resource"));
+    }
+    const mileStones = await mileStonesService.findMany(filter, paginate);
+    const { offset, limit } = pagination(paginate);
+
+    return res.status(200).send({
+      success: true,
+      message: "mile stones successfully retrieved",
+      mileStones: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...mileStones,
+      },
+    });
+  }
+
   checkAccessLawyer(context) {
     return async (req, res, next) => {
       const {
@@ -117,6 +159,50 @@ class mileStonesController {
 
       return next();
     };
+  }
+
+  queryContext(req, res, next) {
+    const {
+      decodedToken: { role, id },
+      query,
+    } = req;
+
+    let filter = {};
+
+    const commonOptions = () => {
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
+      }
+
+      if (query.search && query.search.paid) {
+        filter = { ...filter, paid: query.search.paid };
+      }
+
+      if (query.search && query.search.claimId) {
+        filter = { ...filter, claimId: query.search.claimId };
+      }
+
+      if (query.search && query.search.status) {
+        filter = { ...filter, status: query.search.status };
+      }
+    };
+
+    if (role === "admin" || role === "super-admin") {
+      commonOptions();
+
+      if (query.search && query.search.lawyerId) {
+        filter = { ...filter, lawyerId: query.search.lawyerId };
+      }
+    }
+
+    if (role === "lawyer") {
+      filter = { ...filter, lawyerId: id };
+
+      commonOptions();
+    }
+
+    req.filter = filter;
+    return next();
   }
 }
 

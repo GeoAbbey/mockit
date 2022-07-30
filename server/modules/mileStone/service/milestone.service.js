@@ -2,6 +2,7 @@ import debug from "debug";
 import models from "../../../models";
 import { handleFalsy } from "../../../utils";
 import smallClaimsService from "../../small-claims/services/small-claims.service";
+import { paginate } from "../../helpers";
 
 const debugLog = debug("app:MileStones-service");
 
@@ -47,6 +48,15 @@ class MileStonesService {
       message: "mile stones successfully created",
       mileStones,
     };
+  }
+
+  async findMany(filter, pageDetails) {
+    debugLog(`retrieving milestones with the following filter ${JSON.stringify(filter)}`);
+    return models.MileStone.findAndCountAll({
+      order: [["createdAt", "DESC"]],
+      where: { ...filter },
+      ...paginate(pageDetails),
+    });
   }
 
   async update(id, MileStoneDTO, oldMileStone, t = undefined) {
