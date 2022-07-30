@@ -11,22 +11,34 @@ export class MileStoneRoutes extends CommonRoutesConfig {
   configureRoutes() {
     this.app
       .route(`${this.path}/milestones`)
-      .all([Authenticate.verifyToken(), wrapCatch(MileStonesController.checkAccessLawyer())])
+      .all([Authenticate.verifyToken()])
       .post([
+        wrapCatch(MileStonesController.checkAccessLawyer()),
         middleware({ schema: createMileStoneSchema, property: "body" }),
         wrapCatch(MileStonesController.mileStoneExits("create")),
         wrapCatch(MileStonesController.makeMileStones),
+      ])
+      .get([
+        wrapCatch(MileStonesController.queryContext),
+        wrapCatch(MileStonesController.getAllMileStones),
       ]);
 
     this.app
       .route(`${this.path}/milestones/:id`)
-      .all([Authenticate.verifyToken()])
-      .put([
+      .all([
+        Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
+      ])
+      .put([
         middleware({ schema: modifyMileStoneSchema, property: "body" }),
         wrapCatch(MileStonesController.mileStoneExits()),
         wrapCatch(MileStonesController.checkAccessLawyer("modify")),
         wrapCatch(MileStonesController.modifyMileStone),
+      ])
+      .get([
+        wrapCatch(MileStonesController.mileStoneExits()),
+        wrapCatch(MileStonesController.checkAccessLawyer("modify")),
+        wrapCatch(MileStonesController.getMileStone),
       ]);
 
     return this.app;
