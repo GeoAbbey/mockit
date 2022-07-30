@@ -83,7 +83,7 @@ class SmallClaimsService {
               model: models.InterestedLawyer,
               as: "interestedLawyers",
               where: { modelId: id },
-              attributes: ["serviceCharge", "lawyerId", "serviceChargeInNaira"],
+              attributes: ["serviceCharge", "lawyerId", "serviceChargeInNaira", "id"],
               required: false,
               include: [
                 {

@@ -14,6 +14,8 @@ const common = {
   consultationFee: process.env.CONSULTATION_FEE,
   lawyerConsultationPercentage: process.env.LAWYER_CONSULTATION_PERCENTAGE,
   administrationPercentage: process.env.ADMINISTRATION_PERCENTAGE,
+  smsApiKey: process.env.SMS_API_KEY,
+  smsBaseUrl: process.env.SMS_BASE_URL,
 };
 
 module.exports = {
