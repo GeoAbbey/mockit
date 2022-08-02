@@ -1,14 +1,26 @@
-import { applicationMappers } from "./mappers";
+import dotenv from "dotenv";
+import { applicationMappers } from "./mappers.js";
+
+dotenv.config();
 
 const config = {
-  smsApiKey: "7662274f43401f25d0574769d4d32baf-06b2fa5f-746f-44b9-bbf5-b8c633b5fc5a",
-  smsBaseUrl: "https://89nenr.api.infobip.com",
+  smsApiKey: process.env.SMS_API_KEY,
+  smsBaseUrl: process.env.SMS_BASE_URL,
 };
 
 export const smsService = (request) => ({
   async makeApplication(data) {
     return this.requestBuilder(`${config.smsBaseUrl}/2fa/2/applications`, data, "POST");
   },
+
+  async send2FAPin(data) {
+    return this.requestBuilder(`${config.smsBaseUrl}/2fa/2/pin`, data, "POST");
+  },
+
+  async verifyPhone(data, pinId) {
+    return this.requestBuilder(`${config.smsBaseUrl}/2fa/2/pin/${pinId}/verify`, data, "POST");
+  },
+
   async makeMessage(data) {
     return this.requestBuilder(
       `${config.smsBaseUrl}/2fa/2/applications/${applicationMappers.verifyPhoneId}/messages`,
@@ -16,6 +28,7 @@ export const smsService = (request) => ({
       "POST"
     );
   },
+
   async requestBuilder(url, data, method) {
     const headers = {
       Authorization: `App ${config.smsApiKey}`,

@@ -11,6 +11,7 @@ import {
   changePasswordSchema,
   createAnAdminSchema,
   adminUpdateUser,
+  validPIN,
 } from "./schema/users.schema";
 import {
   middleware,
@@ -67,6 +68,11 @@ export class UserRoutes extends CommonRoutesConfig {
       .post([wrapCatch(UsersController.generateNewOtp)]);
 
     this.app
+      .route(`${this.path}/users/new-pin`)
+      .all([UsersController.userExistMiddleware()])
+      .post([wrapCatch(UsersController.generateNewPin)]);
+
+    this.app
       .route(`${this.path}/users/verify`)
       .all([Authenticate.verifyToken("verify"), UsersController.userExistMiddleware()])
       .patch([
@@ -79,8 +85,8 @@ export class UserRoutes extends CommonRoutesConfig {
     this.app
       .route(`${this.path}/users/verify-phone`)
       .all([Authenticate.verifyToken("verify"), UsersController.userExistMiddleware()])
-      .patch([
-        middleware({ schema: validOTP, property: "body" }),
+      .put([
+        middleware({ schema: validPIN, property: "body" }),
         AccessControl.checkPermissionUserOrLawyerAccess(),
         wrapCatch(UsersController.verifyPhoneNumber),
       ]);
