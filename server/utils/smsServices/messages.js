@@ -15,5 +15,5 @@ export const messages = {
   },
 };
 
-const messageID = SMSService.makeApplication(messages.verifyPhoneNumber);
+const messageID = SMSService.makeMessage(messages.verifyPhoneNumber);
 console.log({ messageID });

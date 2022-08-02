@@ -73,7 +73,10 @@ module.exports = (sequelize, DataTypes) => {
           isSuspended: false,
           hasAgreedToTerms: false,
           isEmailVerified: false,
-          isPhoneVerified: false,
+          isPhone: {
+            pinId: null,
+            verified: false,
+          },
           notification: {
             email: true,
             phone: true,

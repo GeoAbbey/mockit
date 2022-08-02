@@ -67,6 +67,10 @@ export const validOTP = Joi.object().keys({
   otp: Joi.string().required(),
 });
 
+export const validPIN = Joi.object().keys({
+  pin: Joi.string().required(),
+});
+
 export const validOtpAndPassword = Joi.object().keys({
   otp: Joi.number().required(),
   newPassword: Joi.string().required(),

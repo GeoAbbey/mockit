@@ -91,9 +91,15 @@ class UsersService {
           isEmailVerified: UserDTO.settings
             ? handleFalsy(UserDTO.settings.isEmailVerified, settings.isEmailVerified)
             : settings.isEmailVerified,
-          isPhoneVerified: UserDTO.settings
-            ? handleFalsy(UserDTO.settings.isPhoneVerified, settings.isPhoneVerified)
-            : settings.isPhoneVerified,
+          isPhone: {
+            verified:
+              UserDTO.settings && UserDTO.settings.isPhone
+                ? handleFalsy(UserDTO.settings.isPhone.verified, settings.isPhone.verified)
+                : settings.isPhone.verified,
+            pinId:
+              (UserDTO.settings && UserDTO.settings.isPhone && UserDTO.settings.isPhone.pinId) ||
+              settings.isPhone.pinId,
+          },
           hasAgreedToTerms: UserDTO.settings
             ? handleFalsy(UserDTO.settings.hasAgreedToTerms, settings.hasAgreedToTerms)
             : settings.hasAgreedToTerms,
