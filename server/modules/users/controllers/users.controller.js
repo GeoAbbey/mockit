@@ -211,7 +211,7 @@ class UsersController {
 
     const [, [User]] = await UsersService.update(
       id,
-      { settings: { isPhone: { verified: response.verified } } },
+      { settings: { isEmailVerified: true, isPhone: { verified: response.verified } } },
       req.user
     );
 

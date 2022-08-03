@@ -20,26 +20,26 @@ export const userEvents = (eventEmitter) => {
     logger(`${EVENT_IDENTIFIERS.USER.CREATED} events has been received`);
 
     const { email, otp, id, firstName, role, phone } = user.dataValues;
-    if (role === "user")
-      sendTemplateEmail(email, TEMPLATE.USER_SIGNUP, {
-        firstName,
-        otp: otp.value,
-        email,
-      });
+    // if (role === "user")
+    //   sendTemplateEmail(email, TEMPLATE.USER_SIGNUP, {
+    //     firstName,
+    //     otp: otp.value,
+    //     email,
+    //   });
 
-    if (role === "lawyer")
-      sendTemplateEmail(email, TEMPLATE.LAWYER_SIGNUP, {
-        firstName,
-        otp: otp.value,
-        email,
-      });
+    // if (role === "lawyer")
+    //   sendTemplateEmail(email, TEMPLATE.LAWYER_SIGNUP, {
+    //     firstName,
+    //     otp: otp.value,
+    //     email,
+    //   });
 
-    if (role === "admin")
-      sendTemplateEmail(email, TEMPLATE.USER_SIGNUP, {
-        firstName,
-        otp: config.lawyerPassword,
-        email,
-      });
+    // if (role === "admin")
+    //   sendTemplateEmail(email, TEMPLATE.USER_SIGNUP, {
+    //     firstName,
+    //     otp: config.lawyerPassword,
+    //     email,
+    //   });
 
     AccountInfosService.create({ id });
     LocationService.findOrCreate({ where: { id }, defaults: { id } });
