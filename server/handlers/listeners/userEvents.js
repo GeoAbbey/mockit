@@ -49,7 +49,6 @@ export const userEvents = (eventEmitter) => {
       to: phone,
       applicationId: applicationMappers.verifyPhoneId,
       messageId: messageTemplateMappers.verifyPhoneMessageId,
-      from: "App Rescue",
     });
 
     userService.update(id, { settings: { isPhone: { pinId } } }, user.dataValues);
