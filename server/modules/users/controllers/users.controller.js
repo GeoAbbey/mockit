@@ -196,7 +196,7 @@ class UsersController {
 
   async verifyPhoneNumber(req, res, next) {
     const {
-      body: { pin },
+      body: { otp },
       user: {
         id,
         settings: {
@@ -206,7 +206,7 @@ class UsersController {
     } = req;
     log(`verifying pin details of user with id ${id}`);
 
-    const { response } = await SMSService.verifyPhone({ pin }, pinId);
+    const { response } = await SMSService.verifyPhone({ pin: otp }, pinId);
     if (!response.verified) return next(createError(400, "Something went wrong, try again later"));
 
     const [, [User]] = await UsersService.update(
