@@ -229,6 +229,8 @@ class PaymentsService {
     return {
       invitationCost: config.invitationCost,
       costOfSubscriptionUnit: config.costOfSubscriptionUnit,
+      administrationPercentage: config.administrationPercentage,
+      consultationFee: config.consultationFee,
     };
   }
 
