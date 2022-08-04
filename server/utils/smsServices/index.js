@@ -55,7 +55,11 @@ export const smsService = (request) => ({
       console.log({ response });
       return { success: true, response: response.data };
     } catch (error) {
-      console.log({ error }, error.response, "🚎");
+      console.log(
+        { error: error.response },
+        error.response.data.requestError.serviceException,
+        "🚎"
+      );
       return { success: false, response: error };
     }
   },

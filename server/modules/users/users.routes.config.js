@@ -78,7 +78,8 @@ export class UserRoutes extends CommonRoutesConfig {
       .patch([
         middleware({ schema: validOTP, property: "body" }),
         AccessControl.checkPermissionUserOrLawyerAccess(),
-        wrapCatch(UsersController.verifyPhoneNumber),
+        wrapCatch(UsersController.validateOTP),
+        wrapCatch(UsersController.verifyEmail),
       ]);
 
     this.app
