@@ -34,10 +34,11 @@ class mileStonesController {
         )
       );
 
-    const compileMileStones = mileStones.map((mileStone) => ({
+    const compileMileStones = mileStones.map((mileStone, index) => ({
       ...mileStone,
       claimId,
       lawyerId,
+      order: index + 1,
     }));
 
     log(`creating a new mileStone by lawyer with id ${lawyerId}`);
