@@ -63,8 +63,6 @@ export const mileStonePay = async (args) => {
       parseInt(percentage)) /
     100;
 
-  console.log({ amountToPay });
-
   return {
     ...common(args),
     metaData: { id: args.id, type: args.type, modelId: args.modelId },

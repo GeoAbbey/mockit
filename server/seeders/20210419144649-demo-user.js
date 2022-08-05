@@ -32,7 +32,10 @@ module.exports = {
             isSuspended: false,
             hasAgreedToTerms: false,
             isEmailVerified: true,
-            isPhoneVerified: false,
+            isPhone: {
+              pinId: null,
+              verified: true,
+            },
             oneTimeSubscription: false,
             notification: {
               email: true,

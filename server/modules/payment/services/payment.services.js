@@ -20,6 +20,7 @@ import configOptions from "../../../config/config";
 import { EVENT_IDENTIFIERS } from "../../../constants";
 import milestoneService from "../../mileStone/service/milestone.service";
 import { exceptionHandler } from "../../../utils/exceptionHandler";
+import interestedLawyersServices from "../../interestedLawyers/services/interestedLawyers.services";
 
 const config = configOptions[env];
 const getAmount = PayoutsController.getAmount;
@@ -243,6 +244,7 @@ class PaymentsService {
       smallClaim: this.handleSmallClaim,
       cooperate: this.handleCooperateTransfer,
       subscriptionCount: this.handleSubscriptionCount,
+      mileStone: this.handleMileStone,
     };
 
     if (PaymentDTO.code) return this.handleCooperate(PaymentDTO, eventEmitter, decodedToken);
@@ -258,13 +260,13 @@ class PaymentsService {
       singleInvitation: this.handleSingleInvitation,
       wallet: this.handleWalletPayIn,
       cooperate: this.handleCooperatePayIn,
-      mileStone: this.handleMileStonePayIn,
+      mileStone: this.handleSingleMileStonePayIn,
     };
 
     return mapper[data.metaData.type]({ data, eventEmitter, decodedToken });
   }
 
-  handleMileStonePayIn = async ({ data, eventEmitter, decodedToken }) => {
+  handleSingleMileStonePayIn = async ({ data, eventEmitter, decodedToken }) => {
     debugLog("processing a payment handleMileStonePayIn");
     let result = await models.sequelize.transaction(async (t) => {
       const { metaData: metadata, amountPaid: amount, transactionReference: reference } = data;
@@ -286,6 +288,15 @@ class PaymentsService {
         metadata.modelId,
         { paid: true, status: "in-progress" },
         oldMileStone,
+        { transaction: t }
+      );
+
+      const oldClaim = await SmallClaimsService.find(oldMileStone.claimId);
+
+      const [, [paidClaim]] = await SmallClaimsService.update(
+        oldMileStone.claimId,
+        { status: "engagement" },
+        oldClaim,
         { transaction: t }
       );
 
@@ -704,6 +715,97 @@ class PaymentsService {
       return error;
     }
   }
+
+  async handleMileStone(args, emitter, decodedToken) {
+    debugLog("I am handling payment for mile stone", args);
+    try {
+      let result = await models.sequelize.transaction(async (t) => {
+        const oldMileStone = await milestoneService.find(args.modelId, null, { transaction: t });
+
+        if (oldMileStone.dataValues.paid)
+          throw new exceptionHandler({
+            message: `The mile stone has already been paid for`,
+            success: false,
+            status: 400,
+            name: "paymentExceptionHandler",
+          });
+
+        const { lawyerId, claimId, percentage } = oldMileStone;
+
+        const { serviceCharge } = await interestedLawyersServices.findOne({
+          lawyerId,
+          modelId: claimId,
+        });
+
+        const amountToPay =
+          ((serviceCharge + (config.administrationPercentage / 100) * serviceCharge) *
+            parseInt(percentage)) /
+          100;
+
+        const oldAccountInfo = await AccountInfosService.find(args.id, { transaction: t });
+
+        if (oldAccountInfo.walletAmount < amountToPay) {
+          return {
+            message: "you do not have sufficient funds to prosecute this transaction",
+            success: false,
+          };
+        }
+
+        const oldClaim = await SmallClaimsService.find(claimId);
+
+        const [, [paidClaim]] = await SmallClaimsService.update(
+          claimId,
+          { status: "engagement" },
+          oldClaim,
+          { transaction: t }
+        );
+
+        const newAccountInfo = await AccountInfosService.update(
+          args.id,
+          {
+            wallet: {
+              info: true,
+              operation: "deduct",
+            },
+            walletAmount: amountToPay,
+          },
+          oldAccountInfo,
+          { transaction: t }
+        );
+
+        const [, [paidMileStone]] = await milestoneService.update(
+          args.modelId,
+          { paid: true, status: "in-progress" },
+          oldMileStone,
+          { transaction: t }
+        );
+
+        const receipt = await TransactionService.create(
+          {
+            ownerId: args.id,
+            performedBy: args.id,
+            modelType: "mileStone",
+            modelId: args.modelId,
+            amount: amountToPay,
+          },
+          { transaction: t }
+        );
+
+        emitter.emit(EVENT_IDENTIFIERS.MILESTONE.PAID, {
+          mileStone: paidMileStone,
+          decodedToken,
+        });
+
+        return { success: true, service: paidMileStone };
+      });
+
+      return result;
+    } catch (error) {
+      console.log({ error }, "🐒");
+      return error;
+    }
+  }
+
   async handleInvitation(args, emitter, decodedToken) {
     debugLog("I am handling payment for invitations", args);
     try {
@@ -717,11 +819,6 @@ class PaymentsService {
           };
         }
         const oldAccountInfo = await AccountInfosService.find(args.id, { transaction: t });
-
-        debugLog({
-          oldAccountInfo: oldAccountInfo.walletAmount,
-          invitationCost: config.invitationCost,
-        });
 
         if (oldAccountInfo.walletAmount < config.invitationCost) {
           return {
@@ -948,7 +1045,7 @@ class PaymentsService {
               info: true,
               operation: "deduct",
             },
-            walletAmount: totalCostOfService,
+            walletAmount: parseInt(config.consultationFee),
           },
           oldAccountInfo,
           { transaction: t }
@@ -956,7 +1053,7 @@ class PaymentsService {
 
         const [, [paidSmallClaim]] = await SmallClaimsService.update(
           args.modelId,
-          { paid: true, assignedLawyerId: args.lawyerId },
+          { paid: true, assignedLawyerId: args.lawyerId, status: "consultation_in_progress" },
           oldClaim,
           { transaction: t }
         );
@@ -967,14 +1064,14 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "smallClaim",
             modelId: args.modelId,
-            amount: totalCostOfService,
+            amount: parseInt(config.consultationFee),
           },
           { transaction: t }
         );
 
         emitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken);
 
-        return { success: true, claim: paidSmallClaim };
+        return { success: true, service: paidSmallClaim };
       });
 
       return result;
