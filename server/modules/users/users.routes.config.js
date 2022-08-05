@@ -144,7 +144,7 @@ export class UserRoutes extends CommonRoutesConfig {
         middleware({ schema: adminUpdateUser, property: "body" }),
         wrapCatch(UsersController.updateUser),
       ])
-      .get([wrapCatch(UsersController.getUser)]);
+      .get([UsersController.userExistMiddleware(), wrapCatch(UsersController.getUser)]);
 
     this.app
       .route(`${this.path}/users`)
