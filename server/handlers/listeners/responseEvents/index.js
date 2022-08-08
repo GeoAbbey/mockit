@@ -164,6 +164,7 @@ export const responseEvents = (eventEmitter) => {
         },
         userDetails
       );
+      console.log({ coordinates }, "🍋");
 
       //return all the lawyers that are online and aren't busy within the given radius
       const results = await LocationServices.findLawyersWithinRadius({
