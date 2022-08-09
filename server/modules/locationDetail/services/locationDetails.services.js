@@ -45,11 +45,13 @@ class LocationsService {
     };
 
     return models.sequelize.query(
-      `UPDATE "LocationDetails" SET "online"=${final.online},"location"=${final.location},"room"=${
-        final.room
-      },"currentResponseId"=${final.currentResponseId},"socketId"=${final.socketId},"assigningId"=${
+      `UPDATE "LocationDetails" SET "online"=${final.online},"location"='${
+        final.location
+      }',"room"='${final.room}',"currentResponseId"='${final.currentResponseId}',"socketId"='${
+        final.socketId
+      }',"assigningId"='${
         final.assigningId
-      },"updatedAt"=${Date.now()} WHERE "id" = ${id} RETURNING "id","socketId","speed","currentResponseId","online","meta","location","assigningId","room","createdAt","updatedAt"`,
+      }',"updatedAt"=${Date.now()} WHERE "id" = '${id}' RETURNING "id","socketId","speed","currentResponseId","online","meta","location","assigningId","room","createdAt","updatedAt"`,
       {
         type: QueryTypes.SELECT,
       }
