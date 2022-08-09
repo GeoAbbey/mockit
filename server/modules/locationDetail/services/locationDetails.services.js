@@ -35,16 +35,24 @@ class LocationsService {
   async update(id, LocationDTO, oldLocation) {
     const { location, online, assigningId, socketId, currentResponseId, room } = oldLocation;
 
-    return models.LocationDetail.update(
+    const final = {
+      online: handleFalsy(LocationDTO.online, online),
+      location: LocationDTO.location || location,
+      room: handleFalsy(LocationDTO.room, room),
+      currentResponseId: handleFalsy(LocationDTO.currentResponseId, currentResponseId),
+      socketId: LocationDTO.socketId || socketId,
+      assigningId: handleFalsy(LocationDTO.assigningId, assigningId),
+    };
+
+    return models.sequelize.query(
+      `UPDATE "LocationDetails" SET "online"=${final.online},"location"=${final.location},"room"=${
+        final.room
+      },"currentResponseId"=${final.currentResponseId},"socketId"=${final.socketId},"assigningId"=${
+        final.assigningId
+      },"updatedAt"=${Date.now()} WHERE "id" = ${id} RETURNING "id","socketId","speed","currentResponseId","online","meta","location","assigningId","room","createdAt","updatedAt"`,
       {
-        online: handleFalsy(LocationDTO.online, online),
-        location: LocationDTO.location || location,
-        room: handleFalsy(LocationDTO.room, room),
-        currentResponseId: handleFalsy(LocationDTO.currentResponseId, currentResponseId),
-        socketId: LocationDTO.socketId || socketId,
-        assigningId: handleFalsy(LocationDTO.assigningId, assigningId),
-      },
-      { where: { id }, returning: true }
+        type: QueryTypes.SELECT,
+      }
     );
   }
 
