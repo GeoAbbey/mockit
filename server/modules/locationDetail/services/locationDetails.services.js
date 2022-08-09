@@ -51,7 +51,7 @@ class LocationsService {
         final.socketId
       }',"assigningId"='${
         final.assigningId
-      }',"updatedAt"=${Date.now()} WHERE "id" = '${id}' RETURNING "id","socketId","speed","currentResponseId","online","meta","location","assigningId","room","createdAt","updatedAt"`,
+      }',"updatedAt"='${Date.now()}' WHERE "id" = '${id}' RETURNING "id","socketId","speed","currentResponseId","online","meta","location","assigningId","room","createdAt","updatedAt"`,
       {
         type: QueryTypes.SELECT,
       }
