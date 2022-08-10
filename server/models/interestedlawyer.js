@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.SmallClaim, { foreignKey: "modelId" });
+      this.belongsTo(models.SmallClaim, { foreignKey: "claimId" });
       this.belongsTo(models.User, { as: "profile", foreignKey: "lawyerId" });
     }
   }
@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       lawyerId: { type: DataTypes.UUID, allowNull: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
-      modelId: { type: DataTypes.UUID, allowNull: false },
+      claimId: { type: DataTypes.UUID, allowNull: false },
       id: {
         type: DataTypes.UUID,
         primaryKey: true,

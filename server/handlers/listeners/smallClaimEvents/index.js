@@ -61,8 +61,30 @@ export const smallClaimEvents = (eventEmitter) => {
     }
   );
 
-  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CLOSED, async (claim, decodedToken) => {
-    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.CLOSED} event has been received`);
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CANCELLED, async (claim, decodedToken) => {
+    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.CANCELLED} event has been received`);
+
+    const userToken = await UserService.findByPk(claim.ownerId);
+
+    const notificationData = data.CANCELLED({
+      sender_id: decodedToken.id,
+      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+      status_id: claim.id,
+      sender_firebase_token: decodedToken.firebaseToken,
+    });
+
+    notifyPeople({
+      event: EVENT_IDENTIFIERS.SMALL_CLAIM.CANCELLED,
+      people: [userToken],
+      notificationData,
+    });
+
+    sendTemplateEmail(
+      userToken.dataValues.email,
+      TEMPLATE.SMALL_CLAIM_ASSIGNED,
+      { firstName: userToken.dataValues.firstName },
+      claim.ticketId
+    );
   });
 
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.COMPLETED, async (claim, decodedToken) => {
@@ -158,12 +180,12 @@ export const smallClaimEvents = (eventEmitter) => {
     );
   });
 
-  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CANCELLED, async (claim, decodedToken) => {
-    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.CANCELLED} event has been received`);
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CLOSED, async (claim, decodedToken) => {
+    logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.CLOSED} event has been received`);
 
     const lawyerToken = await UserService.findByPk(claim.assignedLawyerId);
 
-    const notificationData = data.CANCELLED({
+    const notificationData = data.CLOSED({
       sender_id: decodedToken.id,
       sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
       status_id: claim.id,
@@ -171,7 +193,7 @@ export const smallClaimEvents = (eventEmitter) => {
     });
 
     notifyPeople({
-      event: EVENT_IDENTIFIERS.SMALL_CLAIM.CANCELLED,
+      event: EVENT_IDENTIFIERS.SMALL_CLAIM.CLOSED,
       people: [lawyerToken],
       notificationData,
     });

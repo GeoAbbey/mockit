@@ -48,7 +48,7 @@ class mileStonesController {
 
     eventEmitter.emit(EVENT_IDENTIFIERS.MILESTONE.CREATED, {
       decodedToken: req.decodedToken,
-      theMileStones: mileStones,
+      theMileStones,
     });
 
     return res.status(201).send(theMileStones);

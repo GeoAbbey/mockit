@@ -72,35 +72,37 @@ class SmallClaimsService {
                 "phone",
               ],
               required: false,
+              include: [
+                {
+                  model: models.InterestedLawyer,
+                  as: "interest",
+                  where: { claimId: id },
+                  attributes: ["serviceCharge", "lawyerId", "serviceChargeInNaira", "id"],
+                  required: false,
+                  include: [
+                    {
+                      model: models.User,
+                      as: "profile",
+                      attributes: [
+                        "firstName",
+                        "lastName",
+                        "email",
+                        "profilePic",
+                        "phone",
+                        "id",
+                        "firebaseToken",
+                        "description",
+                      ],
+                    },
+                  ],
+                },
+              ],
             },
             {
               model: models.Review,
               as: "reviews",
               where: { modelType: "SmallClaim", modelId: id },
               required: false,
-            },
-            {
-              model: models.InterestedLawyer,
-              as: "interestedLawyers",
-              where: { modelId: id },
-              attributes: ["serviceCharge", "lawyerId", "serviceChargeInNaira", "id"],
-              required: false,
-              include: [
-                {
-                  model: models.User,
-                  as: "profile",
-                  attributes: [
-                    "firstName",
-                    "lastName",
-                    "email",
-                    "profilePic",
-                    "phone",
-                    "id",
-                    "firebaseToken",
-                    "description",
-                  ],
-                },
-              ],
             },
           ],
         },
@@ -111,32 +113,46 @@ class SmallClaimsService {
   }
 
   async findMany(filter, pageDetails) {
-    debugLog(`retrieving small claims with the following filter ${JSON.stringify(filter)}`);
-
-    const { limit, offset } = paginate(pageDetails);
-
-    let params = filter ? `WHERE ${filter}` : "";
-
-    const [data] = await models.sequelize.query(
-      `SELECT count("SmallClaims"."id") AS "count" FROM "SmallClaims" AS "SmallClaims" LEFT OUTER JOIN "Users" AS "ownerProfile" ON "SmallClaims"."ownerId" = "ownerProfile"."id" AND ("ownerProfile"."deletedAt" IS NULL) LEFT OUTER JOIN "Users" AS "lawyerProfile" ON "SmallClaims"."assignedLawyerId" = "lawyerProfile"."id" AND ("lawyerProfile"."deletedAt" IS NULL) ${params}`,
-      {
-        nest: true,
-        type: QueryTypes.SELECT,
-      }
-    );
-
-    const rows = await models.sequelize.query(
-      `SELECT "SmallClaims".claim, "SmallClaims"."createdAt","SmallClaims"."paid","SmallClaims"."ticketId","SmallClaims"."status","SmallClaims"."venue","SmallClaims"."updatedAt", "SmallClaims".amount, "SmallClaims"."assignedLawyerId", "SmallClaims".attachments, "SmallClaims".id, "SmallClaims"."ownerId","ownerProfile"."lastName" AS "ownerProfile.lastName","ownerProfile"."firstName" AS "ownerProfile.firstName", "ownerProfile"."profilePic" AS "ownerProfile.profilePic", "ownerProfile".email AS "ownerProfile.email","ownerProfile".phone AS "ownerProfile.phone", "ownerProfile"."firebaseToken" AS "ownerProfile.firebaseToken","lawyerProfile"."lastName" AS "lawyerProfile.lastName", "lawyerProfile"."firstName" AS "lawyerProfile.firstName", "lawyerProfile"."profilePic" AS "lawyerProfile.profilePic", "lawyerProfile".email AS "lawyerProfile.email","lawyerProfile".phone AS "lawyerProfile.phone", "lawyerProfile"."firebaseToken" AS "lawyerProfile.firebaseToken", (SELECT AVG("Reviews".rating) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.averageRating", (SELECT COUNT(id) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.noOfReviews" FROM "SmallClaims" LEFT OUTER JOIN "Users" AS "lawyerProfile" ON "SmallClaims"."assignedLawyerId" = "lawyerProfile".id LEFT OUTER JOIN "Users" AS "ownerProfile" ON "SmallClaims"."ownerId" = "ownerProfile".id ${params} ORDER BY "SmallClaims"."createdAt" DESC LIMIT ${limit} OFFSET ${offset};`,
-      {
-        nest: true,
-        type: QueryTypes.SELECT,
-      }
-    );
-
-    return {
-      count: parseInt(data.count),
-      rows,
-    };
+    debugLog(`retrieving invitations with the following filter ${JSON.stringify(filter)}`);
+    return models.SmallClaim.findAndCountAll({
+      order: [["createdAt", "DESC"]],
+      where: { ...filter },
+      ...paginate(pageDetails),
+      include: [
+        {
+          model: models.User,
+          as: "ownerProfile",
+          attributes: [
+            "firstName",
+            "lastName",
+            "email",
+            "profilePic",
+            "firebaseToken",
+            "phone",
+            "sumOfReviews",
+            "numOfReviews",
+            "description",
+          ],
+          required: false,
+        },
+        {
+          model: models.User,
+          as: "lawyerProfile",
+          attributes: [
+            "firstName",
+            "lastName",
+            "email",
+            "profilePic",
+            "firebaseToken",
+            "phone",
+            "sumOfReviews",
+            "numOfReviews",
+            "description",
+          ],
+          required: false,
+        },
+      ],
+    });
   }
 
   async update(id, smallClaimDTO, oldSmallClaim, t = undefined) {

@@ -3,45 +3,43 @@ import { generic } from "../../../constants";
 export const data = {
   CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
     generic({
-      title: "Withdrawal Initiated",
-      body: "A withdrawal has been initiated kindly approve this transaction for disbursement",
+      title: "Milestones Created",
+      body: "Milestones has been created for your small claim, kindly make payment",
       sender_firebase_token,
       sender_id,
       status_id,
       sender_name,
-      receiver_role: "admin",
-      view: "withdrawal_initiated_screen",
-      status: "withdrawal_initiated",
-      click_action: "new_withdrawal_initiated",
+      receiver_role: "user",
+      view: "user_mile_stone_created",
+      status: "milestone",
+      click_action: "milestone_created",
     }),
 
   PAID: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
     generic({
-      title: "Withdrawal Authorized",
-      body:
-        "Withdrawal has been authorized and funds should be available in your account shortly, kindly reach out to support in case there is any delays",
+      title: "Milestone Paid",
+      body: "Milestones has been created for your small claim, lawyer will proceed with execution",
       sender_firebase_token,
       sender_id,
       status_id,
       sender_name,
       receiver_role: "lawyer",
-      view: "withdrawal_authorized_screen",
-      status: "withdrawal_authorized",
-      click_action: "new_withdrawal_authorized",
+      view: "lawyer_mile_stone_paid",
+      status: "milestone",
+      click_action: "milestone_paid",
     }),
 
   COMPLETED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
     generic({
-      title: "Withdrawal Authorized",
-      body:
-        "Withdrawal has been authorized and funds should be available in your account shortly, kindly reach out to support in case there is any delays",
+      title: "Milestones Completed",
+      body: "Milestone has been completed for your small claim",
       sender_firebase_token,
       sender_id,
       status_id,
       sender_name,
-      receiver_role: "lawyer",
-      view: "withdrawal_authorized_screen",
-      status: "withdrawal_authorized",
-      click_action: "new_withdrawal_authorized",
+      receiver_role: "user",
+      view: "mile_stone_created",
+      status: "milestone",
+      click_action: "milestone_completed",
     }),
 };

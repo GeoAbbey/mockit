@@ -81,10 +81,10 @@ export const data = {
       status: "small_claim",
       click_action: "lawyer_complete_consultation",
     }),
-  CANCELLED: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
+  CLOSED: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
     generic({
-      title: "Claim Cancelled",
-      body: "Consultation has have been paid for kindly proceed with the execution",
+      title: "Claim Closed",
+      body: "Claim has have been closed user does not wish to proceed further",
       sender_firebase_token,
       sender_id,
       status_id,
@@ -92,6 +92,19 @@ export const data = {
       receiver_role: "lawyer",
       view: "lawyer_small_claim_detail_screen",
       status: "small_claim",
-      click_action: "user_choose_me_for_claim",
+      click_action: "user_close_claim",
+    }),
+  CANCELLED: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
+    generic({
+      title: "Claim Cancelled",
+      body: "Claim has have been closed lawyer does not wish to proceed further",
+      sender_firebase_token,
+      sender_id,
+      status_id,
+      sender_name,
+      receiver_role: "user",
+      view: "user_small_claim_detail_screen",
+      status: "small_claim",
+      click_action: "user_cancelled_claim",
     }),
 };

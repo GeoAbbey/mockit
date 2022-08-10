@@ -63,6 +63,12 @@ module.exports = {
       description: {
         type: Sequelize.STRING,
       },
+      sumOfReviews: {
+        type: Sequelize.INTEGER,
+      },
+      numOfReviews: {
+        type: Sequelize.INTEGER,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

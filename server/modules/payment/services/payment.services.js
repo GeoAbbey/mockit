@@ -140,13 +140,16 @@ class PaymentsService {
           { transaction: t }
         );
 
-        const thePayout = await PayOutServices.create({
-          ownerId: theModel.assignedLawyerId || theModel.lawyerId,
-          modelType: theModel.type,
-          modelId: theModel.id,
-          ticketId: theModel.ticketId,
-          amount: await getAmount(theModel),
-        });
+        const thePayout = await PayOutServices.create(
+          {
+            ownerId: theModel.assignedLawyerId || theModel.lawyerId,
+            modelType: theModel.type,
+            modelId: theModel.id,
+            ticketId: theModel.ticketId,
+            amount: await getAmount(theModel),
+          },
+          { transaction: t }
+        );
 
         return {
           success: true,
@@ -267,7 +270,7 @@ class PaymentsService {
   }
 
   handleSingleMileStonePayIn = async ({ data, eventEmitter, decodedToken }) => {
-    debugLog("processing a payment handleMileStonePayIn");
+    debugLog("processing a payment handle mile stone PayIn");
     let result = await models.sequelize.transaction(async (t) => {
       const { metaData: metadata, amountPaid: amount, transactionReference: reference } = data;
 
@@ -596,14 +599,18 @@ class PaymentsService {
 
         const oldCooperateInfo = await CooperateService.findOne(args.code);
 
-        const lawyerId = args.lawyerId;
-        const {
-          dataValues: { baseCharge, serviceCharge },
-        } = oldClaim.dataValues.interestedLawyers.find((lawyer) => lawyer.lawyerId === lawyerId);
+        const lawyerOfInterest = await interestedLawyersServices.findOne({
+          lawyerId: args.lawyerId,
+          claimId: args.modelId,
+        });
 
-        const totalCostOfService = baseCharge + serviceCharge;
+        if (!lawyerOfInterest)
+          return {
+            success: false,
+            message: "The lawyer selected didn't mark interest in this particular small claim",
+          };
 
-        if (oldCooperateInfo.walletAmount < totalCostOfService) {
+        if (oldCooperateInfo.walletAmount < parseInt(config.consultationFee)) {
           return {
             message: "you do not have sufficient funds to prosecute this transaction",
             success: false,
@@ -614,7 +621,7 @@ class PaymentsService {
           oldCooperateInfo.dataValues.id,
           {
             operation: "deduct",
-            walletAmount: totalCostOfService,
+            walletAmount: parseInt(config.consultationFee),
           },
           oldCooperateInfo,
           { transaction: t }
@@ -622,7 +629,7 @@ class PaymentsService {
 
         const [, [paidClaim]] = await SmallClaimsService.update(
           args.modelId,
-          { paid: true, assignedLawyerId: lawyerId },
+          { paid: true, assignedLawyerId: args.lawyerId, status: "consultation_in_progress" },
           oldClaim,
           { transaction: t }
         );
@@ -634,7 +641,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "smallClaim",
             modelId: args.modelId,
-            amount: totalCostOfService,
+            amount: parseInt(config.consultationFee),
           },
           { transaction: t }
         );
@@ -734,7 +741,7 @@ class PaymentsService {
 
         const { serviceCharge } = await interestedLawyersServices.findOne({
           lawyerId,
-          modelId: claimId,
+          claimId,
         });
 
         const amountToPay =
@@ -1010,7 +1017,7 @@ class PaymentsService {
 
     try {
       let result = await models.sequelize.transaction(async (t) => {
-        const oldClaim = await SmallClaimsService.find(args.modelId, true, { transaction: t });
+        const oldClaim = await SmallClaimsService.find(args.modelId, false, { transaction: t });
 
         if (oldClaim.dataValues.paid) {
           return {
@@ -1021,9 +1028,10 @@ class PaymentsService {
 
         const oldAccountInfo = await AccountInfosService.find(args.id, { transaction: t });
 
-        const lawyerOfInterest = oldClaim.dataValues.interestedLawyers.find(
-          (lawyer) => lawyer.lawyerId === args.lawyerId
-        );
+        const lawyerOfInterest = await interestedLawyersServices.findOne({
+          lawyerId: args.lawyerId,
+          claimId: args.modelId,
+        });
 
         if (!lawyerOfInterest)
           return {

@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Report, { as: "ownerProfile", foreignKey: "reporterId" });
       this.hasMany(models.Comment, { as: "myProfile", foreignKey: "commenterId" });
       this.hasMany(models.Notification, { as: "profile", foreignKey: "ownerId" });
-      this.hasMany(models.InterestedLawyer, { foreignKey: "lawyerId" });
+      this.hasMany(models.InterestedLawyer, { as: "interest", foreignKey: "lawyerId" });
       this.hasMany(models.MileStone, { foreignKey: "lawyerId" });
       this.hasMany(models.Reaction, { as: "myLikes", foreignKey: "ownerId" });
       this.hasMany(models.Reaction, { as: "myRepost", foreignKey: "ownerId" });
@@ -58,6 +58,8 @@ module.exports = (sequelize, DataTypes) => {
   User.init(
     {
       firstName: { type: DataTypes.STRING, allowNull: false },
+      sumOfReviews: { type: DataTypes.INTEGER, defaultValue: 0 },
+      numOfReviews: { type: DataTypes.INTEGER, defaultValue: 0 },
       lastName: { type: DataTypes.STRING, allowNull: false },
       email: { type: DataTypes.STRING, allowNull: false, unique: true, isEmail: true },
       password: { type: DataTypes.STRING, allowNull: false, min: 8 },

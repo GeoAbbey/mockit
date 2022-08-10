@@ -49,6 +49,8 @@ export const subscriptionPay = (args) => {
 };
 
 export const mileStonePay = async (args) => {
+  console.log("I was here 🍑 🇳🇬");
+  console.log(args);
   if (!args.modelId) return { success: false, message: "modelId is required to prosecute payment" };
 
   const theMileStone = await milestoneService.find(args.modelId);
@@ -56,7 +58,7 @@ export const mileStonePay = async (args) => {
 
   const { lawyerId, claimId, percentage } = theMileStone;
 
-  const { serviceCharge } = await interestedLawyersServices.findOne({ lawyerId, modelId: claimId });
+  const { serviceCharge } = await interestedLawyersServices.findOne({ lawyerId, claimId });
 
   const amountToPay =
     ((serviceCharge + (config.administrationPercentage / 100) * serviceCharge) *
@@ -101,7 +103,7 @@ export const singleSmallClaimPay = async (args) => {
   if (!args.lawyerId)
     return { success: false, message: "ID of interested lawyer is required to prosecute payment" };
 
-  const oldClaim = await SmallClaimsService.find(args.modelId, true);
+  const oldClaim = await SmallClaimsService.find(args.modelId);
 
   if (oldClaim.dataValues.paid) {
     return {
@@ -110,9 +112,10 @@ export const singleSmallClaimPay = async (args) => {
     };
   }
 
-  const lawyerOfInterest = oldClaim.dataValues.interestedLawyers.find(
-    (lawyer) => lawyer.lawyerId === args.lawyerId
-  );
+  const lawyerOfInterest = await interestedLawyersServices.findOne({
+    claimId: args.modelId,
+    lawyerId: args.lawyerId,
+  });
 
   if (!lawyerOfInterest)
     return {

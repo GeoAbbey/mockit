@@ -1,6 +1,7 @@
 import debug from "debug";
 import createError from "http-errors";
 import { EVENT_IDENTIFIERS } from "../../../constants";
+import { paginate as pagination } from "../../helpers";
 
 import InterestedLawyersService from "../services/interestedLawyers.services";
 const logger = debug("app:small-claims-controller");
@@ -28,10 +29,10 @@ class InterestedLawyersController {
     const interest = await InterestedLawyersService.create({
       serviceCharge,
       lawyerId,
-      modelId: id,
+      claimId: id,
     });
 
-    if (!interest) return next(createError(400, `The ${modelType} with id ${id} cannot be found`));
+    if (!interest) return next(createError(400, `The claim with id ${id} cannot be found`));
 
     eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, interest, req.decodedToken);
 
@@ -45,7 +46,7 @@ class InterestedLawyersController {
   interestExits(context) {
     return async (req, res, next) => {
       const {
-        params: { id: modelId },
+        params: { id: claimId },
         decodedToken: { id: lawyerId },
       } = req;
       if (context !== "create") {
@@ -54,14 +55,35 @@ class InterestedLawyersController {
         req.oldInterest = interest;
         return next();
       } else {
-        const interest = await InterestedLawyersService.findOne({ modelId, lawyerId });
+        const interest = await InterestedLawyersService.findOne({ claimId, lawyerId });
         if (interest)
           return next(
-            createError(403, `You can only indicate interest once per small claim with ${modelId}`)
+            createError(403, `You can only indicate interest once per small claim with ${claimId}`)
           );
         return next();
       }
     };
+  }
+
+  async getAllInterest(req, res, next) {
+    logger("getting all invitations");
+    const {
+      params: { id },
+      query: { paginate = {} },
+    } = req;
+
+    const interests = await InterestedLawyersService.findMany(paginate, id);
+    const { offset, limit } = pagination(paginate);
+
+    return res.status(200).send({
+      success: true,
+      message: "invitations successfully retrieved",
+      interests: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...interests,
+      },
+    });
   }
 
   async editInterest(req, res, next) {

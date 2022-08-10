@@ -15,7 +15,7 @@ export class InterestedLawyersRoutes extends CommonRoutesConfig {
 
   configureRoutes() {
     this.app
-      .route(`${this.path}/interested-lawyers/:modelType/:id`)
+      .route(`${this.path}/interested-lawyers/:id`)
       .all([
         Authenticate.verifyToken(),
         middleware({ schema: allowedModelSchema, property: "params" }),
@@ -25,7 +25,8 @@ export class InterestedLawyersRoutes extends CommonRoutesConfig {
         InterestedLawyersController.checkAccessLawyer(),
         InterestedLawyersController.interestExits("create"),
         wrapCatch(InterestedLawyersController.marKInterest),
-      ]);
+      ])
+      .get([wrapCatch(InterestedLawyersController.getAllInterest)]);
 
     this.app
       .route(`${this.path}/interested-lawyers/:id`)

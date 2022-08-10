@@ -58,10 +58,6 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
         middleware({ schema: updateSmallClaimSchema, property: "body" }),
         SmallClaimsController.checkAccessUser("modify"),
         wrapCatch(SmallClaimsController.modifyClaim),
-      ])
-      .post([
-        SmallClaimsController.checkAccessLawyer("markAsComplete"),
-        wrapCatch(SmallClaimsController.marKAsCompleted),
       ]);
 
     this.app

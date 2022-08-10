@@ -4,6 +4,7 @@ import { EVENT_IDENTIFIERS } from "../../../constants";
 
 import SmallClaimsService from "../services/small-claims.service";
 import { paginate as pagination } from "../../helpers";
+import { Op } from "sequelize";
 const log = debug("app:small-claims-controller");
 
 class SmallClaimsController {
@@ -107,10 +108,22 @@ class SmallClaimsController {
       query: { paginate = {} },
       decodedToken: {
         address: { country, state },
+        id,
       },
     } = req;
 
-    const filter = `("SmallClaims"."assignedLawyerId" IS NULL AND (("SmallClaims"."venue"#>>'{country}') = '${country}' AND ("SmallClaims"."venue"#>>'{state}') = '${state}'))`;
+    const filter = {
+      [Op.or]: [
+        {
+          assignedLawyerId: id,
+        },
+        {
+          assignedLawyerId: null,
+          paid: true,
+          venue: { country, state },
+        },
+      ],
+    };
 
     const smallClaims = await SmallClaimsService.findMany(filter, paginate);
     const { offset, limit } = pagination(paginate);
@@ -123,29 +136,6 @@ class SmallClaimsController {
         pageSize: limit,
         ...smallClaims,
       },
-    });
-  }
-
-  async marKAsCompleted(req, res, next) {
-    const eventEmitter = req.app.get("eventEmitter");
-
-    const {
-      params: { id },
-      decodedToken,
-      oldSmallClaim,
-    } = req;
-
-    const [, [updatedSmallClaim]] = await SmallClaimsService.update(
-      id,
-      { status: "completed" },
-      oldSmallClaim
-    );
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.COMPLETED, updatedSmallClaim, decodedToken);
-
-    return res.status(200).send({
-      success: true,
-      message: "You have successfully completed this small claim",
-      smallClaim: updatedSmallClaim,
     });
   }
 
@@ -280,54 +270,44 @@ class SmallClaimsController {
       query,
     } = req;
 
-    let filter = "";
+    let filter = {};
 
-    if (role === "admin" || role === "super-admin") {
-      if (query.search && query.search.ownerId) {
-        filter = filter
-          ? `${filter} AND "SmallClaims"."ownerId" = '${query.search.ownerId}'`
-          : `"SmallClaims"."ownerId" = '${query.search.ownerId}'`;
-      }
-
+    const commonOptions = () => {
       if (query.search && query.search.ticketId) {
-        filter = filter
-          ? `${filter} AND "SmallClaims"."ticketId" ILIKE '%${query.search.ticketId}%'`
-          : `"SmallClaims"."ticketId" ILIKE '%${query.search.ticketId}%'`;
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
       }
 
       if (query.search && query.search.paid) {
-        filter = filter
-          ? `${filter} AND "SmallClaims"."paid" = ${query.search.paid}`
-          : `"SmallClaims"."paid" = ${query.search.paid}`;
+        filter = { ...filter, paid: query.search.paid };
       }
 
       if (query.search && query.search.status) {
-        filter = filter
-          ? `${filter} AND "SmallClaims"."status" = '${query.search.status}'`
-          : `"SmallClaims"."status" = '${query.search.status}'`;
+        filter = { ...filter, status: query.search.status };
+      }
+    };
+
+    if (role === "admin" || role === "super-admin") {
+      if (query.search && query.search.ownerId) {
+        filter = { ...filter, ownerId: query.search.ownerId };
       }
 
+      commonOptions();
+
       if (query.search && query.search.assignedLawyerId) {
-        filter = filter
-          ? `${filter} AND "SmallClaims"."assignedLawyerId" = '${query.search.assignedLawyerId}'`
-          : `"SmallClaims"."assignedLawyerId" = '${query.search.assignedLawyerId}'`;
+        filter = { ...filter, assignedLawyerId: query.search.assignedLawyerId };
       }
     }
 
     if (role === "lawyer") {
-      filter = `${filter} "SmallClaims"."assignedLawyerId" = '${id}'`;
+      filter = { ...filter, assignedLawyerId: id };
 
-      if (query.search && query.search.ticketId) {
-        filter = `${filter} AND "SmallClaims"."ticketId" ILIKE '%${query.search.ticketId}%'`;
-      }
+      commonOptions();
     }
 
     if (role === "user") {
-      filter = `${filter} "SmallClaims"."ownerId" = '${id}'`;
+      filter = { ...filter, ownerId: id };
 
-      if (query.search && query.search.ticketId) {
-        filter = `${filter} AND "SmallClaims"."ticketId" ILIKE '%${query.search.ticketId}%'`;
-      }
+      commonOptions();
     }
 
     req.filter = filter;

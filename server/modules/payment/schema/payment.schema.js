@@ -62,7 +62,8 @@ export const queryOptions = Joi.object().keys({
       "singleSmallClaim",
       "singleInvitation",
       "wallet",
-      "subscription"
+      "subscription",
+      "mileStone"
     ),
   }),
   paginate: Joi.object().keys({

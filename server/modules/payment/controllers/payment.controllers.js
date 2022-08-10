@@ -227,6 +227,18 @@ class PaymentsController {
           amount,
           type,
         }),
+      mileStone: () =>
+        this.handleMileStoneCardPayIn({
+          monnifyToken,
+          email,
+          firstName,
+          lastName,
+          id,
+          authCode,
+
+          type,
+          modelId,
+        }),
     };
 
     const result = await mapper[type]();
@@ -237,6 +249,14 @@ class PaymentsController {
 
   async handleWalletOrCooperateCardPayIn(args) {
     let data = walletPay(args);
+
+    if (data.success === false) return data;
+    data = { ...data, cardToken: args.authCode };
+    return payment.chargeCard(data);
+  }
+
+  async handleMileStoneCardPayIn(args) {
+    let data = await mileStonePay(args);
 
     if (data.success === false) return data;
     data = { ...data, cardToken: args.authCode };

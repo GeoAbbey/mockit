@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       });
       this.hasMany(models.Review, { as: "reviews", foreignKey: "modelId" });
-      this.hasMany(models.InterestedLawyer, { as: "interestedLawyers", foreignKey: "modelId" });
+      this.hasMany(models.InterestedLawyer, { as: "interestedLawyers", foreignKey: "claimId" });
       this.hasMany(models.MileStone, { foreignKey: "claimId" });
     }
   }
