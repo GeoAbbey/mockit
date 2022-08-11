@@ -112,46 +112,53 @@ class SmallClaimsService {
     return models.SmallClaim.findByPk(id);
   }
 
-  async findMany(filter, pageDetails) {
+  async findMany(filter, pageDetails, canApply) {
     debugLog(`retrieving invitations with the following filter ${JSON.stringify(filter)}`);
+
+    let temp = [
+      {
+        model: models.User,
+        as: "lawyerProfile",
+        attributes: [
+          "firstName",
+          "lastName",
+          "email",
+          "profilePic",
+          "firebaseToken",
+          "phone",
+          "sumOfReviews",
+          "numOfReviews",
+          "description",
+        ],
+        required: false,
+      },
+      {
+        model: models.User,
+        as: "ownerProfile",
+        attributes: [
+          "firstName",
+          "lastName",
+          "email",
+          "profilePic",
+          "firebaseToken",
+          "phone",
+          "sumOfReviews",
+          "numOfReviews",
+          "description",
+        ],
+        required: false,
+      },
+    ];
+
+    if (canApply) {
+      temp.push(canApply(models.InterestedLawyer));
+    }
+
     return models.SmallClaim.findAndCountAll({
       order: [["createdAt", "DESC"]],
       where: { ...filter },
       ...paginate(pageDetails),
-      include: [
-        {
-          model: models.User,
-          as: "ownerProfile",
-          attributes: [
-            "firstName",
-            "lastName",
-            "email",
-            "profilePic",
-            "firebaseToken",
-            "phone",
-            "sumOfReviews",
-            "numOfReviews",
-            "description",
-          ],
-          required: false,
-        },
-        {
-          model: models.User,
-          as: "lawyerProfile",
-          attributes: [
-            "firstName",
-            "lastName",
-            "email",
-            "profilePic",
-            "firebaseToken",
-            "phone",
-            "sumOfReviews",
-            "numOfReviews",
-            "description",
-          ],
-          required: false,
-        },
-      ],
+      include: temp,
     });
   }
 

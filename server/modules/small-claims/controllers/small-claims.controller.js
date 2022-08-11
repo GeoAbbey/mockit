@@ -112,6 +112,13 @@ class SmallClaimsController {
       },
     } = req;
 
+    const canApply = (model) => ({
+      model,
+      as: "myInterest",
+      required: false,
+      where: { lawyerId: id },
+    });
+
     const filter = {
       [Op.or]: [
         {
@@ -125,7 +132,7 @@ class SmallClaimsController {
       ],
     };
 
-    const smallClaims = await SmallClaimsService.findMany(filter, paginate);
+    const smallClaims = await SmallClaimsService.findMany(filter, paginate, canApply);
     const { offset, limit } = pagination(paginate);
 
     return res.status(200).send({
