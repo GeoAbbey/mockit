@@ -72,31 +72,13 @@ class SmallClaimsService {
                 "phone",
               ],
               required: false,
-              include: [
-                {
-                  model: models.InterestedLawyer,
-                  as: "interest",
-                  where: { claimId: id },
-                  attributes: ["serviceCharge", "lawyerId", "serviceChargeInNaira", "id"],
-                  required: false,
-                  include: [
-                    {
-                      model: models.User,
-                      as: "profile",
-                      attributes: [
-                        "firstName",
-                        "lastName",
-                        "email",
-                        "profilePic",
-                        "phone",
-                        "id",
-                        "firebaseToken",
-                        "description",
-                      ],
-                    },
-                  ],
-                },
-              ],
+            },
+            {
+              model: models.InterestedLawyer,
+              as: "myInterest",
+              where: { lawyerId: context },
+              attributes: ["serviceCharge", "lawyerId", "serviceChargeInNaira", "id"],
+              required: false,
             },
             {
               model: models.Review,

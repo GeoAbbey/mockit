@@ -36,7 +36,13 @@ class SmallClaimsController {
 
   smallClaimExits(context) {
     return async (req, res, next) => {
-      const { id } = req.params;
+      const {
+        params: { id },
+        decodedToken: { role },
+      } = req;
+
+      if (role === "lawyer") context = req.decodedToken.id;
+
       log(`verifying that the small claim with id ${id} exits`);
       const smallClaim = await SmallClaimsService.find(id, context);
       if (!smallClaim) return next(createError(404, "The small claim can not be found"));
