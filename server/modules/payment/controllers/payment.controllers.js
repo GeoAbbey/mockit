@@ -235,7 +235,6 @@ class PaymentsController {
           lastName,
           id,
           authCode,
-
           type,
           modelId,
         }),

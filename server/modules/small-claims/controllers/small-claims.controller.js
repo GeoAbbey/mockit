@@ -126,7 +126,7 @@ class SmallClaimsController {
         },
         {
           assignedLawyerId: null,
-          paid: true,
+          paid: false,
           venue: { country, state },
         },
       ],
