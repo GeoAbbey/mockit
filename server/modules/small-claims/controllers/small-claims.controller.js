@@ -126,16 +126,9 @@ class SmallClaimsController {
     });
 
     const filter = {
-      [Op.or]: [
-        {
-          assignedLawyerId: id,
-        },
-        {
-          assignedLawyerId: null,
-          paid: false,
-          venue: { country, state },
-        },
-      ],
+      status: "initiated",
+      paid: false,
+      venue: { country, state },
     };
 
     const smallClaims = await SmallClaimsService.findMany(filter, paginate, canApply);
