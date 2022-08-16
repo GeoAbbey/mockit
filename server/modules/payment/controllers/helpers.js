@@ -56,7 +56,7 @@ export const mileStonePay = async (args) => {
   const theMileStone = await milestoneService.find(args.modelId);
   if (!theMileStone) return { success: false, message: "mile stone can not be found" };
 
-  const { lawyerId, claimId, percentage } = theMileStone;
+  const { lawyerId, claimId, percentage, ticketId } = theMileStone;
 
   const { serviceCharge } = await interestedLawyersServices.findOne({ lawyerId, claimId });
 
@@ -67,7 +67,7 @@ export const mileStonePay = async (args) => {
 
   return {
     ...common(args),
-    metaData: { id: args.id, type: args.type, modelId: args.modelId },
+    metaData: { id: args.id, type: args.type, modelId: args.modelId, ticketId },
     amount: amountToPay,
     paymentDescription: `of subscription has been purchased by user ${args.id}`,
   };
@@ -79,9 +79,9 @@ export const singleInvitationPay = async (args) => {
   if (!args.modelId)
     return { success: false, message: "invitation modelId is required to prosecute payment" };
 
-  const oldInvitation = await InvitationsService.find(args.modelId, null);
+  const { paid, ticketId } = await InvitationsService.find(args.modelId, null);
 
-  if (oldInvitation.dataValues.paid) {
+  if (paid) {
     return {
       message: "this item has already been paid for",
       success: false,
@@ -92,7 +92,7 @@ export const singleInvitationPay = async (args) => {
     ...common(args),
     amount: config.invitationCost,
     paymentDescription: `amount of ${config.invitationCost} is paid for single invitation with ${args.modelId} by user ${args.id}`,
-    metaData: { id: args.id, type: args.type, modelId: args.modelId },
+    metaData: { id: args.id, type: args.type, modelId: args.modelId, ticketId },
   };
 };
 
@@ -103,9 +103,9 @@ export const singleSmallClaimPay = async (args) => {
   if (!args.lawyerId)
     return { success: false, message: "ID of interested lawyer is required to prosecute payment" };
 
-  const oldClaim = await SmallClaimsService.find(args.modelId);
+  const { paid, ticketId } = await SmallClaimsService.find(args.modelId);
 
-  if (oldClaim.dataValues.paid) {
+  if (paid) {
     return {
       message: "this item has already been paid for",
       success: false,
@@ -132,6 +132,7 @@ export const singleSmallClaimPay = async (args) => {
       type: args.type,
       modelId: args.modelId,
       assignedLawyerId: args.lawyerId,
+      ticketId,
     },
   };
 };

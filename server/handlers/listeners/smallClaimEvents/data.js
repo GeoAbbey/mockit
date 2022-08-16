@@ -41,19 +41,18 @@ export const data = {
       status: "small_claim",
       click_action: "case_closed",
     }),
-  ASSIGNED: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
+  EDIT_INTEREST: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
     generic({
-      title: "Case Assigned",
-      body:
-        "You have been assigned a small claim kindly proceed with it execution once payment is confirmed",
+      title: "Claim Re-assessed",
+      body: "Lawyer has re-assessed the amount he is willing to charge for the purposed claim",
       sender_firebase_token,
       sender_id,
       status_id,
       sender_name,
-      receiver_role: "lawyer",
-      view: "lawyer_small_claim_detail_screen",
+      receiver_role: "user",
+      view: "user_small_claim_detail_screen",
       status: "small_claim",
-      click_action: "user_choose_me_for_claim",
+      click_action: "lawyer_reassess_the_claim",
     }),
   PAID: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
     generic({

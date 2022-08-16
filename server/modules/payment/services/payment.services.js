@@ -294,20 +294,12 @@ class PaymentsService {
         { transaction: t }
       );
 
-      const oldClaim = await SmallClaimsService.find(oldMileStone.claimId);
-
-      const [, [paidClaim]] = await SmallClaimsService.update(
-        oldMileStone.claimId,
-        { status: "engagement" },
-        oldClaim,
-        { transaction: t }
-      );
-
       const receipt = await PayInServices.create(
         {
           for: metadata.type,
           amount: parseFloat(amount),
           reference,
+          ticketId: metadata.ticketId,
           ownerId: metadata.id,
         },
         { transaction: t }
@@ -355,6 +347,8 @@ class PaymentsService {
           for: metadata.type,
           amount: parseFloat(amount),
           reference,
+          ticketId: metadata.ticketId,
+          modelId: metadata.modelId,
           ownerId: metadata.id,
         },
         { transaction: t }
@@ -408,6 +402,7 @@ class PaymentsService {
           reference,
           ownerId: metadata.id,
           modelId: metadata.modelId,
+          ticketId: metadata.ticketId,
         },
         { transaction: t }
       );
@@ -641,6 +636,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "smallClaim",
             modelId: args.modelId,
+            ticketId: oldClaim.ticketId,
             amount: parseInt(config.consultationFee),
           },
           { transaction: t }
@@ -704,6 +700,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "invitation",
             modelId: args.modelId,
+            ticketId: oldInvitation.ticketId,
             amount: config.invitationCost,
           },
           { transaction: t }
@@ -737,7 +734,7 @@ class PaymentsService {
             name: "paymentExceptionHandler",
           });
 
-        const { lawyerId, claimId, percentage } = oldMileStone;
+        const { lawyerId, claimId, percentage, ticketId } = oldMileStone;
 
         const { serviceCharge } = await interestedLawyersServices.findOne({
           lawyerId,
@@ -757,15 +754,6 @@ class PaymentsService {
             success: false,
           };
         }
-
-        const oldClaim = await SmallClaimsService.find(claimId);
-
-        const [, [paidClaim]] = await SmallClaimsService.update(
-          claimId,
-          { status: "engagement" },
-          oldClaim,
-          { transaction: t }
-        );
 
         const newAccountInfo = await AccountInfosService.update(
           args.id,
@@ -793,6 +781,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "mileStone",
             modelId: args.modelId,
+            ticketId,
             amount: amountToPay,
           },
           { transaction: t }
@@ -860,6 +849,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "invitation",
             modelId: args.modelId,
+            ticketId: oldInvitation.ticketId,
             amount: config.invitationCost,
           },
           { transaction: t }
@@ -882,7 +872,6 @@ class PaymentsService {
 
   async handleSubscriptionCount(args, emitter, decodedToken) {
     debugLog("Purchasing subscription count from my personal wallet");
-    console.log({ args }, "🤯");
 
     const oldAccountInfo = await AccountInfosService.find(args.id);
     const amount = config.costOfSubscriptionUnit * args.quantity;
@@ -1072,6 +1061,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "smallClaim",
             modelId: args.modelId,
+            ticketId: oldClaim.ticketId,
             amount: parseInt(config.consultationFee),
           },
           { transaction: t }
@@ -1178,6 +1168,7 @@ class PaymentsService {
             performedBy: args.id,
             modelType: "response",
             modelId: args.modelId,
+            ticketId: oldResponse.ticketId,
             amount: parseInt(config.costOfSubscriptionUnit),
           },
           { transaction: t }

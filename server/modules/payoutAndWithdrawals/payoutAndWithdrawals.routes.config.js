@@ -15,6 +15,7 @@ export class PayoutsAndWithdrawalRoutes extends CommonRoutesConfig {
       .get([
         PayoutAndWithdrawalController.checkAccessLawyer(),
         middleware({ schema: queryOptions, property: "query" }),
+        wrapCatch(PayoutAndWithdrawalController.queryContext),
         wrapCatch(PayoutAndWithdrawalController.getHistory),
       ]);
 
