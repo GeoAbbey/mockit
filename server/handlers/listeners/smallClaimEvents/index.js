@@ -11,6 +11,7 @@ import { notifyAdminOfNoLawyer } from "../helpers/notifyAdminOfNoLawyer";
 import { updateModelInstance } from "../helpers/updateModelInstance";
 import { notifyPeople } from "../helpers/notifyPeople";
 import { sendBulkTemplatedEmail, sendTemplateEmail } from "../../../utils/MailService";
+import smallClaimsService from "../../../modules/small-claims/services/small-claims.service";
 
 export const smallClaimEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, async (claim, decodedToken) => {
@@ -55,9 +56,25 @@ export const smallClaimEvents = (eventEmitter) => {
 
   eventEmitter.on(
     EVENT_IDENTIFIERS.SMALL_CLAIM.EDIT_INTEREST,
-    async (updatedInterest, oldInterest, decodedToken) => {
+    async ({ updatedInterest, decodedToken }) => {
       logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.EDIT_INTEREST} event has been received`);
-      console.log(updatedInterest, oldInterest, decodedToken);
+
+      const theClaim = await smallClaimsService.find(updatedInterest.claimId);
+
+      const userToken = await UserService.findByPk(theClaim.ownerId);
+
+      const notificationData = data.EDIT_INTEREST({
+        sender_id: decodedToken.id,
+        sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+        status_id: updatedInterest.claimId,
+        sender_firebase_token: decodedToken.firebaseToken,
+      });
+
+      notifyPeople({
+        event: EVENT_IDENTIFIERS.SMALL_CLAIM.EDIT_INTEREST,
+        people: [userToken],
+        notificationData,
+      });
     }
   );
 

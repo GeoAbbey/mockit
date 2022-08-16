@@ -2,16 +2,16 @@ import debug from "debug";
 import createError from "http-errors";
 
 import PayoutsService from "../services/payout.services";
-import SmallClaimsService from "../../small-claims/services/small-claims.service";
 import configOptions from "../../../config/config";
 import { paginate as pagination } from "../../helpers";
 import { Op } from "sequelize";
 import interestedLawyersServices from "../../interestedLawyers/services/interestedLawyers.services";
+import { pgDateFormate } from "../../../utils/pgFormateDate";
 
 const env = process.env.NODE_ENV || "development";
 const config = configOptions[env];
 
-const log = debug("app:Payouts-controller");
+const log = debug("app:payouts-controller");
 
 class PayoutsController {
   static instance;

@@ -18,7 +18,7 @@ export const updateSmallClaimSchema = Joi.object().keys({
     state: Joi.string(),
     street: Joi.string(),
   }),
-  status: Joi.string().valid("closed"),
+  status: Joi.string().valid("closed", "engagement"),
   attachments: [Joi.array().items(Joi.string()), Joi.number()],
   amount: Joi.number().integer().min(0).max(5000000),
   assignedLawyerId: Joi.string().guid({ version: "uuidv4" }),
