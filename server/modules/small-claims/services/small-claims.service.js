@@ -152,6 +152,7 @@ class SmallClaimsService {
       attachments,
       amount,
       assignedLawyerId,
+      isReassessed,
       paid,
       isNotified,
     } = oldSmallClaim;
@@ -179,6 +180,7 @@ class SmallClaimsService {
         venue: smallClaimDTO.venue && handleAddresses(smallClaimDTO.venue, venue),
         amount: smallClaimDTO.amount || amount,
         isNotified: handleFalsy(smallClaimDTO.isNotified, isNotified),
+        isReassessed: handleFalsy(smallClaimDTO.isReassessed, isReassessed),
         assignedLawyerId: smallClaimDTO.assignedLawyerId || assignedLawyerId,
         attachments: handleAttachments(),
         paid: handleFalsy(smallClaimDTO.paid, paid),
