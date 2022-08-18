@@ -61,6 +61,14 @@ export const smallClaimEvents = (eventEmitter) => {
 
       const theClaim = await smallClaimsService.find(updatedInterest.claimId);
 
+      if (decodedToken.id === theClaim.assignedLawyerId) {
+        const [, [newClaim]] = await smallClaimsService.update(
+          theClaim.id,
+          { isReassessed: true },
+          theClaim
+        );
+      }
+
       const userToken = await UserService.findByPk(theClaim.ownerId);
 
       const notificationData = data.EDIT_INTEREST({
