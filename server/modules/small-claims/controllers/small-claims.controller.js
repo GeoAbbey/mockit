@@ -202,7 +202,7 @@ class SmallClaimsController {
       }
 
       if ((context === "delete" || context === "modify") && status !== "initiated") {
-        if (req.body.status === "closed") return next();
+        if (req.body.status === "closed" || req.body.status === "engagement") return next();
         return next(
           createError(401, `You can not ${context} a small claim once it has been assigned`)
         );
