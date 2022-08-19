@@ -2,6 +2,7 @@ import Joi from "joi";
 
 export const createInvitationSchema = Joi.object().keys({
   reason: Joi.string(),
+  time: Joi.string(),
   venue: Joi.object().keys({
     country: Joi.string(),
     state: Joi.string(),
@@ -20,7 +21,6 @@ export const updatedInvitationSchema = Joi.object().keys({
   }),
   attachments: [Joi.array().items(Joi.string()), Joi.number()],
   assignedLawyerId: Joi.string().guid({ version: "uuidv4" }),
-  status: Joi.string().valid("in-progress", "completed", "cancel"),
   dateOfVisit: Joi.date(),
 });
 

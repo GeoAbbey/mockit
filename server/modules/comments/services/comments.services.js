@@ -15,7 +15,13 @@ class CommentsService {
 
   async create(commentDTO) {
     debugLog("creating a comment");
-    return models.Comment.create(commentDTO);
+    try {
+      return models.sequelize.transaction(async (t) => {
+        const theReport = await models.Report.findByPk(commentDTO.reportId);
+        await theReport.increment("numOfComments", { transaction: t });
+        return models.Comment.create(commentDTO, { transaction: t });
+      });
+    } catch (error) {}
   }
 
   async find(id, context) {
@@ -56,9 +62,19 @@ class CommentsService {
 
   async remove(id) {
     debugLog(`deleting the Comment with id ${id}`);
-    return models.Comment.destroy({
-      where: { id },
-    });
+    try {
+      return models.sequelize.transaction(async (t) => {
+        const theComment = await models.Comment.findByPk(id);
+        const theReport = await models.Report.findByPk(theComment.reportId);
+        await theReport.decrement("numOfComments", { transaction: t });
+        return models.Comment.destroy(
+          {
+            where: { id },
+          },
+          { transaction: t }
+        );
+      });
+    } catch (error) {}
   }
 }
 

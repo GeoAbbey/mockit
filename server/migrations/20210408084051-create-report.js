@@ -34,6 +34,15 @@ module.exports = {
           as: "reporterId",
         },
       },
+      numOfRePosts: {
+        type: Sequelize.INTEGER,
+      },
+      numOfLikes: {
+        type: Sequelize.INTEGER,
+      },
+      numOfComments: {
+        type: Sequelize.INTEGER,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

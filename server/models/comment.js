@@ -20,6 +20,8 @@ module.exports = (sequelize, DataTypes) => {
     {
       content: { type: DataTypes.TEXT },
       commenterId: { type: DataTypes.UUID, allowNull: false },
+      numOfRePosts: { type: DataTypes.INTEGER, defaultValue: 0 },
+      numOfLikes: { type: DataTypes.INTEGER, defaultValue: 0 },
       reportId: { type: DataTypes.UUID, allowNull: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       id: {

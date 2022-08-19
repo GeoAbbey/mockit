@@ -14,6 +14,9 @@ module.exports = {
       venue: {
         type: Sequelize.JSONB,
       },
+      time: {
+        type: Sequelize.STRING,
+      },
       dateOfVisit: {
         type: Sequelize.DATE,
       },
