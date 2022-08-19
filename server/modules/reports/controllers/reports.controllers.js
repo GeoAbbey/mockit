@@ -82,11 +82,11 @@ class ReportsController {
   async getAllReports(req, res, next) {
     log("getting all reports");
     const {
-      replacements,
+      decodedToken: { id },
       query: { paginate = {} },
     } = req;
 
-    const reports = await ReportsService.findMany(replacements, paginate);
+    const reports = await ReportsService.findMany(id, paginate);
     const { offset, limit } = pagination(paginate);
 
     return res.status(200).send({
@@ -166,20 +166,6 @@ class ReportsController {
       if (role === "admin" || role === "super-admin") return next();
       else return next(createError(401, "You do not have permission to access this route"));
     };
-  }
-
-  queryContext(req, res, next) {
-    const {
-      decodedToken: { role, id },
-    } = req;
-
-    let replacements = {};
-
-    replacements.reporterId = id;
-
-    req.replacements = replacements;
-
-    return next();
   }
 }
 

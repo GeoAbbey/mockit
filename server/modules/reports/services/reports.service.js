@@ -20,15 +20,6 @@ class ReportsService {
 
   async find(id, context, reporterId) {
     debugLog(`looking for an report with filter ${JSON.stringify(id)}`);
-    if (context) {
-      return models.sequelize.query(
-        `select "Reports".id, "Reports".attachments,"Reports".content, "Reports"."ticketId", "Reports".location, "Reports"."createdAt", "Reports"."updatedAt", "Reports".meta, "Reports"."reporterId", "Users"."profilePic", "Users".email, "Users"."firebaseToken", "Users"."firstName", "Users"."lastName", (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'repost') as reposts, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like') as likes, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like' and "ownerId" =:reporterId) as has_liked, (select count(id) from "Reactions" where "modelId" = "Reports".id and "reactionType" = 'repost' and "modelType" = 'Report' and "ownerId" = :reporterId) as has_reposted, (select count (id) from "Comments" where "reportId" = "Reports".id) as comments from "Reports" INNER JOIN "Users" ON "Reports"."reporterId" = "Users"."id" WHERE "Reports"."id" = :id;`,
-        {
-          type: QueryTypes.SELECT,
-          replacements: { id, reporterId },
-        }
-      );
-    }
     return models.Report.findByPk(id);
   }
 
@@ -51,26 +42,44 @@ class ReportsService {
     });
   }
 
-  async findMany(replacements, pageDetails) {
+  async findMany(ownerId, pageDetails) {
     debugLog(`retrieving reports`);
-    const { limit, offset } = paginate(pageDetails);
-
-    const [data] = await models.sequelize.query(`SELECT count("Reports"."id") from "Reports"`, {
-      nest: true,
-      type: QueryTypes.SELECT,
+    return models.Report.findAndCountAll({
+      order: [["createdAt", "DESC"]],
+      ...paginate(pageDetails),
+      include: [
+        {
+          model: models.User,
+          as: "ownerProfile",
+          attributes: [
+            "firstName",
+            "lastName",
+            "email",
+            "profilePic",
+            "firebaseToken",
+            "phone",
+            "description",
+          ],
+          required: false,
+        },
+        {
+          model: models.Reaction,
+          as: "hasLiked",
+          where: { reactionType: "like", ownerId },
+          attributes: ["value"],
+          required: false,
+        },
+        {
+          model: models.Reaction,
+          as: "hasRePosted",
+          attributes: ["value"],
+          where: { reactionType: "repost", ownerId },
+          required: false,
+        },
+      ],
     });
-
-    const rows = await models.sequelize.query(
-      `select "Reports".id, "Reports".attachments,"Reports".content, "Reports"."ticketId", "Reports".location, "Reports"."createdAt", "Reports"."updatedAt", "Reports".meta, "Reports"."reporterId", "Users"."profilePic", "Users".email, "Users"."firebaseToken", "Users"."firstName", "Users"."lastName", (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'repost') as reposts, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like') as likes, (select count(id) from "Reactions" where "modelId" = "Reports".id and "modelType" = 'Report' and "reactionType" = 'like' and "ownerId" =:reporterId) as has_liked, (select count(id) from "Reactions" where "modelId" = "Reports".id and "reactionType" = 'repost' and "modelType" = 'Report' and "ownerId" = :reporterId) as has_reposted, (select count (id) from "Comments" where "reportId" = "Reports".id) as comments from "Reports" INNER JOIN "Users" ON "Reports"."reporterId" = "Users"."id" ORDER BY "Reports"."createdAt" DESC LIMIT ${limit} OFFSET ${offset};`,
-      {
-        type: QueryTypes.SELECT,
-        replacements,
-      }
-    );
-
-    return { count: parseInt(data.count), rows };
   }
-
+  hasLiked;
   async update(id, ReportDTO, oldReport) {
     const { content, attachments, location } = oldReport;
     const handleAttachments = () => {
