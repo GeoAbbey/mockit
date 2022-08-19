@@ -4,7 +4,13 @@ import axios from "axios";
 import { payStack } from "../../../utils/paymentService";
 
 import PaymentsService from "../services/payment.services";
-import { walletPay, subscriptionPay, singleInvitationPay, singleSmallClaimPay } from "./helpers";
+import {
+  walletPay,
+  subscriptionPay,
+  singleInvitationPay,
+  singleSmallClaimPay,
+  mileStonePay,
+} from "./helpers";
 import { paginate as pagination } from "../../helpers";
 import { Op } from "sequelize";
 
@@ -131,9 +137,10 @@ class PaymentsController {
       monnifyToken,
     } = req;
 
+    console.log("I was here");
     const result = await payment.verifyPayment(ref, { monnifyToken });
+
     const {
-      success,
       response: { responseBody: data },
     } = result;
 
@@ -220,6 +227,17 @@ class PaymentsController {
           amount,
           type,
         }),
+      mileStone: () =>
+        this.handleMileStoneCardPayIn({
+          monnifyToken,
+          email,
+          firstName,
+          lastName,
+          id,
+          authCode,
+          type,
+          modelId,
+        }),
     };
 
     const result = await mapper[type]();
@@ -230,6 +248,14 @@ class PaymentsController {
 
   async handleWalletOrCooperateCardPayIn(args) {
     let data = walletPay(args);
+
+    if (data.success === false) return data;
+    data = { ...data, cardToken: args.authCode };
+    return payment.chargeCard(data);
+  }
+
+  async handleMileStoneCardPayIn(args) {
+    let data = await mileStonePay(args);
 
     if (data.success === false) return data;
     data = { ...data, cardToken: args.authCode };
@@ -278,6 +304,17 @@ class PaymentsController {
       subscription: () =>
         this.handleSubscriptionPayIn({
           quantity,
+          email,
+          id,
+          firstName,
+          lastName,
+          type,
+          callback_url,
+          monnifyToken,
+        }),
+      mileStone: () =>
+        this.handleMileStonePayIn({
+          modelId,
           email,
           id,
           firstName,
@@ -341,6 +378,13 @@ class PaymentsController {
 
   async handleSubscriptionPayIn(args) {
     const data = subscriptionPay(args);
+
+    if (data.success === false) return data;
+    return payment.initializePayment(data);
+  }
+
+  async handleMileStonePayIn(args) {
+    const data = await mileStonePay(args);
 
     if (data.success === false) return data;
     return payment.initializePayment(data);

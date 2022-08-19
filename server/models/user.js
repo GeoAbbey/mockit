@@ -20,7 +20,8 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Report, { as: "ownerProfile", foreignKey: "reporterId" });
       this.hasMany(models.Comment, { as: "myProfile", foreignKey: "commenterId" });
       this.hasMany(models.Notification, { as: "profile", foreignKey: "ownerId" });
-      this.hasMany(models.InterestedLawyer, { foreignKey: "lawyerId" });
+      this.hasMany(models.InterestedLawyer, { as: "interest", foreignKey: "lawyerId" });
+      this.hasMany(models.MileStone, { foreignKey: "lawyerId" });
       this.hasMany(models.Reaction, { as: "myLikes", foreignKey: "ownerId" });
       this.hasMany(models.Reaction, { as: "myRepost", foreignKey: "ownerId" });
       this.hasMany(models.Response, { as: "myEmergencyResponse", foreignKey: "ownerId" });
@@ -57,49 +58,72 @@ module.exports = (sequelize, DataTypes) => {
   User.init(
     {
       firstName: { type: DataTypes.STRING, allowNull: false },
-      notification: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
-      isAccountSuspended: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+      sumOfReviews: { type: DataTypes.INTEGER, defaultValue: 0 },
+      numOfReviews: { type: DataTypes.INTEGER, defaultValue: 0 },
       lastName: { type: DataTypes.STRING, allowNull: false },
       email: { type: DataTypes.STRING, allowNull: false, unique: true, isEmail: true },
       password: { type: DataTypes.STRING, allowNull: false, min: 8 },
-      isSubscribed: { type: DataTypes.BOOLEAN },
-      isVerified: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-      address: {
-        type: DataTypes.JSONB,
-        defaultValue: {
-          country: "",
-          state: "",
-          residence: {
-            work: "",
-            home: "",
-          },
-        },
-      },
-      phone: { type: DataTypes.STRING },
-      dob: { type: DataTypes.STRING, isDate: true },
-      emergencyContact: { type: DataTypes.JSONB },
-      description: { type: DataTypes.STRING },
-      meta: { type: DataTypes.JSONB, defaultValue: {} },
+      phone: { type: DataTypes.STRING, allowNull: false, unique: true },
       profilePic: {
         type: DataTypes.STRING,
         allowNull: false,
         defaultValue: "https://zapplawyer.s3.us-west-2.amazonaws.com/attachments/user.png",
       },
+      settings: {
+        type: DataTypes.JSONB,
+        defaultValue: {
+          isSuspended: false,
+          hasAgreedToTerms: false,
+          isEmailVerified: false,
+          isPhone: {
+            pinId: null,
+            verified: false,
+          },
+          notification: {
+            email: true,
+            phone: true,
+            inApp: true,
+          },
+        },
+      },
+      address: {
+        type: DataTypes.JSONB,
+        defaultValue: {
+          country: null,
+          state: null,
+          residence: {
+            work: null,
+            home: null,
+          },
+        },
+      },
+      dob: { type: DataTypes.STRING, isDate: true },
+      emergencyContact: {
+        type: DataTypes.JSONB,
+        defaultValue: {
+          profilePic: null,
+          phone: null,
+          firstName: null,
+          lastName: null,
+          email: null,
+        },
+      },
+      description: { type: DataTypes.STRING },
+      meta: { type: DataTypes.JSONB, defaultValue: {} },
       lawyer: {
         type: DataTypes.JSONB,
         defaultValue: {
-          supremeCourtNumber: "",
-          typeOfDocument: "",
-          isSubscribed: false,
+          supremeCourtNumber: null,
+          typeOfDocument: null,
+          oneTimeSubscription: false,
           isVerified: "initiated",
           documents: {
-            name: "",
-            link: "",
+            name: null,
+            link: null,
           },
         },
       },
       firebaseToken: { type: DataTypes.STRING },
-      hasAgreedToTerms: { type: DataTypes.BOOLEAN },
       role: {
         type: DataTypes.STRING,
         validate: {
@@ -118,7 +142,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: () => otp(),
       },
-
       id: {
         type: DataTypes.UUID,
         primaryKey: true,

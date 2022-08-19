@@ -17,7 +17,7 @@ export class ReportRoutes extends CommonRoutesConfig {
         uploadMiddleware(),
         wrapCatch(ReportsController.makeReport),
       ])
-      .get([wrapCatch(ReportsController.queryContext), wrapCatch(ReportsController.getAllReports)]);
+      .get([wrapCatch(ReportsController.getAllReports)]);
 
     this.app
       .route(`${this.path}/reports/admin`)

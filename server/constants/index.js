@@ -1,4 +1,4 @@
-const generic = ({
+export const generic = ({
   title,
   body,
   sender_firebase_token,
@@ -30,104 +30,6 @@ const generic = ({
 });
 
 export const NOTIFICATION_DATA = {
-  INVITATION: {
-    ASSIGNED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
-      generic({
-        title: "Lawyer Assigned",
-        body: "A lawyer has been assigned to a case",
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "user",
-        status: "police_invitation",
-        view: "user_police_invitation_detail_screen",
-        click_action: "lawyer_shown_interest",
-      }),
-    CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
-      generic({
-        title: "New Police Invitation",
-        body: "Kindly Indicate Interest to get assigned to the case",
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "lawyer",
-        view: "lawyer_police_invitation_screen",
-        status: "police_invitation",
-        click_action: "new_police_invitation_created",
-      }),
-    MARK_AS_COMPLETED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
-      generic({
-        title: "Police Invitation Completed",
-        body: "Kindly drop a review for the lawyer",
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "user",
-        status: "police_invitation",
-        view: "consultation_screen",
-        click_action: "case_closed",
-      }),
-  },
-  RESPONSE: {
-    ASSIGNED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
-      generic({
-        title: "Emergency Response Assigned",
-        body: "A Lawyer has been assigned to your emergency response",
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "user",
-        view: "user_emergency_response_screen",
-        status: "emergency_response",
-        click_action: "assigned_emergency_response",
-      }),
-
-    MEET_TIME: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
-      generic({
-        title: "Meet Time",
-        body: "Lawyer has indicated that he has met with you.",
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "user",
-        view: "user_emergency_response_screen",
-        status: "emergency_response",
-        click_action: "meet_with_lawyer",
-      }),
-    CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token, ...rest }) =>
-      generic({
-        title: "New Emergency Response",
-        body: "Kindly Indicate Interest to get assigned to the case",
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "lawyer",
-        view: "lawyer_emergency_response_screen",
-        status: "emergency_response",
-        click_action: "create_emergency_response",
-        ...rest,
-      }),
-    MARK_AS_COMPLETED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
-      generic({
-        title: "Emergency Response Completed",
-        body: "Response has been completed kindly drop a review",
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "user",
-        view: "consultation_screen",
-        status: "emergency_response",
-        click_action: "lawyer_mark_as_completed",
-      }),
-  },
-
   SMALL_CLAIM: {
     MARK_INTEREST: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
       generic({
@@ -143,71 +45,21 @@ export const NOTIFICATION_DATA = {
         view: "user_small_claim_detail_screen",
         click_action: "lawyer_shown_interest",
       }),
-    CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
+  },
+  RESPONSE: {
+    CREATED: ({ sender_id, status_id, sender_name, sender_firebase_token, ...rest }) =>
       generic({
-        title: "New Small Claims",
+        title: "New Emergency Response",
         body: "Kindly Indicate Interest to get assigned to the case",
         sender_firebase_token,
         sender_id,
         status_id,
         sender_name,
         receiver_role: "lawyer",
-        view: "small_claim_screen",
-        status: "small_claim",
-        click_action: "new_small_claim_created",
-      }),
-    MARK_AS_COMPLETED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
-      generic({
-        title: "Small Claims Completed",
-        body: "Kindly drop a review for the lawyer",
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "user",
-        view: "consultation_screen",
-        status: "small_claim",
-        click_action: "case_closed",
-      }),
-    ASSIGNED: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
-      generic({
-        title: "Case Assigned",
-        body:
-          "You have been assigned a small claim kindly proceed with it execution once payment is confirmed",
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "lawyer",
-        view: "lawyer_small_claim_detail_screen",
-        status: "small_claim",
-        click_action: "user_choose_me_for_claim",
-      }),
-    PAID: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
-      generic({
-        title: "Paid Claim",
-        body: "Claim has have been paid for kindly proceed with it execution",
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "lawyer",
-        view: "lawyer_small_claim_detail_screen",
-        status: "small_claim",
-        click_action: "user_choose_me_for_claim",
-      }),
-    MARK_AS_IN_PROGRESS: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
-      generic({
-        title: "Claim Started",
-        body: "Claim has have been started by assigned lawyer",
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "lawyer",
-        view: "lawyer_small_claim_detail_screen",
-        status: "small_claim",
-        click_action: "user_choose_me_for_claim",
+        view: "lawyer_emergency_response_screen",
+        status: "emergency_response",
+        click_action: "create_emergency_response",
+        ...rest,
       }),
   },
 
@@ -238,73 +90,13 @@ export const NOTIFICATION_DATA = {
       google_sent_time: new Date().toISOString(),
     },
   }),
-
-  WITHDRAWAL: {
-    INITIATED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
-      generic({
-        title: "Withdrawal Initiated",
-        body: "A withdrawal has been initiated kindly approve this transaction for disbursement",
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "admin",
-        view: "withdrawal_initiated_screen",
-        status: "withdrawal_initiated",
-        click_action: "new_withdrawal_initiated",
-      }),
-
-    AUTHORIZED: ({ sender_id, status_id, sender_name, sender_firebase_token }) =>
-      generic({
-        title: "Withdrawal Authorized",
-        body:
-          "Withdrawal has been authorized and funds should be available in your account shortly, kindly reach out to support in case there is any delays",
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "lawyer",
-        view: "withdrawal_authorized_screen",
-        status: "withdrawal_authorized",
-        click_action: "new_withdrawal_authorized",
-      }),
-  },
-
-  COOPERATE_ACCESS: {
-    GRANTED: ({ sender_id, sender_name, status_id, sender_firebase_token }) =>
-      generic({
-        title: "Access Granted",
-        body: `You have been granted access to use cooperate code`,
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "user",
-        view: "user_cooperate_access",
-        status: "cooperate_access",
-        click_action: "user_choose_me_for_cooperate_access",
-      }),
-
-    REVOKED: ({ sender_id, sender_name, status_id, sender_firebase_token, ...rest }) =>
-      generic({
-        title: "Access Revoked",
-        body: `Your access to use this cooperate code has been revoked`,
-        sender_firebase_token,
-        sender_id,
-        status_id,
-        sender_name,
-        receiver_role: "user",
-        view: "user_cooperate_access",
-        status: "cooperate_access",
-        click_action: "user_choose_me_for_cooperate_access",
-      }),
-  },
 };
 
 export const EVENT_IDENTIFIERS = {
   INVITATION: {
     CREATED: "INVITATION_CREATED",
     ASSIGNED: "INVITATION_ASSIGNED",
+    CANCELLED: "INVITATION_CANCELLED",
     MARK_AS_COMPLETED: "INVITATION_MARK_AS_COMPLETED",
     ADMIN_ASSIGN_LAWYER: "INVITATION_ADMIN_ASSIGN_LAWYER",
   },
@@ -313,13 +105,20 @@ export const EVENT_IDENTIFIERS = {
     EDITED: "REVIEW_EDITED",
     DELETED: "REVIEW_DELETED",
   },
+  MILESTONE: {
+    CREATED: "MILESTONE_CREATED",
+    PAID: "MILESTONE_PAID",
+    COMPLETED: "MILESTONE_COMPLETED",
+  },
   SMALL_CLAIM: {
     CREATED: "SMALL_CLAIM_CREATED",
     PAID: "SMALL_CLAIM_PAID",
-    ASSIGNED: "SMALL_CLAIM_ASSIGNED",
     MARK_INTEREST: "SMALL_CLAIM_MARK_INTEREST",
-    MARK_AS_IN_PROGRESS: "SMALL_CLAIM_MARK_AS_IN_PROGRESS",
-    MARK_AS_COMPLETED: "SMALL_CLAIM_MARK_AS_COMPLETED",
+    EDIT_INTEREST: "SMALL_CLAIM_EDIT_INTEREST",
+    CONSULTATION_COMPLETED: "SMALL_CLAIM_CONSULTATION_COMPLETED",
+    CANCELLED: "SMALL_CLAIM_CANCELLED",
+    COMPLETED: "SMALL_CLAIM_COMPLETED",
+    CLOSED: "SMALL_CLAIM_CLOSED",
   },
   RESPONSE: {
     CREATED: "RESPONSE_CREATED",

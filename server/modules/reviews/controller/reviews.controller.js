@@ -53,26 +53,6 @@ class ReviewsController {
     });
   }
 
-  async editReview(req, res) {
-    const eventEmitter = req.app.get("eventEmitter");
-
-    const {
-      body,
-      params: { id },
-      oldReview,
-    } = req;
-
-    const [, [updatedReview]] = await ReviewsService.update(id, body, oldReview);
-
-    eventEmitter.emit(EVENT_IDENTIFIERS.REVIEW.EDITED, updatedReview);
-
-    return res.status(200).send({
-      success: true,
-      message: "review successfully updated",
-      review: updatedReview,
-    });
-  }
-
   reviewExits(context) {
     return async (req, res, next) => {
       const {

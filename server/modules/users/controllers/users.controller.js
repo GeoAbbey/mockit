@@ -1,5 +1,6 @@
 import debug from "debug";
 import createError from "http-errors";
+import axios from "axios";
 import { compareAsc } from "date-fns";
 
 import UsersService from "../service/user.service";
@@ -15,8 +16,11 @@ const config = configOptions[envs];
 
 import { Op } from "sequelize";
 import { paginate as pagination } from "../../helpers";
+import { smsService } from "../../../utils/smsServices";
+import { applicationMappers, messageTemplateMappers } from "../../../utils/smsServices/mappers";
 
 const log = debug("app:users-controller");
+const SMSService = smsService(axios);
 
 class UsersController {
   static instance;
@@ -129,22 +133,17 @@ class UsersController {
       lawyer: {
         documents: {},
       },
-      emergencyContact: {},
       ...body,
     };
 
     if (req.files) {
       var {
-        files: { profilePic, link, emergencyContactProfilePic },
+        files: { profilePic, link },
       } = req;
     }
 
     if (profilePic && profilePic[0]) {
       newBody.profilePic = profilePic[0].location;
-    }
-
-    if (emergencyContactProfilePic && emergencyContactProfilePic[0]) {
-      newBody.emergencyContact.profilePic = emergencyContactProfilePic[0].location;
     }
 
     if (link && link[0]) {
@@ -180,13 +179,48 @@ class UsersController {
     } = req;
     log(`verifying otp details of user with id ${id}`);
 
-    body.isVerified = true;
-    const [, [User]] = await UsersService.update(id, body, user);
+    let data = {
+      settings: {
+        isEmailVerified: true,
+      },
+    };
+    const [, [User]] = await UsersService.update(id, data, user);
     delete User.dataValues.password;
     const token = await Authenticate.signToken(User.dataValues);
     return res.status(200).send({
       success: true,
       message: "email successfully verified",
+      token,
+    });
+  }
+
+  async verifyPhoneNumber(req, res, next) {
+    const {
+      body: { pin },
+      user: {
+        id,
+        settings: {
+          isPhone: { pinId },
+        },
+      },
+    } = req;
+    log(`verifying pin details of user with id ${id}`);
+
+    console.log({ pinId });
+    const { response } = await SMSService.verifyPhone({ pin }, pinId);
+    if (!response.verified) return next(createError(response.status, response.statusText));
+
+    const [, [User]] = await UsersService.update(
+      id,
+      { settings: { isEmailVerified: true, isPhone: { verified: response.verified } } },
+      req.user
+    );
+
+    delete User.dataValues.password;
+    const token = await Authenticate.signToken(User.dataValues);
+    return res.status(200).send({
+      success: true,
+      message: "phone successfully verified",
       token,
     });
   }
@@ -204,6 +238,32 @@ class UsersController {
     res.status(200).send({
       message: "new OTP successfully generated",
       success: true,
+    });
+  }
+
+  async generateNewPin(req, res, next) {
+    const {
+      user: { phone, id },
+    } = req;
+    log(`Generating new pin for user with phone ${phone}`);
+
+    const response = await SMSService.send2FAPin({
+      to: phone,
+      applicationId: applicationMappers.verifyPhoneId,
+      messageId: messageTemplateMappers.verifyPhoneMessageId,
+      from: "App Rescue",
+    });
+
+    if (!response.success) return next(createError(500, "Something went wrong. Try again later"));
+    const {
+      response: { pinId },
+    } = response;
+
+    await UsersService.update(id, { settings: { isPhone: { pinId } } }, req.user);
+
+    res.status(200).send({
+      ...response,
+      message: "new PIN successfully generated",
     });
   }
 
@@ -249,13 +309,15 @@ class UsersController {
       const identifier =
         (req.params && req.params.id) ||
         (req.decodedToken && req.decodedToken.id) ||
-        (req.body && req.body.email);
+        (req.body && req.body.email && { email: req.body.email }) ||
+        (req.body && req.body.phone && { phone: req.body.phone });
 
       if (!identifier) return next(createError(403, "means of identification must be supplied"));
       log(`validating that user with identifier ${identifier} exists`);
-      const user = req.body.email
-        ? await UsersService.findOne({ email: identifier })
-        : await UsersService.findByPk(identifier);
+      const user =
+        req.body.email || req.body.phone
+          ? await UsersService.findOne({ ...identifier })
+          : await UsersService.findByPk(identifier);
 
       if (user && context === "signup")
         return next(createError(409, "user with the given email already exits"));

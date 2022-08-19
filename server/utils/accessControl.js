@@ -32,8 +32,6 @@ class Permissions {
       log("checking admin access to perform a certain operation");
       const { role } = req.decodedToken;
 
-      console.log({ role, decodedToken: req.decodedToken, body: req.body });
-
       if (role !== "admin" && role !== "super-admin") {
         return next(createError(403, "you do not have access to perform this operation"));
       }

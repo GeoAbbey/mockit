@@ -5,6 +5,8 @@ import SmallClaimsService from "../../small-claims/services/small-claims.service
 
 const env = process.env.NODE_ENV || "development";
 import configOptions from "../../../config/config";
+import milestoneService from "../../mileStone/service/milestone.service";
+import interestedLawyersServices from "../../interestedLawyers/services/interestedLawyers.services";
 
 const config = configOptions[env];
 const logger = debug("app:modules:payment:controllers:helpers");
@@ -14,7 +16,7 @@ const common = (args) => ({
   contractCode: config.payment_contract_code,
   currencyCode: "NGN",
   customerName: `${args.firstName} ${args.lastName}`,
-  paymentMethods: ["CARD", "ACCOUNT_TRANSFER"],
+  paymentMethods: ["CARD"],
   redirectUrl: args.callback_url,
   monnifyToken: args.monnifyToken,
   paymentReference: `ARC-${nanoid(12)}`,
@@ -46,15 +48,40 @@ export const subscriptionPay = (args) => {
   };
 };
 
+export const mileStonePay = async (args) => {
+  console.log("I was here 🍑 🇳🇬");
+  console.log(args);
+  if (!args.modelId) return { success: false, message: "modelId is required to prosecute payment" };
+
+  const theMileStone = await milestoneService.find(args.modelId);
+  if (!theMileStone) return { success: false, message: "mile stone can not be found" };
+
+  const { lawyerId, claimId, percentage, ticketId } = theMileStone;
+
+  const { serviceCharge } = await interestedLawyersServices.findOne({ lawyerId, claimId });
+
+  const amountToPay =
+    ((serviceCharge + (config.administrationPercentage / 100) * serviceCharge) *
+      parseInt(percentage)) /
+    100;
+
+  return {
+    ...common(args),
+    metaData: { id: args.id, type: args.type, modelId: args.modelId, ticketId },
+    amount: amountToPay,
+    paymentDescription: `of subscription has been purchased by user ${args.id}`,
+  };
+};
+
 export const singleInvitationPay = async (args) => {
   logger("composing input for singleInvitationPay initialization");
 
   if (!args.modelId)
     return { success: false, message: "invitation modelId is required to prosecute payment" };
 
-  const oldInvitation = await InvitationsService.find(args.modelId, null);
+  const { paid, ticketId } = await InvitationsService.find(args.modelId, null);
 
-  if (oldInvitation.dataValues.paid) {
+  if (paid) {
     return {
       message: "this item has already been paid for",
       success: false,
@@ -65,7 +92,7 @@ export const singleInvitationPay = async (args) => {
     ...common(args),
     amount: config.invitationCost,
     paymentDescription: `amount of ${config.invitationCost} is paid for single invitation with ${args.modelId} by user ${args.id}`,
-    metaData: { id: args.id, type: args.type, modelId: args.modelId },
+    metaData: { id: args.id, type: args.type, modelId: args.modelId, ticketId },
   };
 };
 
@@ -76,18 +103,19 @@ export const singleSmallClaimPay = async (args) => {
   if (!args.lawyerId)
     return { success: false, message: "ID of interested lawyer is required to prosecute payment" };
 
-  const oldClaim = await SmallClaimsService.find(args.modelId, true);
+  const { paid, ticketId } = await SmallClaimsService.find(args.modelId);
 
-  if (oldClaim.dataValues.paid) {
+  if (paid) {
     return {
       message: "this item has already been paid for",
       success: false,
     };
   }
 
-  const lawyerOfInterest = oldClaim.dataValues.interestedLawyers.find(
-    (lawyer) => lawyer.lawyerId === args.lawyerId
-  );
+  const lawyerOfInterest = await interestedLawyersServices.findOne({
+    claimId: args.modelId,
+    lawyerId: args.lawyerId,
+  });
 
   if (!lawyerOfInterest)
     return {
@@ -95,21 +123,16 @@ export const singleSmallClaimPay = async (args) => {
       message: "The lawyer selected didn't mark interest in this particular small claim",
     };
 
-  const {
-    dataValues: { baseCharge, serviceCharge },
-  } = lawyerOfInterest;
-
-  const totalCostOfService = baseCharge + serviceCharge;
-
   return {
     ...common(args),
-    amount: totalCostOfService,
-    paymentDescription: `amount of ${totalCostOfService} is paid for single small claim with ${args.modelId} by user ${args.id}`,
+    amount: config.consultationFee,
+    paymentDescription: `amount of ${config.consultationFee} is paid for single small claim with ${args.modelId} by user ${args.id}`,
     metaData: {
       id: args.id,
       type: args.type,
       modelId: args.modelId,
       assignedLawyerId: args.lawyerId,
+      ticketId,
     },
   };
 };

@@ -21,38 +21,26 @@ module.exports = {
         unique: true,
         allowNull: false,
       },
-      notification: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true,
+      phone: {
+        type: Sequelize.STRING,
+        unique: true,
         allowNull: false,
       },
-      isAccountSuspended: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true,
-        allowNull: false,
+      role: {
+        type: Sequelize.STRING,
       },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE,
+      firebaseToken: {
+        type: Sequelize.STRING,
       },
-      notification: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
+      profilePic: {
+        type: Sequelize.STRING,
+      },
+      settings: {
+        type: Sequelize.JSONB,
       },
       password: {
         type: Sequelize.STRING,
         allowNull: false,
-      },
-      isSubscribed: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
-      },
-      isVerified: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
       },
       emergencyContact: {
         type: Sequelize.JSONB,
@@ -69,26 +57,21 @@ module.exports = {
       otp: {
         type: Sequelize.JSONB,
       },
-      phone: {
-        type: Sequelize.STRING,
-      },
       dob: {
         type: Sequelize.STRING,
       },
       description: {
         type: Sequelize.STRING,
       },
-      hasAgreedToTerms: {
-        type: Sequelize.BOOLEAN,
+      sumOfReviews: {
+        type: Sequelize.INTEGER,
       },
-      role: {
-        type: Sequelize.STRING,
+      numOfReviews: {
+        type: Sequelize.INTEGER,
       },
-      firebaseToken: {
-        type: Sequelize.STRING,
-      },
-      profilePic: {
-        type: Sequelize.STRING,
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,

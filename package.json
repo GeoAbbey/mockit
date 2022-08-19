@@ -18,7 +18,8 @@
     "seed:up": "npx sequelize-cli db:seed:all",
     "seed:down:prod": "export NODE_ENV=devDeployment && npx sequelize-cli db:seed:undo:all",
     "seed:down": "npx sequelize-cli db:seed:undo:all",
-    "create:template": "node /Users/gbolahanolagunju/Documents/zapplawyer/server/utils/emailTemplates.js"
+    "make:app": "node server/utils/smsServices/applications.js",
+    "make:message": "node server/utils/smsServices/messages.js"
   },
   "repository": {
     "type": "git",

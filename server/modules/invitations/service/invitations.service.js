@@ -161,7 +161,7 @@ class InvitationsService {
         dateOfVisit: invitationDTO.dateOfVisit || dateOfVisit,
         isNotified: handleFalsy(invitationDTO.isNotified, isNotified),
         attachments: handleAttachments(),
-        assignedLawyerId: invitationDTO.assignedLawyerId || assignedLawyerId,
+        assignedLawyerId: handleFalsy(invitationDTO.assignedLawyerId, assignedLawyerId),
       },
       { where: { id }, returning: true, ...t }
     );

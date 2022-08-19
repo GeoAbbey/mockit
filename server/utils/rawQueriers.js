@@ -7,6 +7,6 @@ export const rawQueries = {
   },
 
   noOfActiveUsers: () => {
-    return `SELECT role, COUNT(*) FROM "Users" WHERE "Users"."isVerified"=true GROUP BY role`;
+    return `SELECT role, COUNT(*) FROM "Users" where "Users".settings @> '{"isEmailVerified":true}' AND "Users".settings @> '{"isPhone":{"verified": true}}' GROUP BY role`;
   },
 };
