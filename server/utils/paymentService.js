@@ -82,9 +82,13 @@ export const payStack = (request) => {
         }
 
         return { success: true, response: response.data };
-      } catch (error) {
-        console.log({ error }, error.response, "🚎");
-        return { success: false, response: error };
+      } catch ({ response }) {
+        console.log({ response });
+        throw new exceptionHandler({
+          message: response.statusText,
+          status: response.status,
+          name: "paymentExceptionHandler",
+        });
       }
     },
   };

@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { exceptionHandler } from "../exceptionHandler.js";
 import { applicationMappers } from "./mappers.js";
 
 dotenv.config();
@@ -52,15 +53,13 @@ export const smsService = (request) => ({
         response = await request({ url, method: "DELETE", headers });
       }
 
-      console.log({ response });
       return { success: true, response: response.data };
-    } catch (error) {
-      console.log(
-        { error: error.response },
-        error.response.data.requestError.serviceException,
-        "🚎"
-      );
-      return { success: false, response: error };
+    } catch ({ response }) {
+      throw new exceptionHandler({
+        message: response.statusText,
+        status: response.status,
+        name: "SMSExceptionHandler",
+      });
     }
   },
 });
