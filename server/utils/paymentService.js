@@ -1,5 +1,6 @@
 const env = process.env.NODE_ENV || "development";
 import configOptions from "../config/config";
+import { exceptionHandler } from "./exceptionHandler";
 
 const config = configOptions[env];
 export const payStack = (request) => {

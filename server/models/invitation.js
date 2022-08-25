@@ -40,7 +40,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         defaultValue: "initiated",
       },
-      time: { type: DataTypes.STRING, allowNull: false },
       dateOfVisit: { type: DataTypes.DATE, allowNull: false },
       paid: { type: DataTypes.BOOLEAN, defaultValue: () => false },
       isNotified: { type: DataTypes.BOOLEAN, defaultValue: () => false },

@@ -42,6 +42,26 @@ class PaymentsController {
     });
   }
 
+  async activityHistory(req, res, next) {
+    const {
+      decodedToken: { id },
+      query: { paginate = {} },
+    } = req;
+
+    const { offset, limit } = pagination(paginate);
+    const activities = await PaymentsService.activity({ id, offset, limit });
+
+    return res.status(200).send({
+      success: true,
+      message: "all prices successfully returned",
+      activities: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        ...activities,
+      },
+    });
+  }
+
   async payInHistory(req, res, next) {
     const {
       filter,

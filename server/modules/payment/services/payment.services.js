@@ -20,7 +20,9 @@ import configOptions from "../../../config/config";
 import { EVENT_IDENTIFIERS } from "../../../constants";
 import milestoneService from "../../mileStone/service/milestone.service";
 import { exceptionHandler } from "../../../utils/exceptionHandler";
+import { rawQueries } from "../../../utils/rawQueriers";
 import interestedLawyersServices from "../../interestedLawyers/services/interestedLawyers.services";
+import { QueryTypes } from "sequelize";
 
 const config = configOptions[env];
 const getAmount = PayoutsController.getAmount;
@@ -35,6 +37,13 @@ class PaymentsService {
     }
     return PaymentsService.instance;
   }
+
+  addAmountToAdmin = async (amount, t) => {
+    const superAdmin = await userService.findOne({ role: "super-admin" });
+    const adminAccount = await AccountInfosService.find(superAdmin.id);
+
+    await adminAccount.increment({ walletAmount: amount }, t);
+  };
 
   oneTimeFee = async ({ oldAccountInfo, lawyerInfo }) => {
     try {
@@ -51,6 +60,9 @@ class PaymentsService {
           oldAccountInfo,
           { transaction: t }
         );
+
+        //add it to admin account
+        await this.addAmountToAdmin(parseInt(config.oneTimeFee), { transaction: t });
 
         const receipt = await TransactionService.create(
           {
@@ -1182,6 +1194,13 @@ class PaymentsService {
       console.log({ error }, "🐒");
       return error;
     }
+  }
+
+  async activity({ id, offset, limit }) {
+    return models.sequelize.query(rawQueries.activities(), {
+      replacements: { id, offset, limit },
+      type: QueryTypes.SELECT,
+    });
   }
 }
 

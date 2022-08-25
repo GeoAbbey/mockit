@@ -66,6 +66,10 @@ export class PaymentRoutes extends CommonRoutesConfig {
       ]);
 
     this.app
+      .route(`${this.path}/payment/activity`)
+      .get([Authenticate.verifyToken(), wrapCatch(PaymentsController.activityHistory)]);
+
+    this.app
       .route(`${this.path}/payment/price-list`)
       .get([Authenticate.verifyToken(), wrapCatch(PaymentsController.priceList)]);
 
