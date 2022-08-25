@@ -6,6 +6,7 @@ module.exports = {
       "AccountInfos",
       [
         {
+          id: "a2e2c494-0be4-4b7f-92bb-aeaa3d6a431b",
           walletAmount: 0,
           pendingAmount: 0,
           subscriptionCount: 0,
