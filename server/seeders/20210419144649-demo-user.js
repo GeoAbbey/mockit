@@ -1,6 +1,4 @@
 "use strict";
-
-const v4 = require("uuid").v4;
 const bcrypt = require("bcrypt");
 
 module.exports = {

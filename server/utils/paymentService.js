@@ -1,5 +1,6 @@
 const env = process.env.NODE_ENV || "development";
 import configOptions from "../config/config";
+import { exceptionHandler } from "./exceptionHandler";
 
 const config = configOptions[env];
 export const payStack = (request) => {
@@ -82,9 +83,13 @@ export const payStack = (request) => {
         }
 
         return { success: true, response: response.data };
-      } catch (error) {
-        console.log({ error }, error.response, "🚎");
-        return { success: false, response: error };
+      } catch ({ response }) {
+        console.log({ response });
+        throw new exceptionHandler({
+          message: response.statusText,
+          status: response.status,
+          name: "paymentExceptionHandler",
+        });
       }
     },
   };

@@ -206,8 +206,8 @@ class UsersController {
     } = req;
     log(`verifying pin details of user with id ${id}`);
 
-    console.log({ pinId });
     const { response } = await SMSService.verifyPhone({ pin }, pinId);
+
     if (!response.verified) return next(createError(response.status, response.statusText));
 
     const [, [User]] = await UsersService.update(

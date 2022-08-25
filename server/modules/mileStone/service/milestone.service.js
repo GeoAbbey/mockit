@@ -36,10 +36,10 @@ class MileStonesService {
         message: "You do not have permission to access this resource",
       };
 
-    if (claim.status !== "consultation_completed")
+    if (claim.status !== "engagement")
       return {
         success: false,
-        message: "Kindly complete consultation before proceeding to create a milestone",
+        message: "This small claim has not be  cleared to proceed to engagement",
       };
 
     const mileStones = await models.MileStone.bulkCreate(MileStoneDTO);
