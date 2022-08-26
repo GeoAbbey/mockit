@@ -6,6 +6,7 @@ import { paginate as pagination } from "../../helpers";
 import { Op } from "sequelize";
 import WithdrawalService from "../../withdrawals/services/withdrawals.services";
 import { pgDateFormate } from "../../../utils/pgFormateDate";
+import paymentServices from "../../payment/services/payment.services";
 
 const log = debug("app:payout-withdrawal-controller");
 
@@ -21,19 +22,12 @@ class PayoutAndWithdrawalController {
   async getHistory(req, res, next) {
     log("getting combined transaction history of both payout and withdrawals");
     const {
-      filter = {},
+      decodedToken: { id },
       query: { paginate = {} },
     } = req;
 
-    const payoutHistory = await PayoutsService.getHistory(filter, paginate);
-    delete filter.modelType;
-    const withdrawalHistory = await WithdrawalService.findMany(filter, paginate, false);
-
-    const history = [...payoutHistory.rows, ...withdrawalHistory.rows];
-
-    history.sort((firstItem, secondItem) => secondItem.createdAt - firstItem.createdAt);
-
     const { offset, limit } = pagination(paginate);
+    const history = await paymentServices.payOuts({ id, offset, limit });
 
     return res.status(201).send({
       success: true,

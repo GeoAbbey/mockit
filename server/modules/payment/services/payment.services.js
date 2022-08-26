@@ -156,7 +156,7 @@ class PaymentsService {
         const thePayout = await PayOutServices.create(
           {
             ownerId: theModel.assignedLawyerId || theModel.lawyerId,
-            modelType: theModel.type,
+            type: theModel.type,
             modelId: theModel.id,
             ticketId: theModel.ticketId,
             amount: await getAmount(theModel),
@@ -190,7 +190,7 @@ class PaymentsService {
       let result = await models.sequelize.transaction(async (t) => {
         const oldPayout = await PayOutServices.findOne({
           ownerId: theModel.assignedLawyerId || theModel.lawyerId,
-          modelType: theModel.type,
+          type: theModel.type,
           modelId: theModel.id,
           ticketId: theModel.ticketId,
         });
@@ -798,6 +798,7 @@ class PaymentsService {
         const receipt = await TransactionService.create(
           {
             ownerId: args.id,
+            notes: "debit",
             performedBy: args.id,
             type: "mileStone",
             modelId: args.modelId,
@@ -1209,6 +1210,13 @@ class PaymentsService {
 
   async activity({ id, offset, limit }) {
     return models.sequelize.query(rawQueries.activities(), {
+      replacements: { id, offset, limit },
+      type: QueryTypes.SELECT,
+    });
+  }
+
+  async payOuts({ id, offset, limit }) {
+    return models.sequelize.query(rawQueries.payOuts(), {
       replacements: { id, offset, limit },
       type: QueryTypes.SELECT,
     });
