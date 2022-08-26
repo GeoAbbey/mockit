@@ -309,8 +309,9 @@ class PaymentsService {
 
       const receipt = await PayInServices.create(
         {
-          for: metadata.type,
+          type: metadata.type,
           amount: parseFloat(amount),
+          notes: "debit",
           reference,
           ticketId: metadata.ticketId,
           ownerId: metadata.id,
