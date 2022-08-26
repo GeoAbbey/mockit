@@ -164,7 +164,6 @@ export const responseEvents = (eventEmitter) => {
         },
         userDetails
       );
-      console.log({ coordinates }, "🍋");
 
       //return all the lawyers that are online and aren't busy within the given radius
       const results = await LocationServices.findLawyersWithinRadius({
@@ -173,7 +172,6 @@ export const responseEvents = (eventEmitter) => {
         radius: config.radius,
       });
 
-      logger({ results }, "🐥");
       const lawyerModifiedWithResponseId = [];
 
       results.forEach((result) => {
@@ -194,7 +192,8 @@ export const responseEvents = (eventEmitter) => {
       await PaymentsService.handleResponse({
         id: ownerId,
         modelId: responseId,
-        modelType: "response",
+        notes: "debit",
+        type: "response",
       });
     }
   );

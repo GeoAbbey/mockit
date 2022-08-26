@@ -8,7 +8,10 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
-      for: {
+      type: {
+        type: Sequelize.STRING,
+      },
+      notes: {
         type: Sequelize.STRING,
       },
       ownerId: {

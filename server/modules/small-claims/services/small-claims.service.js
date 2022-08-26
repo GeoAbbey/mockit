@@ -46,14 +46,14 @@ class SmallClaimsService {
                 {
                   model: models.PayIn,
                   as: "oneTimePayments",
-                  where: { for: "singleSmallClaim", modelId: id },
+                  where: { type: "singleSmallClaim", modelId: id },
                   attributes: ["amount"],
                   required: false,
                 },
                 {
                   model: models.Transaction,
                   as: "paymentFromWallet",
-                  where: { modelType: "smallClaim", modelId: id },
+                  where: { type: "smallClaim", modelId: id },
                   attributes: ["amount"],
                   required: false,
                 },

@@ -17,7 +17,7 @@ module.exports = {
           as: "ownerId",
         },
       },
-      modelType: {
+      type: {
         type: Sequelize.STRING,
       },
       code: {

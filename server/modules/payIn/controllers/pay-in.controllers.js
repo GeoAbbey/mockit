@@ -57,7 +57,7 @@ class PayInController {
       filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
     }
 
-    if (query.search && query.search.for) {
+    if (query.search && query.search.type) {
       filter = { ...filter, for: query.search.for };
     }
 

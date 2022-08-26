@@ -63,14 +63,14 @@ class InvitationsService {
               {
                 model: models.PayIn,
                 as: "oneTimePayments",
-                where: { for: "singleInvitation", modelId: id },
+                where: { type: "singleInvitation", modelId: id },
                 attributes: ["amount"],
                 required: false,
               },
               {
                 model: models.Transaction,
                 as: "paymentFromWallet",
-                where: { modelType: "invitation", modelId: id },
+                where: { type: "invitation", modelId: id },
                 attributes: ["amount"],
                 required: false,
               },

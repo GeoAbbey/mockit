@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       ownerId: { type: DataTypes.UUID, allowNull: false },
       performedBy: { type: DataTypes.UUID },
-      modelType: {
+      type: {
         type: DataTypes.STRING,
       },
       ticketId: {
@@ -43,6 +43,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       notes: {
         type: DataTypes.STRING,
+        allowNull: false,
       },
       amount: {
         type: DataTypes.DECIMAL(10, 2),
