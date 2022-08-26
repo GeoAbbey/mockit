@@ -18,11 +18,11 @@ export const rawQueries = {
   },
 
   payOuts: () => {
-    return `SELECT 'credit' as action, "Payouts"."createdAt", "Payouts".amount, "Payouts".type, "Payouts"."ticketId" as notes
-    FROM "Payouts" WHERE "ownerId"=:id
+    return `SELECT  'credit' as action, "Payouts"."createdAt", "Payouts".amount, "Payouts".type, "Payouts"."ticketId" , "Payouts".status as notes 
+    FROM "Payouts"  WHERE "ownerId" = :id
     UNION ALL
-    SELECT 'fluid', "Transactions"."createdAt", "Transactions".amount, "Transactions".type, "Transactions".notes FROM "Transactions" WHERE "ownerId"=:id
+    SELECT 'inflow', "Transactions"."createdAt", "Transactions".amount, "Transactions".type, "Transactions"."ticketId", "Transactions".notes FROM "Transactions"  WHERE "ownerId" = :id
     UNION ALL
-    SELECT 'debit', "Withdrawals"."createdAt", "Withdrawals".amount, "Withdrawals".status as type, "Withdrawals"."ticketId" as notes FROM "Withdrawals" WHERE "ownerId"=:id ORDER BY "createdAt" DESC limit :limit offset :offset;`;
+    SELECT 'debit', "Withdrawals"."createdAt", "Withdrawals".amount, "Withdrawals".status as type, "Withdrawals"."ticketId", "Withdrawals".reference as notes  FROM "Withdrawals" WHERE "ownerId"=:id ORDER BY "createdAt" DESC limit :limit offset :offset;`;
   },
 };
