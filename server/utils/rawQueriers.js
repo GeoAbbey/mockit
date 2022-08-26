@@ -11,9 +11,9 @@ export const rawQueries = {
   },
 
   activities: () => {
-    return `SELECT "PayIns"."createdAt", "PayIns".amount, "PayIns"."ticketId" as notes, "PayIns".for as service
+    return `SELECT "PayIns"."createdAt", "PayIns".amount, "PayIns".notes, "PayIns".type
     FROM "PayIns"
     UNION ALL
-    SELECT "Transactions"."createdAt", "Transactions".amount, "Transactions".notes, "Transactions"."modelType" as service FROM "Transactions" WHERE "ownerId"=:id ORDER BY "createdAt" ASC limit :limit offset :offset;`;
+    SELECT "Transactions"."createdAt", "Transactions".amount, "Transactions".notes, "Transactions".type FROM "Transactions" WHERE "ownerId"=:id ORDER BY "createdAt" ASC limit :limit offset :offset;`;
   },
 };

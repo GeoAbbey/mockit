@@ -9,7 +9,7 @@ export const TransactionSchema = Joi.object().keys({
 export const queryOptions = Joi.object().keys({
   search: Joi.object().keys({
     ownerId: Joi.string().guid({ version: "uuidv4" }),
-    modelType: Joi.string().valid("small-claim", "invitation", "response"),
+    type: Joi.string().valid("small-claim", "invitation", "response"),
     ticketId: Joi.string(),
     code: Joi.string(),
     notes: Joi.string(),

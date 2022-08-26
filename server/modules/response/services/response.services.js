@@ -66,7 +66,7 @@ class ResponsesService {
                 {
                   model: models.Transaction,
                   as: "paymentFromWallet",
-                  where: { modelType: "response", modelId: id },
+                  where: { type: "response", modelId: id },
                   attributes: ["amount"],
                   required: false,
                 },

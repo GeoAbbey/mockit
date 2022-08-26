@@ -57,7 +57,7 @@ class PaymentsController {
       activities: {
         currentPage: offset / limit + 1,
         pageSize: limit,
-        ...activities,
+        activities,
       },
     });
   }

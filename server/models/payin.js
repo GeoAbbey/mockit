@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   PayIn.init(
     {
-      for: {
+      type: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
@@ -44,6 +44,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: () => nanoid(10),
       },
       reference: { type: DataTypes.STRING, allowNull: false },
+      notes: { type: DataTypes.STRING, allowNull: false },
       subQuantity: {
         type: DataTypes.JSONB,
       },

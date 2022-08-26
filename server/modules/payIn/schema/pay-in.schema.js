@@ -2,7 +2,7 @@ import Joi from "joi";
 
 export const queryOptions = Joi.object().keys({
   search: Joi.object().keys({
-    for: Joi.string().valid(
+    type: Joi.string().valid(
       "singleSmallClaim",
       "singleInvitation",
       "wallet",

@@ -67,7 +67,8 @@ class PaymentsService {
         const receipt = await TransactionService.create(
           {
             ownerId: lawyerInfo.id,
-            notes: "one time fee",
+            type: "oneTimeFee",
+            notes: "debit",
             amount: config.oneTimeFee,
           },
           { transaction: t }
@@ -356,8 +357,9 @@ class PaymentsService {
 
       const receipt = await PayInServices.create(
         {
-          for: metadata.type,
+          type: metadata.type,
           amount: parseFloat(amount),
+          notes: "debit",
           reference,
           ticketId: metadata.ticketId,
           modelId: metadata.modelId,
@@ -409,8 +411,9 @@ class PaymentsService {
 
       const receipt = await PayInServices.create(
         {
-          for: metadata.type,
+          type: metadata.type,
           amount: parseFloat(amount),
+          notes: "debit",
           reference,
           ownerId: metadata.id,
           modelId: metadata.modelId,
@@ -457,8 +460,9 @@ class PaymentsService {
 
       const receipt = await PayInServices.create(
         {
-          for: metadata.type,
+          type: metadata.type,
           amount: Number(amount),
+          notes: "credit",
           reference,
           ownerId: metadata.id,
         },
@@ -497,8 +501,9 @@ class PaymentsService {
       //create a pay-in record that captures this payIn
       const receipt = await PayInServices.create(
         {
-          for: metadata.type,
+          type: metadata.type,
           amount: Number(amount),
+          notes: "credit",
           reference,
           ownerId: metadata.id,
         },
@@ -539,8 +544,9 @@ class PaymentsService {
 
       const receipt = await PayInServices.create(
         {
-          for: metadata.type,
+          type: metadata.type,
           amount: Number(amount),
+          notes: "credit",
           reference,
           subQuantity: {
             count: parseInt(amount / parseInt(config.costOfSubscriptionUnit)),
@@ -595,7 +601,7 @@ class PaymentsService {
 
     try {
       let result = await models.sequelize.transaction(async (t) => {
-        const oldClaim = await SmallClaimsService.find(args.modelId, true, { transaction: t });
+        const oldClaim = await SmallClaimsService.find(args.modelId, null, { transaction: t });
 
         if (oldClaim.dataValues.paid) {
           return {
@@ -646,7 +652,8 @@ class PaymentsService {
             code: args.code,
             ownerId: args.id,
             performedBy: args.id,
-            modelType: "smallClaim",
+            notes: "debit",
+            type: "smallClaim",
             modelId: args.modelId,
             ticketId: oldClaim.ticketId,
             amount: parseInt(config.consultationFee),
@@ -708,9 +715,10 @@ class PaymentsService {
         const receipt = await TransactionService.create(
           {
             code: args.code,
+            notes: "debit",
             ownerId: args.id,
             performedBy: args.id,
-            modelType: "invitation",
+            type: "invitation",
             modelId: args.modelId,
             ticketId: oldInvitation.ticketId,
             amount: config.invitationCost,
@@ -791,7 +799,7 @@ class PaymentsService {
           {
             ownerId: args.id,
             performedBy: args.id,
-            modelType: "mileStone",
+            type: "mileStone",
             modelId: args.modelId,
             ticketId,
             amount: amountToPay,
@@ -859,7 +867,8 @@ class PaymentsService {
           {
             ownerId: args.id,
             performedBy: args.id,
-            modelType: "invitation",
+            notes: "debit",
+            type: "invitation",
             modelId: args.modelId,
             ticketId: oldInvitation.ticketId,
             amount: config.invitationCost,
@@ -922,7 +931,7 @@ class PaymentsService {
           {
             ownerId: args.id,
             performedBy: args.id,
-            modelType: args.modelType,
+            type: args.modelType,
             notes: `Unit price of ${config.costOfSubscriptionUnit}`,
             amount: amount,
           },
@@ -988,7 +997,7 @@ class PaymentsService {
           {
             ownerId: args.id,
             performedBy: args.id,
-            modelType: "cooperate",
+            type: "cooperate",
             amount: args.amount,
           },
           { transaction: t }
@@ -1071,7 +1080,8 @@ class PaymentsService {
           {
             ownerId: args.id,
             performedBy: args.id,
-            modelType: "smallClaim",
+            notes: "debit",
+            type: "smallClaim",
             modelId: args.modelId,
             ticketId: oldClaim.ticketId,
             amount: parseInt(config.consultationFee),
@@ -1114,8 +1124,8 @@ class PaymentsService {
           {
             ownerId: args.id,
             performedBy: args.id,
-            modelType: "response",
-            notes: "return",
+            type: "response",
+            notes: "credit",
             amount: parseInt(config.costOfSubscriptionUnit),
           },
           { transaction: t }
@@ -1178,7 +1188,8 @@ class PaymentsService {
           {
             ownerId: args.id,
             performedBy: args.id,
-            modelType: "response",
+            notes: "debit",
+            type: "response",
             modelId: args.modelId,
             ticketId: oldResponse.ticketId,
             amount: parseInt(config.costOfSubscriptionUnit),
