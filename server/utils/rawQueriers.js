@@ -12,7 +12,7 @@ export const rawQueries = {
 
   activities: () => {
     return `SELECT "PayIns"."createdAt", "PayIns".amount, "PayIns".notes, "PayIns".type
-    FROM "PayIns"
+    FROM "PayIns" WHERE "ownerId"=:id 
     UNION ALL
     SELECT "Transactions"."createdAt", "Transactions".amount, "Transactions".notes, "Transactions".type FROM "Transactions" WHERE "ownerId"=:id ORDER BY "createdAt" DESC limit :limit offset :offset;`;
   },
