@@ -56,6 +56,7 @@ module.exports = (sequelize, DataTypes) => {
               "consultation_completed",
               "completed",
               "cancelled",
+              "lawyer_consent",
               "closed",
               "engagement",
             ],

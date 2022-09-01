@@ -220,8 +220,8 @@ class PaymentsService {
         );
 
         // check if lawyer has paid for one time subscription fee
-        !lawyerInfo.lawyer.oneTimeSubscription &&
-          this.oneTimeFee({ oldAccountInfo: newAccountInfo, lawyerInfo });
+        // !lawyerInfo.lawyer.oneTimeSubscription &&
+        //   this.oneTimeFee({ oldAccountInfo: newAccountInfo, lawyerInfo });
 
         return {
           success: true,

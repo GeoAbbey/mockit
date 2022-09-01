@@ -5,6 +5,7 @@ import { EVENT_IDENTIFIERS } from "../../../constants";
 import SmallClaimsService from "../services/small-claims.service";
 import { paginate as pagination } from "../../helpers";
 import { Op } from "sequelize";
+import milestoneService from "../../mileStone/service/milestone.service";
 const log = debug("app:small-claims-controller");
 
 class SmallClaimsController {
@@ -189,6 +190,7 @@ class SmallClaimsController {
       const {
         decodedToken: { role, id },
         body: { assignedLawyerId },
+        params: { id: claimId },
         oldSmallClaim: { ownerId, status, interestedLawyers, assignedLawyerId: lawyerId },
       } = req;
 
@@ -202,7 +204,11 @@ class SmallClaimsController {
       }
 
       if ((context === "delete" || context === "modify") && status !== "initiated") {
-        if (req.body.status === "closed" || req.body.status === "engagement") return next();
+        if (
+          req.body.status === "closed" ||
+          (req.body.status === "engagement" && status === "lawyer_consent")
+        )
+          return next();
         return next(
           createError(401, `You can not ${context} a small claim once it has been assigned`)
         );
@@ -246,6 +252,22 @@ class SmallClaimsController {
       if (context === "updateStatus") {
         if (id !== oldSmallClaim.assignedLawyerId)
           return next(createError(401, "You do not have access to perform this operation"));
+
+        if (req.body.status === "cancelled") {
+          const mileStones = await milestoneService.findMany(
+            { claimId: oldSmallClaim.id },
+            { page: 1, pageSize: 10 }
+          );
+          console.log({ mileStones });
+
+          const theStone = mileStones.rows.find((mileStone) => mileStone.status === "in-progress");
+
+          if (theStone)
+            return next(
+              createError(401, "Can not cancel claim once a mile stone has been paid for")
+            );
+        }
+
         if (!oldSmallClaim.paid)
           return next(
             createError(401, "You can not update the status of a claim that hasn't been paid for")

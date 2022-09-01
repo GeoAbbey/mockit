@@ -29,6 +29,7 @@ export const lawyerUpdateClaimSchema = Joi.object().keys({
     "completed",
     "consultation_in_progress",
     "consultation_completed",
+    "lawyer_consent",
     "cancelled"
   ),
 });
