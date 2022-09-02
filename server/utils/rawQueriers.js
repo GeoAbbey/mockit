@@ -11,18 +11,16 @@ export const rawQueries = {
   },
 
   activities: () => {
-    return `SELECT "PayIns"."createdAt", "PayIns".amount, "PayIns".notes, "PayIns".type
+    return `SELECT "PayIns"."createdAt", "PayIns".amount, "PayIns".notes, "PayIns".reference as ID, "PayIns".type
     FROM "PayIns" WHERE "ownerId"=:id 
     UNION ALL
-    SELECT "Transactions"."createdAt", "Transactions".amount, "Transactions".notes, "Transactions".type FROM "Transactions" WHERE "ownerId"=:id ORDER BY "createdAt" DESC limit :limit offset :offset;`;
+    SELECT "Transactions"."createdAt", "Transactions".amount, "Transactions".notes, "Transactions"."ticketId" as ID,"Transactions".type FROM "Transactions" WHERE "ownerId"=:id ORDER BY "createdAt" DESC limit :limit offset :offset;`;
   },
 
   payOuts: () => {
-    return `SELECT  'credit' as action, "Payouts"."createdAt", "Payouts".amount, "Payouts".type, "Payouts"."ticketId" , "Payouts".status as notes 
+    return `SELECT 'credit' as action, "Payouts"."createdAt", "Payouts".amount, "Payouts".type, "Payouts"."ticketId" , "Payouts".status as ID 
     FROM "Payouts"  WHERE "ownerId" = :id
     UNION ALL
-    SELECT 'inflow', "Transactions"."createdAt", "Transactions".amount, "Transactions".type, "Transactions"."ticketId", "Transactions".notes FROM "Transactions"  WHERE "ownerId" = :id
-    UNION ALL
-    SELECT 'debit', "Withdrawals"."createdAt", "Withdrawals".amount, "Withdrawals".status as type, "Withdrawals"."ticketId", "Withdrawals".reference as notes  FROM "Withdrawals" WHERE "ownerId"=:id ORDER BY "createdAt" DESC limit :limit offset :offset;`;
+    SELECT 'debit', "Withdrawals"."createdAt", "Withdrawals".amount, "Withdrawals".status as type, "Withdrawals"."ticketId", "Withdrawals".reference as ID  FROM "Withdrawals" WHERE "ownerId"=:id ORDER BY "createdAt" DESC limit :limit offset :offset;`;
   },
 };

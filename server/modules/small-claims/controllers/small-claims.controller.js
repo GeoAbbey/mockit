@@ -254,15 +254,12 @@ class SmallClaimsController {
           return next(createError(401, "You do not have access to perform this operation"));
 
         if (req.body.status === "cancelled") {
-          const mileStones = await milestoneService.findMany(
-            { claimId: oldSmallClaim.id },
+          const mileStone = await milestoneService.findMany(
+            { claimId: oldSmallClaim.id, status: "in-progress" },
             { page: 1, pageSize: 10 }
           );
-          console.log({ mileStones });
 
-          const theStone = mileStones.rows.find((mileStone) => mileStone.status === "in-progress");
-
-          if (theStone)
+          if (mileStone)
             return next(
               createError(401, "Can not cancel claim once a mile stone has been paid for")
             );
