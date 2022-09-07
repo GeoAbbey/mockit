@@ -11,10 +11,10 @@ export const rawQueries = {
   },
 
   activities: () => {
-    return `SELECT "PayIns"."createdAt", "PayIns".amount, "PayIns".notes, "PayIns".reference as ID, "PayIns".type
+    return `SELECT "PayIns"."createdAt", "PayIns".amount, "PayIns".notes, "PayIns"."ticketId", "PayIns".type
     FROM "PayIns" WHERE "ownerId"=:id 
     UNION ALL
-    SELECT "Transactions"."createdAt", "Transactions".amount, "Transactions".notes, "Transactions"."ticketId" as ID,"Transactions".type FROM "Transactions" WHERE "ownerId"=:id ORDER BY "createdAt" DESC limit :limit offset :offset;`;
+    SELECT "Transactions"."createdAt", "Transactions".amount, "Transactions".notes, "Transactions"."ticketId","Transactions".type FROM "Transactions" WHERE "ownerId"=:id ORDER BY "createdAt" DESC limit :limit offset :offset;`;
   },
 
   payOuts: () => {
