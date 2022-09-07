@@ -248,6 +248,7 @@ class PaymentsService {
       costOfSubscriptionUnit: config.costOfSubscriptionUnit,
       administrationPercentage: config.administrationPercentage,
       consultationFee: config.consultationFee,
+      lawyerConsultationPercentage: config.lawyerConsultationPercentage,
     };
   }
 
