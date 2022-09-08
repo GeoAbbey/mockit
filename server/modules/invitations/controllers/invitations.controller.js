@@ -134,16 +134,10 @@ class InvitationsController {
     } = req;
 
     const data = {
-      [Op.or]: [
-        {
-          assignedLawyerId: id,
-        },
-        {
-          assignedLawyerId: null,
-          paid: true,
-          venue: { country, state },
-        },
-      ],
+      assignedLawyerId: null,
+      status: "initiated",
+      paid: true,
+      venue: { country, state },
     };
 
     const invitations = await InvitationsService.findMany(data, paginate);
