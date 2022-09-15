@@ -57,7 +57,7 @@ export const responseEvents = (eventEmitter) => {
       sender_firebase_token: decodedToken.firebaseToken,
     });
 
-    notifyPeople({
+    await notifyPeople({
       event: EVENT_IDENTIFIERS.RESPONSE.ASSIGNED,
       people: [userToken],
       notificationData,

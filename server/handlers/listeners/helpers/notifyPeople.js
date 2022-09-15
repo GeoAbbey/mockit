@@ -20,11 +20,11 @@ export const notifyPeople = async ({ event, people, notificationData }) => {
   });
 
   logger("sending notification to qualified people");
-  sendNotificationToClient({
+  await sendNotificationToClient({
     tokens,
     data,
   });
 
   logger("saving notification for qualified people on the database");
-  models.Notification.bulkCreate(allNotices, notificationData);
+  await models.Notification.bulkCreate(allNotices, notificationData);
 };
