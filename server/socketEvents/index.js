@@ -4,10 +4,10 @@ import { hoistedIOUser } from "./userLocation";
 import { hoistedAdminOnlineEnter } from "./adminOnlineEnter";
 import { hoistedAdminOnlineLeave } from "./adminOnlineLeave";
 
-const logger = debug("app:socket-events");
+// const logger = debug("app:socket-events");
 
 export const configureSockets = (io, socket) => {
-  logger("I have been activated");
+  // logger("I have been activated");
   return {
     lawyerLocation: hoistedIOLawyer(io),
     userLocation: hoistedIOUser(io),

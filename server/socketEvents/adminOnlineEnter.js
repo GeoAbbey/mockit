@@ -4,7 +4,7 @@ const logger = debug("app:socket-events:admin-online-enter");
 
 const hoistedAdminOnlineEnter = (io, socket) => {
   return async function adminOnlineEnter(payload) {
-    logger(`admin:online:enter I have received this payload ${payload} 🍋🧣`);
+    // logger(`admin:online:enter I have received this payload ${payload} 🍋🧣`);
     const {
       response: { ownerId, id, assignedLawyerId },
     } = payload;

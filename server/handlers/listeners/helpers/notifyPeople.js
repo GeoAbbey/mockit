@@ -8,7 +8,7 @@ export const notifyPeople = async ({ event, people, notificationData }) => {
   logger(`${event} has been received`);
   const tokens = [];
   const allNotices = [];
-  const data = { ...notificationData }; // this is necessary as sequelize adds model property to notificationData;
+  // const data = { ...notificationData }; // this is necessary as sequelize adds model property to notificationData;
 
   people.forEach((person) => {
     if (person.firebaseToken) tokens.push(person.firebaseToken);
@@ -22,7 +22,7 @@ export const notifyPeople = async ({ event, people, notificationData }) => {
   logger("sending notification to qualified people");
   await sendNotificationToClient({
     tokens,
-    data,
+    data: notificationData,
   });
 
   logger("saving notification for qualified people on the database");

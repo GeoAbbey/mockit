@@ -25,6 +25,8 @@ export const responseEvents = (eventEmitter) => {
       dataValues: { ownerId, assignedLawyerId, id },
     } = response;
 
+    console.log({ response });
+
     const [userLocationDetails, lawyerLocationDetails] = await Promise.all([
       LocationServices.find({ where: { id: ownerId } }),
       LocationServices.find({ where: { id: assignedLawyerId } }),
