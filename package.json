@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "debug:dev": "export DEBUG=*,-engine:* &&  nodemon ./bin/www",
-    "start-devDeployment": "export NODE_ENV=devDeployment && export DEBUG=* && node ./bin/www",
+    "start-devDeployment": "export NODE_ENV=devDeployment && node ./bin/www",
     "start-staging": "export NODE_ENV=staging && export DEBUG=* && node ./bin/www",
     "stop": "pm2 stop 'all'",
     "start:dev": "export DEBUG=* && nodemon ./bin/www",
