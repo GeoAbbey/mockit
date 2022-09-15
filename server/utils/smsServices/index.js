@@ -53,6 +53,7 @@ export const smsService = (request) => ({
         response = await request({ url, method: "DELETE", headers });
       }
 
+      console.log({ response });
       return { success: true, response: response.data };
     } catch ({ response }) {
       throw new exceptionHandler({
