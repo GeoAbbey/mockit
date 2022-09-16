@@ -49,7 +49,7 @@ class PayoutsController {
     const calAmount = async (model) => {
       const { claimId, lawyerId, percentage } = model;
       const { serviceCharge } = await interestedLawyersServices.findOne({
-        modelId: claimId,
+        claimId,
         lawyerId,
       });
 

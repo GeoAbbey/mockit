@@ -2,6 +2,7 @@ import debug from "debug";
 import createError from "http-errors";
 import { EVENT_IDENTIFIERS } from "../../../constants";
 import { paginate as pagination } from "../../helpers";
+import smallClaimsService from "../../small-claims/services/small-claims.service";
 
 import InterestedLawyersService from "../services/interestedLawyers.services";
 const logger = debug("app:small-claims-controller");
@@ -96,6 +97,9 @@ class InterestedLawyersController {
       decodedToken,
     } = req;
 
+    const { status } = await smallClaimsService.find(oldInterest.claimId, null);
+    if (status === "lawyer_consent")
+      return next(createError(400, "Can not edit interest once you have consented"));
     const [, [updatedInterest]] = await InterestedLawyersService.update(id, body, oldInterest);
 
     eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.EDIT_INTEREST, {

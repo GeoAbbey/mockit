@@ -21,14 +21,14 @@ class PayoutsService {
   async create(PayoutDTO) {
     debugLog("creating a Payout");
     //check if payment has already been made for the service.
-    const { ownerId, modelId, modelType } = PayoutDTO;
+    const { ownerId, modelId, type } = PayoutDTO;
 
-    const isAlreadyPaid = await models.Payout.findOne({ where: { ownerId, modelId, modelType } });
+    const isAlreadyPaid = await models.Payout.findOne({ where: { ownerId, modelId, type } });
     if (isAlreadyPaid) {
-      debugLog(`User with ID ${ownerId} has already been paid for ${modelType} with ${modelId}`);
+      debugLog(`User with ID ${ownerId} has already been paid for ${type} with ${modelId}`);
       return {
         success: false,
-        response: `User with ID ${ownerId} has already been paid for ${modelType} with ${modelId}`,
+        response: `User with ID ${ownerId} has already been paid for ${type} with ${modelId}`,
       };
     } else {
       return models.Payout.create({ ...PayoutDTO, status: "in-progress" });

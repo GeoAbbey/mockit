@@ -1,7 +1,7 @@
 export const applicationMappers = {
-  verifyPhoneId: "0808D027BBA7021A47824FF369AF36C5",
+  verifyPhoneId: "5C91F571E06E6A5BF0FD05AC43A6BF60",
 };
 
 export const messageTemplateMappers = {
-  verifyPhoneMessageId: "A42C6C291ADD738CD0796697B6765C1D",
+  verifyPhoneMessageId: "F84F826EC4012A457898C3D68880518D",
 };

@@ -26,7 +26,7 @@ module.exports = {
         unique: true,
         allowNull: false,
       },
-      modelType: { allowNull: false, type: Sequelize.STRING },
+      type: { allowNull: false, type: Sequelize.STRING },
       modelId: { allowNull: false, type: Sequelize.STRING },
       createdAt: {
         allowNull: false,

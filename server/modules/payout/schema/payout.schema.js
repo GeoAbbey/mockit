@@ -15,7 +15,7 @@ export const queryOptions = Joi.object().keys({
   search: Joi.object().keys({
     ticketId: Joi.string(),
     lawyerId: Joi.string().guid({ version: "uuidv4" }),
-    modelType: Joi.string().valid("response", "invitation", "smallClaim"),
+    type: Joi.string().valid("response", "invitation", "smallClaim"),
     from: Joi.date().less(Joi.ref("to")),
     to: Joi.date(),
   }),

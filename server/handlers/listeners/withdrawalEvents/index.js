@@ -1,10 +1,11 @@
 import debug from "debug";
 import { EVENT_IDENTIFIERS, NOTIFICATION_DATA, TEMPLATE, ROLES } from "../../../constants";
 import userService from "../../../modules/users/service/user.service";
-import { sendBulkTemplatedEmail } from "../../../utils/MailService";
+import { sendBulkTemplatedEmail, sendTemplateEmail } from "../../../utils/MailService";
 import { sendNotificationToClient } from "../../../utils/sendNotificationToClient";
 import UserService from "../../../modules/users/service/user.service";
 import { data } from "./data";
+import { notifyPeople } from "../helpers/notifyPeople";
 const logger = debug("app:handlers:listeners:withdrawal-events");
 
 export const withdrawalEvents = (eventEmitter) => {

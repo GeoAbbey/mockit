@@ -9,7 +9,7 @@ export const messages = {
     messageText: "Your pin is {{pin}}",
     pinLength: 6,
     language: "en",
-    senderId: "+2348098506313",
+    senderId: "aptResponse",
     repeatDTMF: "1#",
     speechRate: 1,
   },

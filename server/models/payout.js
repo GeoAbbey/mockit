@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       ownerId: { type: DataTypes.UUID, allowNull: false },
-      modelType: { allowNull: false, type: DataTypes.STRING },
+      type: { allowNull: false, type: DataTypes.STRING },
       modelId: { allowNull: false, type: DataTypes.STRING },
     },
     {
