@@ -251,7 +251,6 @@ class UsersController {
       to: phone,
       applicationId: applicationMappers.verifyPhoneId,
       messageId: messageTemplateMappers.verifyPhoneMessageId,
-      from: "App Rescue",
     });
 
     if (!response.success) return next(createError(500, "Something went wrong. Try again later"));
