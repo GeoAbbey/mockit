@@ -7,7 +7,7 @@ import { notifyAdminOfNoLawyer } from "../helpers/notifyAdminOfNoLawyer";
 import { updateModelInstance } from "../helpers/updateModelInstance";
 import { notifyPeople } from "../helpers/notifyPeople";
 import { data } from "./data";
-import { sendMail } from "../../../utils/MailService";
+import { sendBulkMail, sendMail } from "../../../utils/MailService";
 
 const logger = debug("server:handlers:listeners:invitationEvents");
 
@@ -58,9 +58,14 @@ export const invitationEvents = (eventEmitter) => {
       notificationData,
     });
 
-    // sendBulkTemplatedEmail(lawyers, TEMPLATE.POLICE_INVITATION_CREATED, {
-    //   ticketId: invitation.ticketId,
-    // });
+    const personalizations = lawyers.map((lawyer) => ({
+      to: [{ email: lawyer.email }],
+      dynamic_template_data: {
+        firstName: lawyer.firstName,
+      },
+    }));
+
+    sendBulkMail({ personalizations, templateId: TEMPLATE.POLICE_INVITATION_CREATED });
   });
 
   eventEmitter.on(EVENT_IDENTIFIERS.INVITATION.CANCELLED, async ({ invitation, decodedToken }) => {

@@ -10,7 +10,7 @@ import { data } from "./data";
 import { notifyAdminOfNoLawyer } from "../helpers/notifyAdminOfNoLawyer";
 import { updateModelInstance } from "../helpers/updateModelInstance";
 import { notifyPeople } from "../helpers/notifyPeople";
-import { sendMail } from "../../../utils/MailService";
+import { sendBulkMail, sendMail } from "../../../utils/MailService";
 import smallClaimsService from "../../../modules/small-claims/services/small-claims.service";
 
 export const smallClaimEvents = (eventEmitter) => {
@@ -38,9 +38,14 @@ export const smallClaimEvents = (eventEmitter) => {
       notificationData,
     });
 
-    // sendBulkTemplatedEmail(lawyers, TEMPLATE.SMALL_CLAIM_CREATED, {
-    //   ticketId: claim.ticketId,
-    // });
+    const personalizations = lawyers.map((lawyer) => ({
+      to: [{ email: lawyer.email }],
+      dynamic_template_data: {
+        firstName: lawyer.firstName,
+      },
+    }));
+
+    sendBulkMail({ personalizations, templateId: TEMPLATE.SMALL_CLAIM_CREATED });
   });
 
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, async (claim, decodedToken) => {
@@ -104,12 +109,12 @@ export const smallClaimEvents = (eventEmitter) => {
       notificationData,
     });
 
-    sendTemplateEmail(
-      userToken.dataValues.email,
-      TEMPLATE.SMALL_CLAIM_ASSIGNED,
-      { firstName: userToken.dataValues.firstName },
-      claim.ticketId
-    );
+    // sendTemplateEmail(
+    //   userToken.dataValues.email,
+    //   TEMPLATE.SMALL_CLAIM_ASSIGNED,
+    //   { firstName: userToken.dataValues.firstName },
+    //   claim.ticketId
+    // );
   });
 
   eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.COMPLETED, async (claim, decodedToken) => {

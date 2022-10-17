@@ -2,7 +2,7 @@ import debug from "debug";
 import { sendNotificationToClient } from "../../../utils/sendNotificationToClient";
 import { EVENT_IDENTIFIERS, NOTIFICATION_DATA, ROLES, TEMPLATE } from "../../../constants";
 import models from "../../../models";
-import { sendMail } from "../../../utils/MailService";
+import { sendBulkMail, sendMail } from "../../../utils/MailService";
 
 const logger = debug("app:handlers:listeners:helpers");
 
@@ -107,9 +107,14 @@ export const sendNotificationToEligibleLawyers = async ({
     });
   });
 
-  sendBulkTemplatedEmail(lawyersToNotify, TEMPLATE.ELIGIBLE_LAWYERS, {
-    ticketId: response.ticketId,
-  });
+  const personalizations = lawyersToNotify.map((lawyer) => ({
+    to: [{ email: lawyer.email }],
+    dynamic_template_data: {
+      firstName: lawyer.firstName,
+    },
+  }));
+
+  sendBulkMail({ personalizations, templateId: TEMPLATE.ELIGIBLE_LAWYERS });
 
   logger("sending notification to all eligible lawyers");
   sendNotificationToClient({
