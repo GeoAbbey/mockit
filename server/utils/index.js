@@ -5,7 +5,7 @@ import Authenticate from "./handleJwt";
 import AccessControl from "./accessControl";
 import { otp } from "./otp";
 import { validateUUID, allowedModelSchema } from "./allPurpose.schema";
-import { sendMail, sendTemplateEmail } from "./MailService";
+import { sendMail } from "./MailService";
 import { uploadMiddleware } from "./UploadService";
 import { handleFalsy } from "./handleFalsy";
 
@@ -19,7 +19,6 @@ export {
   validateUUID,
   allowedModelSchema,
   sendMail,
-  sendTemplateEmail,
   uploadMiddleware,
   handleFalsy,
 };
