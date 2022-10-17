@@ -1,7 +1,6 @@
 import debug from "debug";
 import { EVENT_IDENTIFIERS, NOTIFICATION_DATA, TEMPLATE, ROLES } from "../../../constants";
 import userService from "../../../modules/users/service/user.service";
-import { sendBulkTemplatedEmail, sendTemplateEmail } from "../../../utils/MailService";
 import { sendNotificationToClient } from "../../../utils/sendNotificationToClient";
 import UserService from "../../../modules/users/service/user.service";
 import { data } from "./data";
@@ -45,10 +44,10 @@ export const withdrawalEvents = (eventEmitter) => {
       });
 
       //send emails to all admins
-      sendBulkTemplatedEmail(admins, TEMPLATE.WITHDRAWAL_INITIATED, {
-        ticketId: withdrawal.ticketId,
-        amount: withdrawal.amount,
-      });
+      // sendBulkTemplatedEmail(admins, TEMPLATE.WITHDRAWAL_INITIATED, {
+      //   ticketId: withdrawal.ticketId,
+      //   amount: withdrawal.amount,
+      // });
     }
   );
 
@@ -75,12 +74,12 @@ export const withdrawalEvents = (eventEmitter) => {
         notificationData,
       });
 
-      sendTemplateEmail(userToken.email, TEMPLATE.WITHDRAWAL_AUTHORIZED, {
-        firstName: userToken.firstName,
-        email: userToken.email,
-        ticketId: withdrawal.ticketId,
-        amount: withdrawal.amount,
-      });
+      // sendTemplateEmail(userToken.email, TEMPLATE.WITHDRAWAL_AUTHORIZED, {
+      //   firstName: userToken.firstName,
+      //   email: userToken.email,
+      //   ticketId: withdrawal.ticketId,
+      //   amount: withdrawal.amount,
+      // });
     }
   );
 };

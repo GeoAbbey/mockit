@@ -3,7 +3,7 @@ import axios from "axios";
 import { EVENT_IDENTIFIERS, TEMPLATE } from "../../constants";
 import AccountInfosService from "../../modules/accountInfo/services/accountInfo.services";
 import LocationService from "../../modules/locationDetail/services/locationDetails.services";
-import { sendMail, sendTemplateEmail } from "../../utils";
+import { sendMail } from "../../utils";
 const logger = debug("app:handlers:listeners:user-events");
 
 import configOptions from "../../config/config";

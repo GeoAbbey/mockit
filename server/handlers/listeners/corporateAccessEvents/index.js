@@ -1,6 +1,5 @@
 import debug from "debug";
 import { EVENT_IDENTIFIERS, TEMPLATE } from "../../../constants";
-import { sendTemplateEmail } from "../../../utils";
 import UserService from "../../../modules/users/service/user.service";
 import { notifyPeople } from "../helpers/notifyPeople";
 import { data } from "./data";
@@ -28,12 +27,12 @@ export const cooperateAccessEvents = (eventEmitter) => {
         notificationData,
       });
 
-      sendTemplateEmail(
-        userToken.dataValues.email,
-        TEMPLATE.COOPERATE_ACCESS_GRANTED,
-        { firstName: userToken.dataValues.firstName },
-        corporate.ticketId
-      );
+      // sendTemplateEmail(
+      //   userToken.dataValues.email,
+      //   TEMPLATE.COOPERATE_ACCESS_GRANTED,
+      //   { firstName: userToken.dataValues.firstName },
+      //   corporate.ticketId
+      // );
     }
   );
 
@@ -57,12 +56,12 @@ export const cooperateAccessEvents = (eventEmitter) => {
         notificationData,
       });
 
-      sendTemplateEmail(
-        userToken.dataValues.email,
-        TEMPLATE.COOPERATE_ACCESS_REVOKED,
-        { firstName: userToken.dataValues.firstName },
-        corporate.ticketId
-      );
+      // sendTemplateEmail(
+      //   userToken.dataValues.email,
+      //   TEMPLATE.COOPERATE_ACCESS_REVOKED,
+      //   { firstName: userToken.dataValues.firstName },
+      //   corporate.ticketId
+      // );
     }
   );
 };

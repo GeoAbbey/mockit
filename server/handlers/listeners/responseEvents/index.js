@@ -15,7 +15,7 @@ const logger = debug("app:handlers:listeners:response-events");
 import { schedule } from "../../../jobs/scheduler";
 import { data } from "./data";
 import { notifyPeople } from "../helpers/notifyPeople";
-import { sendMail, sendTemplateEmail } from "../../../utils";
+import { sendMail } from "../../../utils";
 
 export const responseEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, async ({ response, io, decodedToken }) => {
@@ -137,12 +137,12 @@ export const responseEvents = (eventEmitter) => {
       notificationData,
     });
 
-    sendTemplateEmail(
-      userToken.dataValues.email,
-      TEMPLATE.RESPONSE_MEET_TIME,
-      { firstName: userToken.dataValues.firstName },
-      response.ticketId
-    );
+    // sendTemplateEmail(
+    //   userToken.dataValues.email,
+    //   TEMPLATE.RESPONSE_MEET_TIME,
+    //   { firstName: userToken.dataValues.firstName },
+    //   response.ticketId
+    // );
   });
 
   eventEmitter.on(
@@ -219,12 +219,12 @@ export const responseEvents = (eventEmitter) => {
         notificationData,
       });
 
-      sendTemplateEmail(
-        userToken.dataValues.email,
-        TEMPLATE.RESPONSE_COMPLETED,
-        { firstName: userToken.dataValues.firstName },
-        response.ticketId
-      );
+      // sendTemplateEmail(
+      //   userToken.dataValues.email,
+      //   TEMPLATE.RESPONSE_COMPLETED,
+      //   { firstName: userToken.dataValues.firstName },
+      //   response.ticketId
+      // );
 
       const theData = {
         ...response.dataValues,
