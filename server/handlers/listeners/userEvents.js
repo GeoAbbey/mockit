@@ -3,7 +3,7 @@ import axios from "axios";
 import { EVENT_IDENTIFIERS, TEMPLATE } from "../../constants";
 import AccountInfosService from "../../modules/accountInfo/services/accountInfo.services";
 import LocationService from "../../modules/locationDetail/services/locationDetails.services";
-import { sendTemplateEmail } from "../../utils";
+import { sendMail, sendTemplateEmail } from "../../utils";
 const logger = debug("app:handlers:listeners:user-events");
 
 import configOptions from "../../config/config";
@@ -15,31 +15,16 @@ const config = configOptions[env];
 
 const SMSService = smsService(axios);
 
+sendMail;
+
 export const userEvents = (eventEmitter) => {
   eventEmitter.on(`${EVENT_IDENTIFIERS.USER.CREATED}`, async ({ user }) => {
     logger(`${EVENT_IDENTIFIERS.USER.CREATED} events has been received`);
 
     const { email, otp, id, firstName, role, phone } = user.dataValues;
-    // if (role === "user")
-    //   sendTemplateEmail(email, TEMPLATE.USER_SIGNUP, {
-    //     firstName,
-    //     otp: otp.value,
-    //     email,
-    //   });
+    if (role === "user") sendMail({ firstName, email, templateId: TEMPLATE.USER_SIGNUP });
 
-    // if (role === "lawyer")
-    //   sendTemplateEmail(email, TEMPLATE.LAWYER_SIGNUP, {
-    //     firstName,
-    //     otp: otp.value,
-    //     email,
-    //   });
-
-    // if (role === "admin")
-    //   sendTemplateEmail(email, TEMPLATE.USER_SIGNUP, {
-    //     firstName,
-    //     otp: config.lawyerPassword,
-    //     email,
-    //   });
+    if (role === "lawyer") sendMail({ firstName, email, templateId: TEMPLATE.LAWYER_SIGNUP });
 
     AccountInfosService.create({ id });
     LocationService.findOrCreate({ where: { id }, defaults: { id } });
@@ -60,10 +45,10 @@ export const userEvents = (eventEmitter) => {
     logger(`${EVENT_IDENTIFIERS.USER.GENERATE_NEW_OTP} events has been received`);
     if (query.for === "reset-password") {
       //send email for reset-password
-      sendTemplateEmail(email, TEMPLATE.OTP_RESET_PASSWORD, { firstName, otp: otp.value, email });
+      // sendTemplateEmail(email, TEMPLATE.OTP_RESET_PASSWORD, { firstName, otp: otp.value, email });
     } else {
       // send email for verify-account due to stale otp
-      sendTemplateEmail(email, TEMPLATE.OTP_VERIFY_EMAIL, { firstName, otp: otp.value, email });
+      // sendTemplateEmail(email, TEMPLATE.OTP_VERIFY_EMAIL, { firstName, otp: otp.value, email });
     }
   });
 

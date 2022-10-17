@@ -2,7 +2,7 @@ import debug from "debug";
 import { sendNotificationToClient } from "../../../utils/sendNotificationToClient";
 import { EVENT_IDENTIFIERS, NOTIFICATION_DATA, ROLES, TEMPLATE } from "../../../constants";
 import models from "../../../models";
-import { sendBulkTemplatedEmail, sendTemplateEmail } from "../../../utils/MailService";
+import { sendBulkTemplatedEmail, sendMail, sendTemplateEmail } from "../../../utils/MailService";
 
 const logger = debug("app:handlers:listeners:helpers");
 
@@ -50,7 +50,11 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (
 
   logger("sending notification to the user");
   if (action === "MARK_INTEREST")
-    sendTemplateEmail(ownerProfile.email, TEMPLATE.SMALL_CLAIM_INTEREST, data.ticketId);
+    sendMail({
+      email: ownerProfile.email,
+      templateId: TEMPLATE.SMALL_CLAIM_INTEREST,
+      firstName: ownerProfile.firstName,
+    });
 
   sendNotificationToClient({
     tokens: [ownerProfile.firebaseToken],

@@ -16,6 +16,7 @@ const common = {
   administrationPercentage: process.env.ADMINISTRATION_PERCENTAGE,
   smsApiKey: process.env.SMS_API_KEY,
   smsBaseUrl: process.env.SMS_BASE_URL,
+  sendGridApiKey: process.env.SENDGRID_API_KEY,
 };
 
 module.exports = {

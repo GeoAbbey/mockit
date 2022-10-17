@@ -7,7 +7,7 @@ import { notifyAdminOfNoLawyer } from "../helpers/notifyAdminOfNoLawyer";
 import { updateModelInstance } from "../helpers/updateModelInstance";
 import { notifyPeople } from "../helpers/notifyPeople";
 import { data } from "./data";
-import { sendBulkTemplatedEmail, sendTemplateEmail } from "../../../utils/MailService";
+import { sendMail } from "../../../utils/MailService";
 
 const logger = debug("server:handlers:listeners:invitationEvents");
 
@@ -58,9 +58,9 @@ export const invitationEvents = (eventEmitter) => {
       notificationData,
     });
 
-    sendBulkTemplatedEmail(lawyers, TEMPLATE.POLICE_INVITATION_CREATED, {
-      ticketId: invitation.ticketId,
-    });
+    // sendBulkTemplatedEmail(lawyers, TEMPLATE.POLICE_INVITATION_CREATED, {
+    //   ticketId: invitation.ticketId,
+    // });
   });
 
   eventEmitter.on(EVENT_IDENTIFIERS.INVITATION.CANCELLED, async ({ invitation, decodedToken }) => {
@@ -90,12 +90,11 @@ export const invitationEvents = (eventEmitter) => {
       notificationData,
     });
 
-    sendTemplateEmail(
-      userToken.dataValues.email,
-      TEMPLATE.INVITATION_LAWYER_ASSIGNED,
-      { firstName: userToken.dataValues.firstName },
-      invitation.ticketId
-    );
+    sendMail({
+      email: userToken.dataValues.email,
+      templateId: TEMPLATE.INVITATION_LAWYER_ASSIGNED,
+      firstName: userToken.dataValues.firstName,
+    });
   });
 
   eventEmitter.on(
@@ -117,13 +116,11 @@ export const invitationEvents = (eventEmitter) => {
         people: [userToken],
         notificationData,
       });
-
-      sendTemplateEmail(
-        userToken.dataValues.email,
-        TEMPLATE.POLICE_INVITATION_COMPLETED,
-        { firstName: userToken.dataValues.firstName },
-        invitation.ticketId
-      );
+      sendMail({
+        email: userToken.dataValues.email,
+        templateId: TEMPLATE.POLICE_INVITATION_COMPLETED,
+        firstName: userToken.dataValues.firstName,
+      });
 
       const theData = {
         ...invitation.dataValues,

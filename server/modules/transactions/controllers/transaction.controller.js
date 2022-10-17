@@ -139,7 +139,7 @@ class TransactionsController {
     if (role === "user" || role === "lawyer") {
       commonOptions();
 
-      filter = { ...filter, ownerId: id };
+      if (!query.search.code) filter = { ...filter, ownerId: id };
     }
 
     req.filter = filter;

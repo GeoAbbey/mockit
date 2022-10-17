@@ -15,7 +15,7 @@ const logger = debug("app:handlers:listeners:response-events");
 import { schedule } from "../../../jobs/scheduler";
 import { data } from "./data";
 import { notifyPeople } from "../helpers/notifyPeople";
-import { sendTemplateEmail } from "../../../utils";
+import { sendMail, sendTemplateEmail } from "../../../utils";
 
 export const responseEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, async ({ response, io, decodedToken }) => {
@@ -65,12 +65,11 @@ export const responseEvents = (eventEmitter) => {
       notificationData,
     });
 
-    sendTemplateEmail(
-      userToken.dataValues.email,
-      TEMPLATE.RESPONSE_LAWYER_ASSIGNED,
-      { firstName: userToken.dataValues.firstName },
-      response.ticketId
-    );
+    sendMail({
+      email: userToken.dataValues.email,
+      templateId: TEMPLATE.RESPONSE_LAWYER_ASSIGNED,
+      firstName: userToken.dataValues.firstName,
+    });
 
     const lawyersThatCantRespond = await EligibleLawyersService.getLawyersForResponse(response.id);
 
