@@ -2,7 +2,7 @@ import debug from "debug";
 import { sendNotificationToClient } from "../../../utils/sendNotificationToClient";
 import { EVENT_IDENTIFIERS, NOTIFICATION_DATA, ROLES, TEMPLATE } from "../../../constants";
 import models from "../../../models";
-import { sendBulkTemplatedEmail, sendMail, sendTemplateEmail } from "../../../utils/MailService";
+import { sendMail } from "../../../utils/MailService";
 
 const logger = debug("app:handlers:listeners:helpers");
 

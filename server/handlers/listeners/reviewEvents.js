@@ -2,7 +2,7 @@ import debug from "debug";
 import models from "../../models";
 import { EVENT_IDENTIFIERS, NOTIFICATION_DATA, TEMPLATE } from "../../constants";
 import { sendNotificationToClient } from "../../utils/sendNotificationToClient";
-import { sendMail, sendTemplateEmail } from "../../utils";
+import { sendMail } from "../../utils";
 
 const logger = debug("app:handlers:listeners:review-events");
 

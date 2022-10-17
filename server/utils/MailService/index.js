@@ -1,7 +1,20 @@
 import sgMail from "@sendgrid/mail";
+import dotenv from "dotenv";
+import AWS from "aws-sdk";
+
+dotenv.config();
 import configOptions from "../../config/config";
-const config = configOptions[env];
+
 const env = process.env.NODE_ENV || "development";
+const config = configOptions[env];
+
+export const AWS_CONFIG = {
+  accessKeyId: process.env.ACCESSKEYID,
+  secretAccessKey: process.env.SECRETACCESSKEY,
+  region: process.env.REGION,
+};
+
+const AWS_SES = new AWS.SES(AWS_CONFIG);
 
 sgMail.setApiKey(config.sendGridApiKey);
 
