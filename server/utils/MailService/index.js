@@ -30,3 +30,18 @@ const msg = ({ email, firstName, templateId }) => ({
 export const sendMail = ({ email, firstName, templateId }) => {
   config.runEmailNotificationService && sgMail.send(msg({ email, firstName, templateId }));
 };
+
+const bulkEmail = ({ personalizations, templateId }) => ({
+  personalizations: personalizations,
+  from: {
+    email: "no-reply@aptresponse.io",
+  },
+  reply_to: {
+    email: "nno-reply@aptresponse.io",
+  },
+  template_id: templateId,
+});
+
+export const sendBulkMail = ({ personalizations, templateId }) => {
+  config.runEmailNotificationService && sgMail.send(bulkEmail({ personalizations, templateId }));
+};
