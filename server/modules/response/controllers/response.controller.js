@@ -57,6 +57,7 @@ class ResponsesController {
       startingLocation,
       speed: config.averageSpeed,
     });
+
     return res.status(201).send({
       success: true,
       message: "1 subscription has been successfully used in creating this response",

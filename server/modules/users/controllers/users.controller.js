@@ -6,7 +6,6 @@ import { compareAsc } from "date-fns";
 import UsersService from "../service/user.service";
 import Authenticate from "../../../utils/handleJwt";
 import { HandlePassword, otp } from "../../../utils";
-import { parseISO } from "date-fns/esm";
 import { EVENT_IDENTIFIERS } from "../../../constants";
 
 const envs = process.env.NODE_ENV || "development";
@@ -268,7 +267,7 @@ class UsersController {
 
   async resetPassword(req, res, next) {
     const { user, body } = req;
-    log(`changing password for user with email ${body.email}`);
+    log(`changing password for user with email ${body.phone}`);
 
     body.password = await HandlePassword.getHash(body.newPassword);
     const [, [User]] = await UsersService.update(user.id, body, user);
@@ -283,13 +282,17 @@ class UsersController {
 
   async validateOTP(req, res, next) {
     log("validating OTP supplied");
-    const { body } = req;
-    if (body.otp != req.user.otp.value) {
-      return next(createError(403, "Invalid OTP supplied"));
-    }
-    if (compareAsc(new Date(), parseISO(req.user.otp.expiresIn)) !== -1) {
-      return next(createError(403, "supplied OTP has expired"));
-    }
+    const {
+      body: { otp },
+      user: {
+        settings: {
+          isPhone: { pinId },
+        },
+      },
+    } = req;
+    const { response } = await SMSService.verifyPhone({ pin: otp }, pinId);
+
+    if (!response.verified) return next(createError(response.status, response.statusText));
     return next();
   }
 
