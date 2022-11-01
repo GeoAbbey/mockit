@@ -1001,6 +1001,18 @@ class PaymentsService {
             ownerId: args.id,
             performedBy: args.id,
             type: "cooperate",
+            notes: "credit",
+            amount: args.amount,
+          },
+          { transaction: t }
+        );
+
+        const walletReceipt = await TransactionService.create(
+          {
+            ownerId: args.id,
+            performedBy: args.id,
+            notes: "debit",
+            type: "transfer",
             amount: args.amount,
           },
           { transaction: t }

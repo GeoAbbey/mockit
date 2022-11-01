@@ -117,11 +117,6 @@ export const responseEvents = (eventEmitter) => {
       ),
     ]);
 
-    io.to(updatedUserDetails.dataValues.socketId).emit("on:meet", {
-      response,
-      message: "lawyer has acknowledged that he has meet with you.",
-    });
-
     const userToken = await UserService.findByPk(response.ownerId);
 
     const notificationData = data.MEET_TIME({
@@ -131,18 +126,17 @@ export const responseEvents = (eventEmitter) => {
       sender_firebase_token: decodedToken.firebaseToken,
     });
 
+    io.to(updatedUserDetails.dataValues.socketId).emit("on:meet", {
+      response,
+      data,
+      message: "lawyer has acknowledged that he has meet with you.",
+    });
+
     notifyPeople({
       event: EVENT_IDENTIFIERS.RESPONSE.MEET_TIME,
       people: [userToken],
       notificationData,
     });
-
-    // sendTemplateEmail(
-    //   userToken.dataValues.email,
-    //   TEMPLATE.RESPONSE_MEET_TIME,
-    //   { firstName: userToken.dataValues.firstName },
-    //   response.ticketId
-    // );
   });
 
   eventEmitter.on(
@@ -182,6 +176,7 @@ export const responseEvents = (eventEmitter) => {
       const answer = await EligibleLawyersService.bulkCreate(lawyerModifiedWithResponseId);
 
       await sendNotificationToEligibleLawyers({
+        io,
         events: EVENT_IDENTIFIERS.RESPONSE.CREATED,
         lawyersToNotify: results,
         startingLocation: JSON.stringify(startingLocation),
@@ -219,12 +214,11 @@ export const responseEvents = (eventEmitter) => {
         notificationData,
       });
 
-      // sendTemplateEmail(
-      //   userToken.dataValues.email,
-      //   TEMPLATE.RESPONSE_COMPLETED,
-      //   { firstName: userToken.dataValues.firstName },
-      //   response.ticketId
-      // );
+      io.to(userToken.dataValues.socketId).emit("on:meet", {
+        response,
+        data: notificationData,
+        message: "lawyer has acknowledged that he has meet with you.",
+      });
 
       const theData = {
         ...response.dataValues,

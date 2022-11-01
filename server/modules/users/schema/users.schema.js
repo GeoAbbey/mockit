@@ -74,7 +74,7 @@ export const validPIN = Joi.object().keys({
 export const validOtpAndPassword = Joi.object().keys({
   otp: Joi.number().required(),
   newPassword: Joi.string().required(),
-  email: Joi.string().email({ minDomainSegments: 2 }).required(),
+  phone: Joi.string().required(),
 });
 
 export const loginUserSchema = Joi.object().keys({

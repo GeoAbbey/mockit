@@ -89,9 +89,11 @@ export const sendNotificationToEligibleLawyers = async ({
 
   const allNotices = [];
   const tokens = [];
+  const socketIDs = [];
 
   lawyersToNotify.forEach((lawyer) => {
     if (lawyer.firebaseToken) tokens.push(lawyer.firebaseToken);
+    if (lawyer.socketId) socketIDs.push(lawyer.socketId);
     allNotices.push({
       for: events,
       ownerId: lawyer.id,
@@ -105,6 +107,19 @@ export const sendNotificationToEligibleLawyers = async ({
         })
       ),
     });
+  });
+
+  socketIDs.forEach((id) => {
+    io.to(id).emit(
+      EVENT_IDENTIFIERS.RESPONSE.CREATED,
+      NOTIFICATION_DATA.RESPONSE.CREATED({
+        sender_id: response.dataValues.ownerId,
+        status_id: response.dataValues.id,
+        sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+        sender_firebase_token: decodedToken.firebaseToken,
+        startingLocation,
+      })
+    );
   });
 
   const personalizations = lawyersToNotify.map((lawyer) => ({
