@@ -167,6 +167,8 @@ export const responseEvents = (eventEmitter) => {
         radius: config.radius,
       });
 
+      console.log({ results });
+
       const lawyerModifiedWithResponseId = [];
 
       results.forEach((result) => {
