@@ -79,6 +79,7 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (
 };
 
 export const sendNotificationToEligibleLawyers = async ({
+  io,
   events,
   lawyersToNotify,
   response,
@@ -109,19 +110,6 @@ export const sendNotificationToEligibleLawyers = async ({
     });
   });
 
-  socketIDs.forEach((id) => {
-    io.to(id).emit(
-      EVENT_IDENTIFIERS.RESPONSE.CREATED,
-      NOTIFICATION_DATA.RESPONSE.CREATED({
-        sender_id: response.dataValues.ownerId,
-        status_id: response.dataValues.id,
-        sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
-        sender_firebase_token: decodedToken.firebaseToken,
-        startingLocation,
-      })
-    );
-  });
-
   const personalizations = lawyersToNotify.map((lawyer) => ({
     to: [{ email: lawyer.email }],
     dynamic_template_data: {
@@ -141,6 +129,19 @@ export const sendNotificationToEligibleLawyers = async ({
       sender_firebase_token: decodedToken.firebaseToken,
       startingLocation,
     }),
+  });
+
+  socketIDs.forEach((id) => {
+    io.to(id).emit(
+      EVENT_IDENTIFIERS.RESPONSE.CREATED,
+      NOTIFICATION_DATA.RESPONSE.CREATED({
+        sender_id: response.dataValues.ownerId,
+        status_id: response.dataValues.id,
+        sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+        sender_firebase_token: decodedToken.firebaseToken,
+        startingLocation,
+      })
+    );
   });
 
   logger("saving notification sent to eligible lawyers in the database");
