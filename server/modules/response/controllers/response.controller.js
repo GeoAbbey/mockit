@@ -229,7 +229,7 @@ class ResponsesController {
 
   async marKAsCompleted(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
-
+    const io = req.app.get("io");
     const {
       params: { id },
       decodedToken,
@@ -245,6 +245,7 @@ class ResponsesController {
     eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED, {
       response: updatedResponse,
       decodedToken,
+      io,
     });
 
     return res.status(200).send({
