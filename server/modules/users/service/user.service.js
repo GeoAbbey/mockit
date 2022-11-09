@@ -38,7 +38,14 @@ class UsersService {
 
   async findByPk(id) {
     debugLog(`retrieving a user with id ${id}`);
-    return models.User.findByPk(id);
+    return models.User.findByPk(id, {
+      include: [
+        {
+          model: models.LocationDetail,
+          attributes: ["socketId"],
+        },
+      ],
+    });
   }
 
   async findOne(filter) {

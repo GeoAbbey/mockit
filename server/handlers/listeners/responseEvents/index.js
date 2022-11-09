@@ -59,6 +59,11 @@ export const responseEvents = (eventEmitter) => {
       sender_firebase_token: decodedToken.firebaseToken,
     });
 
+    io.to(userToken.LocationDetail.socketId).emit(
+      EVENT_IDENTIFIERS.RESPONSE.ASSIGNED,
+      notificationData
+    );
+
     await notifyPeople({
       event: EVENT_IDENTIFIERS.RESPONSE.ASSIGNED,
       people: [userToken],
