@@ -34,77 +34,99 @@ export const invitationEvents = (eventEmitter) => {
     }
   );
 
-  eventEmitter.on(EVENT_IDENTIFIERS.INVITATION.CREATED, async ({ invitation, decodedToken }) => {
-    logger(`${EVENT_IDENTIFIERS.INVITATION.CREATED} has been received`);
+  eventEmitter.on(
+    EVENT_IDENTIFIERS.INVITATION.CREATED,
+    async ({ invitation, decodedToken, io }) => {
+      logger(`${EVENT_IDENTIFIERS.INVITATION.CREATED} has been received`);
 
-    const notificationData = data.CREATED({
-      sender_id: invitation.ownerId,
-      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
-      status_id: invitation.id,
-      sender_firebase_token: decodedToken.firebaseToken,
-    });
+      const notificationData = data.CREATED({
+        sender_id: invitation.ownerId,
+        sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+        status_id: invitation.id,
+        sender_firebase_token: decodedToken.firebaseToken,
+      });
 
-    const lawyers = await UserService.findMany({
-      role: ROLES.LAWYER,
-      address: { country: invitation.venue.country, state: invitation.venue.state },
-    });
+      const lawyers = await UserService.findMany({
+        role: ROLES.LAWYER,
+        address: { country: invitation.venue.country, state: invitation.venue.state },
+      });
 
-    if (!lawyers.length) notifyAdminOfNoLawyer(invitation, "INVITATION");
-    else updateModelInstance(invitation, "INVITATION");
+      if (!lawyers.length) notifyAdminOfNoLawyer(invitation, "INVITATION");
+      else updateModelInstance(invitation, "INVITATION");
 
-    notifyPeople({
-      event: EVENT_IDENTIFIERS.INVITATION.CREATED,
-      people: lawyers,
-      notificationData,
-    });
+      notifyPeople({
+        event: EVENT_IDENTIFIERS.INVITATION.CREATED,
+        people: lawyers,
+        notificationData,
+      });
 
-    const personalizations = lawyers.map((lawyer) => ({
-      to: [{ email: lawyer.email }],
-      dynamic_template_data: {
-        firstName: lawyer.firstName,
-      },
-    }));
+      lawyers.forEach((lawyer) => {
+        io.to(lawyer.LocationDetail.socketId).emit(
+          EVENT_IDENTIFIERS.INVITATION.CREATED,
+          notificationData
+        );
+      });
 
-    sendBulkMail({ personalizations, templateId: TEMPLATE.POLICE_INVITATION_CREATED });
-  });
+      const personalizations = lawyers.map((lawyer) => ({
+        to: [{ email: lawyer.email }],
+        dynamic_template_data: {
+          firstName: lawyer.firstName,
+        },
+      }));
 
-  eventEmitter.on(EVENT_IDENTIFIERS.INVITATION.CANCELLED, async ({ invitation, decodedToken }) => {
-    logger(`${EVENT_IDENTIFIERS.INVITATION.CANCELLED} has been received`);
+      sendBulkMail({ personalizations, templateId: TEMPLATE.POLICE_INVITATION_CREATED });
+    }
+  );
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
-      invitation,
-      decodedToken,
-    });
-  });
+  eventEmitter.on(
+    EVENT_IDENTIFIERS.INVITATION.CANCELLED,
+    async ({ invitation, decodedToken, io }) => {
+      logger(`${EVENT_IDENTIFIERS.INVITATION.CANCELLED} has been received`);
 
-  eventEmitter.on(EVENT_IDENTIFIERS.INVITATION.ASSIGNED, async ({ invitation, decodedToken }) => {
-    logger(`${EVENT_IDENTIFIERS.INVITATION.ASSIGNED} has been received`);
+      eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
+        invitation,
+        decodedToken,
+        io,
+      });
+    }
+  );
 
-    const userToken = await UserService.findByPk(invitation.ownerId);
+  eventEmitter.on(
+    EVENT_IDENTIFIERS.INVITATION.ASSIGNED,
+    async ({ invitation, decodedToken, io }) => {
+      logger(`${EVENT_IDENTIFIERS.INVITATION.ASSIGNED} has been received`);
 
-    const notificationData = data.ASSIGNED({
-      sender_id: decodedToken.id,
-      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
-      status_id: invitation.id,
-      sender_firebase_token: decodedToken.firebaseToken,
-    });
+      const userToken = await UserService.findByPk(invitation.ownerId);
 
-    notifyPeople({
-      event: EVENT_IDENTIFIERS.INVITATION.ASSIGNED,
-      people: [userToken],
-      notificationData,
-    });
+      const notificationData = data.ASSIGNED({
+        sender_id: decodedToken.id,
+        sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+        status_id: invitation.id,
+        sender_firebase_token: decodedToken.firebaseToken,
+      });
 
-    sendMail({
-      email: userToken.dataValues.email,
-      templateId: TEMPLATE.INVITATION_LAWYER_ASSIGNED,
-      firstName: userToken.dataValues.firstName,
-    });
-  });
+      notifyPeople({
+        event: EVENT_IDENTIFIERS.INVITATION.ASSIGNED,
+        people: [userToken],
+        notificationData,
+      });
+
+      io.to(userToken.LocationDetail.socketId).emit(
+        EVENT_IDENTIFIERS.RESPONSE.ASSIGNED,
+        notificationData
+      );
+
+      sendMail({
+        email: userToken.dataValues.email,
+        templateId: TEMPLATE.INVITATION_LAWYER_ASSIGNED,
+        firstName: userToken.dataValues.firstName,
+      });
+    }
+  );
 
   eventEmitter.on(
     EVENT_IDENTIFIERS.INVITATION.MARK_AS_COMPLETED,
-    async ({ invitation, decodedToken }) => {
+    async ({ invitation, decodedToken, io }) => {
       logger(`${EVENT_IDENTIFIERS.INVITATION.MARK_AS_COMPLETED} has been received`);
 
       const userToken = await UserService.findByPk(invitation.ownerId);
@@ -121,6 +143,12 @@ export const invitationEvents = (eventEmitter) => {
         people: [userToken],
         notificationData,
       });
+
+      io.to(userToken.LocationDetail.socketId).emit(
+        EVENT_IDENTIFIERS.RESPONSE.ASSIGNED,
+        notificationData
+      );
+
       sendMail({
         email: userToken.dataValues.email,
         templateId: TEMPLATE.POLICE_INVITATION_COMPLETED,

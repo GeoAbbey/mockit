@@ -64,7 +64,15 @@ class UsersService {
   async findMany(filter) {
     debugLog(`retrieving all user on the platform using ${JSON.stringify(filter)}`);
 
-    return models.User.findAll({ where: { ...filter } });
+    return models.User.findAll({
+      where: { ...filter },
+      include: [
+        {
+          model: models.LocationDetail,
+          attributes: ["socketId"],
+        },
+      ],
+    });
   }
 
   async update(id, UserDTO, oldDetails, t = undefined) {
