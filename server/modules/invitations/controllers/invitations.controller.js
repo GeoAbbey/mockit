@@ -76,6 +76,7 @@ class InvitationsController {
 
   async modifyInvite(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
 
     const {
       body,
@@ -92,6 +93,7 @@ class InvitationsController {
       eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.ASSIGNED, {
         invitation: updatedInvitation,
         decodedToken,
+        io,
       });
 
     return res.status(200).send({
@@ -188,6 +190,7 @@ class InvitationsController {
 
   async updateStatus(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
 
     const statusMapper = {
       completed: { status: "completed" },
@@ -215,6 +218,7 @@ class InvitationsController {
     eventEmitter.emit(eventMapper[status], {
       invitation: updatedInvitation,
       decodedToken,
+      io,
     });
 
     return res.status(200).send({

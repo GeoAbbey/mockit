@@ -119,6 +119,7 @@ class PaymentsController {
 
   async walletOrSubPayment(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
 
     const {
       body: { modelId, modelType, lawyerId = undefined, amount = undefined, quantity = undefined },
@@ -135,6 +136,7 @@ class PaymentsController {
         amount,
         modelType,
         code,
+        io,
       },
       eventEmitter,
       decodedToken
@@ -150,6 +152,7 @@ class PaymentsController {
 
   processPayment = async (req, res, next) => {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
 
     const {
       params: { ref },
@@ -171,6 +174,7 @@ class PaymentsController {
       data,
       eventEmitter,
       decodedToken,
+      io,
     });
 
     return res.status(200).send(paymentResult);
