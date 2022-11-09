@@ -18,6 +18,7 @@ class InterestedLawyersController {
 
   async marKInterest(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
 
     const {
       params: { id },
@@ -35,7 +36,7 @@ class InterestedLawyersController {
 
     if (!interest) return next(createError(400, `The claim with id ${id} cannot be found`));
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, interest, req.decodedToken);
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, interest, req.decodedToken, io);
 
     return res.status(200).send({
       success: true,
@@ -89,6 +90,7 @@ class InterestedLawyersController {
 
   async editInterest(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
 
     const {
       params: { id },
@@ -106,6 +108,7 @@ class InterestedLawyersController {
       updatedInterest,
       oldInterest,
       decodedToken,
+      io,
     });
 
     return res.status(200).send({

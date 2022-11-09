@@ -10,7 +10,8 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (
   events,
   data,
   decodedToken,
-  action
+  action,
+  io
 ) => {
   logger(`${events} events has been received`);
 
@@ -19,32 +20,32 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (
       {
         model: models.User,
         as: "ownerProfile",
-        attributes: ["firebaseToken", "id"],
+        attributes: ["firebaseToken", "id", "email", "firstName"],
         required: false,
-      },
-      {
-        model: models.User,
-        as: "lawyerProfile",
-        attributes: ["firebaseToken", "id"],
-        required: false,
+        include: [
+          {
+            model: models.LocationDetail,
+            attributes: ["socketId"],
+          },
+        ],
       },
     ],
   });
 
-  const { ownerProfile, lawyerProfile } = caseOfInterest.dataValues;
+  const { ownerProfile } = caseOfInterest.dataValues;
+
+  const notificationData = NOTIFICATION_DATA.SMALL_CLAIM[action]({
+    sender_id: data.dataValues.ownerId,
+    status_id: data.dataValues.modelId,
+    sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+    sender_firebase_token: decodedToken.firebaseToken,
+  });
 
   const notice = [
     {
       for: EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST,
       ownerId: ownerProfile.id,
-      content: JSON.stringify(
-        NOTIFICATION_DATA.SMALL_CLAIM[action]({
-          sender_id: data.dataValues.ownerId,
-          status_id: data.dataValues.modelId,
-          sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
-          sender_firebase_token: decodedToken.firebaseToken,
-        })
-      ),
+      content: JSON.stringify(notificationData),
     },
   ];
 
@@ -58,24 +59,16 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (
 
   sendNotificationToClient({
     tokens: [ownerProfile.firebaseToken],
-    data: NOTIFICATION_DATA.SMALL_CLAIM[action]({
-      sender_id: decodedToken.id,
-      status_id: data.dataValues.modelId,
-      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
-      sender_firebase_token: decodedToken.firebaseToken,
-    }),
+    data: notificationData,
   });
 
-  logger("saving notification sent to the user in the database");
-  await models.Notification.bulkCreate(
-    notice,
-    NOTIFICATION_DATA.SMALL_CLAIM[action]({
-      sender_id: data.dataValues.ownerId,
-      status_id: data.dataValues.modelId,
-      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
-      sender_firebase_token: decodedToken.firebaseToken,
-    })
+  io.to(ownerProfile.LocationDetail.socketId).emit(
+    EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST,
+    notificationData
   );
+
+  logger("saving notification sent to the user in the database");
+  await models.Notification.bulkCreate(notice, notificationData);
 };
 
 export const sendNotificationToEligibleLawyers = async ({

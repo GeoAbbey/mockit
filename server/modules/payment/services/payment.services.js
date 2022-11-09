@@ -384,7 +384,7 @@ class PaymentsService {
     return result;
   };
 
-  handleSingleSmallClaim = async ({ data, eventEmitter, decodedToken }) => {
+  handleSingleSmallClaim = async ({ data, eventEmitter, decodedToken, io }) => {
     debugLog("processing a payment handleSingleSmallClaim");
 
     let result = await models.sequelize.transaction(async (t) => {
@@ -427,7 +427,7 @@ class PaymentsService {
 
       await this.saveCardDetails(data, metadata, { transaction: t });
 
-      eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken);
+      eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken, io);
 
       return { success: true, claim: paidSmallClaim };
     });
@@ -596,10 +596,10 @@ class PaymentsService {
       smallClaim: this.handleSmallClaimWithCooperate,
     };
 
-    return mapper[args.modelType](args, emitter, decodedToken);
+    return mapper[args.modelType](args, emitter, decodedToken, io);
   }
 
-  async handleSmallClaimWithCooperate(args, emitter, decodedToken) {
+  async handleSmallClaimWithCooperate(args, emitter, decodedToken, io) {
     debugLog("I am handling a small claim with a cooperate reference");
 
     try {
@@ -664,7 +664,7 @@ class PaymentsService {
           { transaction: t }
         );
 
-        emitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidClaim, decodedToken);
+        emitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidClaim, decodedToken, io);
 
         return { success: true, service: paidClaim };
       });
@@ -1034,7 +1034,7 @@ class PaymentsService {
     }
   }
 
-  async handleSmallClaim(args, emitter, decodedToken) {
+  async handleSmallClaim(args, emitter, decodedToken, io) {
     debugLog("handling payment for small claim", args);
 
     if (!args.lawyerId)
@@ -1107,7 +1107,7 @@ class PaymentsService {
           { transaction: t }
         );
 
-        emitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken);
+        emitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken, io);
 
         return { success: true, service: paidSmallClaim };
       });

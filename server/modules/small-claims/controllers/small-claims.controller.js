@@ -19,6 +19,7 @@ class SmallClaimsController {
 
   async makeClaim(req, res) {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
 
     const { body, decodedToken, attachments = [] } = req;
     const ownerId = req.decodedToken.id;
@@ -26,7 +27,7 @@ class SmallClaimsController {
     body.venue = JSON.parse(body.venue);
     const smallClaim = await SmallClaimsService.create({ ...body, attachments, ownerId });
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, smallClaim, decodedToken);
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, smallClaim, decodedToken, io);
 
     return res.status(201).send({
       success: true,
@@ -148,6 +149,7 @@ class SmallClaimsController {
 
   async updateToNewState(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
 
     const {
       params: { id },
@@ -164,7 +166,8 @@ class SmallClaimsController {
     eventEmitter.emit(
       EVENT_IDENTIFIERS.SMALL_CLAIM[status.toUpperCase()],
       updatedSmallClaim,
-      decodedToken
+      decodedToken,
+      io
     );
 
     return res.status(200).send({
