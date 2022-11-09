@@ -14,7 +14,7 @@ import { sendBulkMail, sendMail } from "../../../utils/MailService";
 import smallClaimsService from "../../../modules/small-claims/services/small-claims.service";
 
 export const smallClaimEvents = (eventEmitter) => {
-  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, async (claim, decodedToken) => {
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, async (claim, decodedToken, io) => {
     logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED} event has been received`);
 
     const notificationData = data.CREATED({
@@ -38,6 +38,13 @@ export const smallClaimEvents = (eventEmitter) => {
       notificationData,
     });
 
+    lawyers.forEach((lawyer) => {
+      io.to(lawyer.LocationDetail.socketId).emit(
+        EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED,
+        notificationData
+      );
+    });
+
     const personalizations = lawyers.map((lawyer) => ({
       to: [{ email: lawyer.email }],
       dynamic_template_data: {
@@ -48,20 +55,21 @@ export const smallClaimEvents = (eventEmitter) => {
     sendBulkMail({ personalizations, templateId: TEMPLATE.SMALL_CLAIM_CREATED });
   });
 
-  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, async (claim, decodedToken) => {
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, async (claim, decodedToken, io) => {
     logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST} event has been received`);
 
     layerMarkInterestOrUpdateStatusForClaim(
       EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST,
       claim,
       decodedToken,
-      "MARK_INTEREST"
+      "MARK_INTEREST",
+      io
     );
   });
 
   eventEmitter.on(
     EVENT_IDENTIFIERS.SMALL_CLAIM.EDIT_INTEREST,
-    async ({ updatedInterest, decodedToken }) => {
+    async ({ updatedInterest, decodedToken, io }) => {
       logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.EDIT_INTEREST} event has been received`);
 
       const theClaim = await smallClaimsService.find(updatedInterest.claimId);
@@ -88,10 +96,15 @@ export const smallClaimEvents = (eventEmitter) => {
         people: [userToken],
         notificationData,
       });
+
+      io.to(userToken.LocationDetail.socketId).emit(
+        EVENT_IDENTIFIERS.SMALL_CLAIM.EDIT_INTEREST,
+        notificationData
+      );
     }
   );
 
-  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CANCELLED, async (claim, decodedToken) => {
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CANCELLED, async (claim, decodedToken, io) => {
     logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.CANCELLED} event has been received`);
 
     const userToken = await UserService.findByPk(claim.ownerId);
@@ -109,15 +122,13 @@ export const smallClaimEvents = (eventEmitter) => {
       notificationData,
     });
 
-    // sendTemplateEmail(
-    //   userToken.dataValues.email,
-    //   TEMPLATE.SMALL_CLAIM_ASSIGNED,
-    //   { firstName: userToken.dataValues.firstName },
-    //   claim.ticketId
-    // );
+    io.to(userToken.LocationDetail.socketId).emit(
+      EVENT_IDENTIFIERS.SMALL_CLAIM.CANCELLED,
+      notificationData
+    );
   });
 
-  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.COMPLETED, async (claim, decodedToken) => {
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.COMPLETED, async (claim, decodedToken, io) => {
     logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.COMPLETED} event  has been received`);
 
     const userToken = await UserService.findByPk(claim.ownerId);
@@ -135,6 +146,11 @@ export const smallClaimEvents = (eventEmitter) => {
       notificationData,
     });
 
+    io.to(userToken.LocationDetail.socketId).emit(
+      EVENT_IDENTIFIERS.SMALL_CLAIM.COMPLETED,
+      notificationData
+    );
+
     sendMail({
       email: userToken.dataValues.email,
       firstName: userToken.dataValues.firstName,
@@ -144,7 +160,7 @@ export const smallClaimEvents = (eventEmitter) => {
 
   eventEmitter.on(
     EVENT_IDENTIFIERS.SMALL_CLAIM.CONSULTATION_COMPLETED,
-    async (claim, decodedToken) => {
+    async (claim, decodedToken, io) => {
       logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.CONSULTATION_COMPLETED} event has been received`);
 
       const userToken = await UserService.findByPk(claim.ownerId);
@@ -162,6 +178,11 @@ export const smallClaimEvents = (eventEmitter) => {
         notificationData,
       });
 
+      io.to(userToken.LocationDetail.socketId).emit(
+        EVENT_IDENTIFIERS.SMALL_CLAIM.CONSULTATION_COMPLETED,
+        notificationData
+      );
+
       const theData = {
         ...claim.dataValues,
         type: "smallClaim",
@@ -176,7 +197,7 @@ export const smallClaimEvents = (eventEmitter) => {
     }
   );
 
-  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, async (claim, decodedToken) => {
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, async (claim, decodedToken, io) => {
     logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.PAID} event has been received`);
 
     const lawyerToken = await UserService.findByPk(claim.assignedLawyerId);
@@ -193,9 +214,14 @@ export const smallClaimEvents = (eventEmitter) => {
       people: [lawyerToken],
       notificationData,
     });
+
+    io.to(lawyerToken.LocationDetail.socketId).emit(
+      EVENT_IDENTIFIERS.SMALL_CLAIM.PAID,
+      notificationData
+    );
   });
 
-  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CLOSED, async (claim, decodedToken) => {
+  eventEmitter.on(EVENT_IDENTIFIERS.SMALL_CLAIM.CLOSED, async (claim, decodedToken, io) => {
     logger(`${EVENT_IDENTIFIERS.SMALL_CLAIM.CLOSED} event has been received`);
 
     const lawyerToken = await UserService.findByPk(claim.assignedLawyerId);
@@ -212,5 +238,10 @@ export const smallClaimEvents = (eventEmitter) => {
       people: [lawyerToken],
       notificationData,
     });
+
+    io.to(lawyerToken.LocationDetail.socketId).emit(
+      EVENT_IDENTIFIERS.SMALL_CLAIM.CLOSED,
+      notificationData
+    );
   });
 };
