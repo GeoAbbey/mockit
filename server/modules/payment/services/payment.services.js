@@ -252,7 +252,7 @@ class PaymentsService {
     };
   }
 
-  async create(PaymentDTO, eventEmitter, decodedToken) {
+  async create(PaymentDTO, eventEmitter, decodedToken, io) {
     debugLog("creating a payment");
 
     const mapper = {
@@ -264,11 +264,11 @@ class PaymentsService {
       mileStone: this.handleMileStone,
     };
 
-    if (PaymentDTO.code) return this.handleCooperate(PaymentDTO, eventEmitter, decodedToken);
-    return mapper[PaymentDTO.modelType](PaymentDTO, eventEmitter, decodedToken);
+    if (PaymentDTO.code) return this.handleCooperate(PaymentDTO, eventEmitter, decodedToken, io);
+    return mapper[PaymentDTO.modelType](PaymentDTO, eventEmitter, decodedToken, io);
   }
 
-  async processPayIn({ data, eventEmitter, decodedToken }) {
+  async processPayIn({ data, eventEmitter, decodedToken, io }) {
     debugLog("processing a payment");
 
     const mapper = {
@@ -280,7 +280,7 @@ class PaymentsService {
       mileStone: this.handleSingleMileStonePayIn,
     };
 
-    return mapper[data.metaData.type]({ data, eventEmitter, decodedToken });
+    return mapper[data.metaData.type]({ data, eventEmitter, decodedToken, io });
   }
 
   handleSingleMileStonePayIn = async ({ data, eventEmitter, decodedToken }) => {
@@ -333,7 +333,7 @@ class PaymentsService {
     return result;
   };
 
-  handleSingleInvitation = async ({ data, eventEmitter, decodedToken }) => {
+  handleSingleInvitation = async ({ data, eventEmitter, decodedToken, io }) => {
     debugLog("processing a payment handleSingleInvitation");
     let result = await models.sequelize.transaction(async (t) => {
       const { metaData: metadata, amountPaid: amount, transactionReference: reference } = data;
@@ -375,6 +375,7 @@ class PaymentsService {
       eventEmitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
         invitation: paidInvitation,
         decodedToken,
+        io,
       });
 
       return { success: true, service: paidInvitation };
@@ -383,7 +384,7 @@ class PaymentsService {
     return result;
   };
 
-  handleSingleSmallClaim = async ({ data, eventEmitter, decodedToken }) => {
+  handleSingleSmallClaim = async ({ data, eventEmitter, decodedToken, io }) => {
     debugLog("processing a payment handleSingleSmallClaim");
 
     let result = await models.sequelize.transaction(async (t) => {
@@ -426,7 +427,7 @@ class PaymentsService {
 
       await this.saveCardDetails(data, metadata, { transaction: t });
 
-      eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken);
+      eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken, io);
 
       return { success: true, claim: paidSmallClaim };
     });
@@ -567,7 +568,7 @@ class PaymentsService {
     return result;
   };
 
-  async handleCooperate(args, emitter, decodedToken) {
+  async handleCooperate(args, emitter, decodedToken, io) {
     //get the cooperate account and the check the access.
     const oldCooperateInfo = await CooperateService.findOne(args.code);
 
@@ -595,10 +596,10 @@ class PaymentsService {
       smallClaim: this.handleSmallClaimWithCooperate,
     };
 
-    return mapper[args.modelType](args, emitter, decodedToken);
+    return mapper[args.modelType](args, emitter, decodedToken, io);
   }
 
-  async handleSmallClaimWithCooperate(args, emitter, decodedToken) {
+  async handleSmallClaimWithCooperate(args, emitter, decodedToken, io) {
     debugLog("I am handling a small claim with a cooperate reference");
 
     try {
@@ -663,7 +664,7 @@ class PaymentsService {
           { transaction: t }
         );
 
-        emitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidClaim, decodedToken);
+        emitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidClaim, decodedToken, io);
 
         return { success: true, service: paidClaim };
       });
@@ -675,7 +676,7 @@ class PaymentsService {
     }
   }
 
-  async handleInvitationWithCooperate(args, emitter, decodedToken) {
+  async handleInvitationWithCooperate(args, emitter, decodedToken, io) {
     debugLog("I am handling a police invitation with a corporate reference");
 
     try {
@@ -731,6 +732,7 @@ class PaymentsService {
         emitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
           invitation: paidInvitation,
           decodedToken,
+          io,
         });
         return { success: true, service: paidInvitation };
       });
@@ -825,7 +827,7 @@ class PaymentsService {
     }
   }
 
-  async handleInvitation(args, emitter, decodedToken) {
+  async handleInvitation(args, emitter, decodedToken, io) {
     debugLog("I am handling payment for invitations", args);
     try {
       let result = await models.sequelize.transaction(async (t) => {
@@ -882,6 +884,7 @@ class PaymentsService {
         emitter.emit(EVENT_IDENTIFIERS.INVITATION.CREATED, {
           invitation: paidInvitation,
           decodedToken,
+          io,
         });
 
         return { success: true, service: paidInvitation };
@@ -1031,7 +1034,7 @@ class PaymentsService {
     }
   }
 
-  async handleSmallClaim(args, emitter, decodedToken) {
+  async handleSmallClaim(args, emitter, decodedToken, io) {
     debugLog("handling payment for small claim", args);
 
     if (!args.lawyerId)
@@ -1104,7 +1107,7 @@ class PaymentsService {
           { transaction: t }
         );
 
-        emitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken);
+        emitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.PAID, paidSmallClaim, decodedToken, io);
 
         return { success: true, service: paidSmallClaim };
       });

@@ -25,8 +25,6 @@ export const responseEvents = (eventEmitter) => {
       dataValues: { ownerId, assignedLawyerId, id },
     } = response;
 
-    console.log({ response });
-
     const [userLocationDetails, lawyerLocationDetails] = await Promise.all([
       LocationServices.find({ where: { id: ownerId } }),
       LocationServices.find({ where: { id: assignedLawyerId } }),
@@ -58,6 +56,11 @@ export const responseEvents = (eventEmitter) => {
       status_id: response.id,
       sender_firebase_token: decodedToken.firebaseToken,
     });
+
+    io.to(userToken.LocationDetail.socketId).emit(
+      EVENT_IDENTIFIERS.RESPONSE.ASSIGNED,
+      notificationData
+    );
 
     await notifyPeople({
       event: EVENT_IDENTIFIERS.RESPONSE.ASSIGNED,
@@ -126,11 +129,10 @@ export const responseEvents = (eventEmitter) => {
       sender_firebase_token: decodedToken.firebaseToken,
     });
 
-    io.to(updatedUserDetails.dataValues.socketId).emit("on:meet", {
-      response,
-      data,
-      message: "lawyer has acknowledged that he has meet with you.",
-    });
+    io.to(updatedUserDetails.dataValues.socketId).emit(
+      EVENT_IDENTIFIERS.RESPONSE.MEET_TIME,
+      notificationData
+    );
 
     notifyPeople({
       event: EVENT_IDENTIFIERS.RESPONSE.MEET_TIME,
@@ -167,6 +169,8 @@ export const responseEvents = (eventEmitter) => {
         radius: config.radius,
       });
 
+      console.log({ results });
+
       const lawyerModifiedWithResponseId = [];
 
       results.forEach((result) => {
@@ -196,7 +200,7 @@ export const responseEvents = (eventEmitter) => {
 
   eventEmitter.on(
     EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED,
-    async ({ response, decodedToken }) => {
+    async ({ response, decodedToken, io }) => {
       logger(`${EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED} event was received`);
 
       const userToken = await UserService.findByPk(response.ownerId);
@@ -214,11 +218,10 @@ export const responseEvents = (eventEmitter) => {
         notificationData,
       });
 
-      io.to(userToken.dataValues.socketId).emit("on:meet", {
-        response,
-        data: notificationData,
-        message: "lawyer has acknowledged that he has meet with you.",
-      });
+      io.to(userToken.LocationDetail.socketId).emit(
+        EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED,
+        notificationData
+      );
 
       const theData = {
         ...response.dataValues,
