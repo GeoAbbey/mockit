@@ -10,7 +10,7 @@
     "start-staging": "export NODE_ENV=staging && export DEBUG=* && node ./bin/www",
     "stop": "pm2 stop 'all'",
     "start:dev": "export DEBUG=* && nodemon ./bin/www",
-    "db:migrate": "./node_modules/.bin/sequelize db:migrate",
+    "db:migrate": "export NODE_ENV=staging && ./node_modules/.bin/sequelize db:migrate",
     "up:dev-deploy": "export NODE_ENV=staging && npm run db:migrate && npm run seed:up",
     "up": "npm run db:migrate && npm run seed:up",
     "seed:up": "npx sequelize-cli db:seed:all",
