@@ -35,8 +35,8 @@ export const layerMarkInterestOrUpdateStatusForClaim = async (
   const { ownerProfile } = caseOfInterest.dataValues;
 
   const notificationData = NOTIFICATION_DATA.SMALL_CLAIM[action]({
-    sender_id: data.dataValues.ownerId,
-    status_id: data.dataValues.modelId,
+    sender_id: data.dataValues.ownerId || decodedToken.id,
+    status_id: data.dataValues.modelId || data.claimId,
     sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
     sender_firebase_token: decodedToken.firebaseToken,
   });
@@ -85,21 +85,21 @@ export const sendNotificationToEligibleLawyers = async ({
   const tokens = [];
   const socketIDs = [];
 
+  const notificationData = NOTIFICATION_DATA.RESPONSE.CREATED({
+    sender_id: response.dataValues.ownerId,
+    status_id: response.dataValues.id,
+    sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
+    sender_firebase_token: decodedToken.firebaseToken,
+    startingLocation,
+  });
+
   lawyersToNotify.forEach((lawyer) => {
     if (lawyer.firebaseToken) tokens.push(lawyer.firebaseToken);
     if (lawyer.socketId) socketIDs.push(lawyer.socketId);
     allNotices.push({
       for: events,
       ownerId: lawyer.id,
-      content: JSON.stringify(
-        NOTIFICATION_DATA.RESPONSE.CREATED({
-          sender_id: response.dataValues.ownerId,
-          status_id: response.dataValues.id,
-          sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
-          sender_firebase_token: decodedToken.firebaseToken,
-          startingLocation,
-        })
-      ),
+      content: JSON.stringify(notificationData),
     });
   });
 
@@ -115,37 +115,13 @@ export const sendNotificationToEligibleLawyers = async ({
   logger("sending notification to all eligible lawyers");
   sendNotificationToClient({
     tokens: tokens,
-    data: NOTIFICATION_DATA.RESPONSE.CREATED({
-      sender_id: response.dataValues.ownerId,
-      status_id: response.dataValues.id,
-      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
-      sender_firebase_token: decodedToken.firebaseToken,
-      startingLocation,
-    }),
+    data: notificationData,
   });
 
   socketIDs.forEach((id) => {
-    io.to(id).emit(
-      EVENT_IDENTIFIERS.RESPONSE.CREATED,
-      NOTIFICATION_DATA.RESPONSE.CREATED({
-        sender_id: response.dataValues.ownerId,
-        status_id: response.dataValues.id,
-        sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
-        sender_firebase_token: decodedToken.firebaseToken,
-        startingLocation,
-      })
-    );
+    io.to(id).emit(EVENT_IDENTIFIERS.RESPONSE.CREATED, notificationData);
   });
 
   logger("saving notification sent to eligible lawyers in the database");
-  await models.Notification.bulkCreate(
-    allNotices,
-    NOTIFICATION_DATA.RESPONSE.CREATED({
-      sender_id: response.dataValues.ownerId,
-      status_id: response.dataValues.id,
-      sender_name: `${decodedToken.firstName} ${decodedToken.lastName}`,
-      sender_firebase_token: decodedToken.firebaseToken,
-      startingLocation,
-    })
-  );
+  await models.Notification.bulkCreate(allNotices, notificationData);
 };

@@ -158,11 +158,7 @@ class SmallClaimsController {
       oldSmallClaim,
     } = req;
 
-    const [, [updatedSmallClaim]] = await SmallClaimsService.update(
-      id,
-      { status: status },
-      oldSmallClaim
-    );
+    const [, [updatedSmallClaim]] = await SmallClaimsService.update(id, { status }, oldSmallClaim);
     eventEmitter.emit(
       EVENT_IDENTIFIERS.SMALL_CLAIM[status.toUpperCase()],
       updatedSmallClaim,
@@ -172,7 +168,7 @@ class SmallClaimsController {
 
     return res.status(200).send({
       success: true,
-      message: "You have successfully started this claim",
+      message: `You have successfully ${status || "started"} this claim`,
       smallClaim: updatedSmallClaim,
     });
   }
@@ -262,7 +258,7 @@ class SmallClaimsController {
             { page: 1, pageSize: 10 }
           );
 
-          if (mileStone)
+          if (mileStone.count)
             return next(
               createError(401, "Can not cancel claim once a mile stone has been paid for")
             );
