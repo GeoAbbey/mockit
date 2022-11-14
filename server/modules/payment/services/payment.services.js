@@ -992,7 +992,7 @@ class PaymentsService {
           oldCooperateInfo.dataValues.id,
           {
             operation: "add",
-            walletAmount: args.amount,
+            walletAmount: +args.amount,
           },
           oldCooperateInfo,
           { transaction: t }
