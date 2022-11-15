@@ -46,10 +46,6 @@ class CooperateService {
     } = oldCooperateDInfo;
 
     const handleAmount = (newValue, previousValue, operation) => {
-      typeof newValue;
-      console.log({ newValue });
-      typeof previousValue;
-      console.log({ previousValue });
       if (operation === "add") {
         return newValue + previousValue;
       } else return previousValue - newValue;
