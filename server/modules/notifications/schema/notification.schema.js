@@ -7,6 +7,7 @@ export const validNotificationUUIDs = Joi.object().keys({
 export const queryOptions = Joi.object().keys({
   search: Joi.object().keys({
     ownerId: Joi.string().guid({ version: "uuidv4" }),
+    status_id: Joi.string().guid({ version: "uuidv4" }),
     for: Joi.string().valid(
       "INVITATION_CREATED",
       "INVITATION_ASSIGNED",
