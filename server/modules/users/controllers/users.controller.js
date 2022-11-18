@@ -292,7 +292,7 @@ class UsersController {
     } = req;
     const { response } = await SMSService.verifyPhone({ pin: otp }, pinId);
 
-    if (!response.verified) return next(createError(response.status, response.statusText));
+    if (!response.verified) return next(createError(400, response.pinError));
     return next();
   }
 

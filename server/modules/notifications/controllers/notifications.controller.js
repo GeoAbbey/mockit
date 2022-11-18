@@ -3,6 +3,7 @@ import { paginate as pagination } from "../../helpers";
 
 import NotificationsService from "../services/notification.services";
 import { Op } from "sequelize";
+import sequelize from "sequelize";
 
 const log = debug("app:notifications-controller");
 
@@ -61,6 +62,15 @@ class NotificationsController {
     const commonOptions = () => {
       if (query.search && query.search.for) {
         filter = { ...filter, for: { [Op.iLike]: `%${query.search.for}%` } };
+      }
+
+      if (query.search && query.search.status_id) {
+        filter = {
+          ...filter,
+          content: sequelize.literal(
+            `"Notification".content @> '{"data": {"status_id": "${query.search.status_id}"}}'`
+          ),
+        };
       }
     };
 
