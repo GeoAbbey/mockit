@@ -34,7 +34,7 @@ class TransactionsController {
 
     return res.status(201).send({
       success: true,
-      message: "transaction successfully created",
+      message: "Transaction successfully created",
       transaction,
     });
   }
@@ -61,7 +61,7 @@ class TransactionsController {
 
     return res.status(200).send({
       success: true,
-      message: "transaction successfully created",
+      message: "Transaction successfully created",
       transactions: {
         currentPage: offset / limit + 1,
         pageSize: limit,
@@ -76,7 +76,7 @@ class TransactionsController {
     const transaction = await TransactionsService.remove(id);
     return res.status(200).send({
       success: true,
-      message: "transaction successfully created",
+      message: "Transaction successfully created",
       transaction,
     });
   }

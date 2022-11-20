@@ -27,7 +27,7 @@ class CooperateController {
 
     return res.status(200).send({
       success: true,
-      message: "co-operate account successfully created",
+      message: "Corperate account successfully created",
       cooperate,
     });
   }
