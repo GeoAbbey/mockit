@@ -31,7 +31,7 @@ class SmallClaimsController {
 
     return res.status(201).send({
       success: true,
-      message: "small claim successfully created",
+      message: "Small Claim successfully created. Looking for lawyers for you now",
       smallClaim,
     });
   }
@@ -63,7 +63,7 @@ class SmallClaimsController {
     const [, [updatedSmallClaim]] = await SmallClaimsService.update(id, body, oldSmallClaim);
     return res.status(200).send({
       success: true,
-      message: "small claim successfully updated",
+      message: "Small claim successfully updated",
       smallClaim: updatedSmallClaim,
     });
   }
@@ -75,7 +75,7 @@ class SmallClaimsController {
 
     return res.status(200).send({
       success: true,
-      message: "small claim successfully deleted",
+      message: "Small claim successfully deleted",
       smallClaim: deletedSmallClaim,
     });
   }
@@ -84,7 +84,7 @@ class SmallClaimsController {
     const { oldSmallClaim } = req;
     return res.status(200).send({
       success: true,
-      message: "small claim successfully retrieved",
+      message: "Small claim successfully retrieved",
       smallClaim: oldSmallClaim,
     });
   }

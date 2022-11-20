@@ -33,7 +33,7 @@ class ReviewsController {
     eventEmitter.emit(EVENT_IDENTIFIERS.REVIEW.CREATED, review);
     return res.status(201).send({
       success: true,
-      message: "review successfully created",
+      message: "Review submitted. Thanks",
       review,
     });
   }

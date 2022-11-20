@@ -120,8 +120,8 @@ class ResponsesController {
     return res.status(200).send({
       success: true,
       message: !oldResponse.bid
-        ? "response successfully updated"
-        : "You have been assigned this response",
+        ? "Emergency response successfully updated"
+        : "This emergency response has been assigned to you",
       response: updatedResponse,
     });
   }

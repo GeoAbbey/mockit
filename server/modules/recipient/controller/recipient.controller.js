@@ -75,7 +75,7 @@ class RecipientsController {
 
     return res.status(201).send({
       success: true,
-      message: "recipient successfully created",
+      message: "Recipient successfully created",
       recipient: newRecipient,
     });
   };

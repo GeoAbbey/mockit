@@ -30,7 +30,7 @@ class mileStonesController {
       return next(
         createError(
           400,
-          `total mile stone percentage must be equal to 100% not ${totalPercentage}%`
+          `Milestone percentage must equal 100% and not ${totalPercentage}%`
         )
       );
 

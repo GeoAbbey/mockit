@@ -45,7 +45,7 @@ class MileStonesService {
     const mileStones = await models.MileStone.bulkCreate(MileStoneDTO);
     return {
       success: true,
-      message: "mile stones successfully created",
+      message: "Milestones successfully created",
       mileStones,
     };
   }

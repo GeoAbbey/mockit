@@ -58,7 +58,7 @@ class InvitationsController {
 
     return res.status(201).send({
       success: true,
-      message: "invitation successfully created",
+      message: "Police invitation successfully created",
       invitation,
     });
   }
@@ -100,7 +100,7 @@ class InvitationsController {
       success: true,
       message: !oldInvitation.bid
         ? "invitation successfully updated"
-        : "You have been assigned this invitation",
+        : "This request has been assigned to you",
       invitation: updatedInvitation,
     });
   }
