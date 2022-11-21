@@ -93,6 +93,8 @@ export const sendNotificationToEligibleLawyers = async ({
     startingLocation,
   });
 
+  console.log({ notificationData });
+
   lawyersToNotify.forEach((lawyer) => {
     if (lawyer.firebaseToken) tokens.push(lawyer.firebaseToken);
     if (lawyer.socketId) socketIDs.push(lawyer.socketId);
@@ -113,7 +115,7 @@ export const sendNotificationToEligibleLawyers = async ({
   sendBulkMail({ personalizations, templateId: TEMPLATE.ELIGIBLE_LAWYERS });
 
   logger("sending notification to all eligible lawyers");
-  sendNotificationToClient({
+  await sendNotificationToClient({
     tokens: tokens,
     data: notificationData,
   });
