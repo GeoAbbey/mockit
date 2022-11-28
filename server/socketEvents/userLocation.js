@@ -18,7 +18,7 @@ const hoistedIOUser = (io) => {
       await updateDbWithNewLocation(payload, io, isOnline);
       const { recipient } = io;
       if (recipient.assigningId) {
-        // logger({ assigningId: recipient.assigningId }, "user:online");
+        logger({ assigningId: recipient.assigningId }, "user:online");
         const deliverTo = await LocationServices.find({ where: { id: recipient.assigningId } });
         const { socketId, location } = deliverTo.dataValues;
 
@@ -28,7 +28,7 @@ const hoistedIOUser = (io) => {
           speed: recipient.speed,
         });
       } else if (!recipient.assigningId && recipient.online) {
-        // logger(`on:surrounding:lawyers: finding surrounding lawyers`, { recipient }, "🦋");
+        logger(`on:surrounding:lawyers: finding surrounding lawyers`, { recipient }, "🦋");
         const { socketId, location } = recipient;
         io.to(socketId).emit("on:surrounding:lawyers", {
           results: await LocationServices.findLawyersWithinRadius({
