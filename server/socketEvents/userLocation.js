@@ -11,7 +11,7 @@ import { calcCrow } from "./helpers";
 
 const hoistedIOUser = (io) => {
   return async function userLocation(payload) {
-    // logger(`user:online:location I have received this payload ${payload} 🐥🍅`);
+    logger(`user:online:location I have received this payload ${payload} 🐥🍅`);
     const isOnline = await LocationServices.findByPk(payload.id);
 
     if (isOnline.dataValues.online) {
