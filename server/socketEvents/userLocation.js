@@ -7,7 +7,7 @@ import { updateDbWithNewLocation } from "./updateDBWithNewLocation";
 import LocationServices from "../modules/locationDetail/services/locationDetails.services";
 import { calcCrow } from "./helpers";
 
-// const logger = debug("app:socket-events:user-location");
+const logger = debug("app:socket-events:user-location");
 
 const hoistedIOUser = (io) => {
   return async function userLocation(payload) {
