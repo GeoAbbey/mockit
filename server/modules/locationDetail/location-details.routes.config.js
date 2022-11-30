@@ -25,6 +25,10 @@ export class LocationDetailRoutes extends CommonRoutesConfig {
       .route(`${this.path}/location/countries/states`)
       .get([wrapCatch(LocationDetailsController.getCountriesAndStates)]);
 
+    this.app
+      .route(`${this.path}/location`)
+      .post([Authenticate.verifyToken(), wrapCatch(LocationDetailsController.setLocation)]);
+
     return this.app;
   }
 }
