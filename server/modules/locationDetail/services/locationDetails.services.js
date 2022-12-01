@@ -32,9 +32,12 @@ class LocationsService {
     return models.LocationDetail.findOrCreate(LocationDTO);
   }
 
-  async specificUpdate(id, data) {
+  async specificUpdate(id, data, socketId) {
     debugLog("updating specific properties");
-    return models.LocationDetail.update({ location: data }, { where: { id }, returning: true });
+    return models.LocationDetail.update(
+      { location: data, socketId },
+      { where: { id }, returning: true }
+    );
   }
 
   async update(id, LocationDTO, oldLocation) {

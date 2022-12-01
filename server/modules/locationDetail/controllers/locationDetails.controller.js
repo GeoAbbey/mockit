@@ -42,7 +42,7 @@ class LocationDetailsController {
 
   async setLocation(req, res, next) {
     const {
-      body: { longitude, latitude },
+      body: { longitude, latitude, socketId },
       decodedToken: { id },
     } = req;
 
@@ -51,7 +51,11 @@ class LocationDetailsController {
       coordinates: [longitude, latitude],
     };
 
-    const [, [locationDetail]] = await LocationDetailsService.specificUpdate(id, location);
+    const [, [locationDetail]] = await LocationDetailsService.specificUpdate(
+      id,
+      location,
+      socketId
+    );
 
     const otherHalfLocation = await LocationDetailsService.findByPk(locationDetail.assigningId);
 
