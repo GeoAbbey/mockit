@@ -32,6 +32,11 @@ class LocationsService {
     return models.LocationDetail.findOrCreate(LocationDTO);
   }
 
+  async specificUpdate(id, data) {
+    debugLog("updating specific properties");
+    return models.LocationDetail.update({ location: data }, { where: { id }, returning: true });
+  }
+
   async update(id, LocationDTO, oldLocation) {
     const { location, online, assigningId, socketId, currentResponseId, room } = oldLocation;
 
