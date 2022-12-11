@@ -12,4 +12,11 @@ export const schedule = {
       lawyerInfo,
     });
   },
+
+  staleResponses: async () => {
+    console.log("Rice 🍚");
+    await agendaInstance.every("2 minutes", "stale-response");
+  },
 };
+
+agendaInstance.on("ready", () => schedule.staleResponses());

@@ -13,7 +13,7 @@ const agenda = new Agenda({
     collection: "myAgendaJobs",
     options: { useUnifiedTopology: true },
   },
-  processEvery: "1 minute",
+  processEvery: "2 minute",
   maxConcurrency: 20,
 });
 
