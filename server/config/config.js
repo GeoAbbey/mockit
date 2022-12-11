@@ -17,6 +17,7 @@ const common = {
   smsApiKey: process.env.SMS_API_KEY,
   smsBaseUrl: process.env.SMS_BASE_URL,
   sendGridApiKey: process.env.SENDGRID_API_KEY,
+  closeStaleResponseInterval: process.env.CLOSE_STALE_RESPONSE,
 };
 
 module.exports = {
