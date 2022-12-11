@@ -1,6 +1,5 @@
 import { agenda } from "./agenda";
 import { allDefinitions } from "./definitions";
-
 agenda
   .on("ready", () => console.log("Agenda started!"))
   .on("error", () => console.log("Agenda connection error!"));

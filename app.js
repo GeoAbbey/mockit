@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import Loaders from "./server/loaders";
 import { onConnection } from "./server/socketEvents";
 import UsersService from "./server/modules/users/service/user.service";
+import { schedule } from "./server/jobs/scheduler";
 
 const debugLog = debug("app");
 
