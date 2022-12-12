@@ -99,7 +99,8 @@ class ResponsesController {
       params: { id },
     } = req;
     if (oldResponse.bid) {
-      (body.assignedLawyerId = req.decodedToken.id), (body.status = "in-progress");
+      body.assignedLawyerId = req.decodedToken.id;
+      body.status = "in-progress";
     }
     const [, [updatedResponse]] = await ResponsesService.update(id, body, oldResponse);
 

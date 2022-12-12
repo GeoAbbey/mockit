@@ -91,35 +91,6 @@ export const responseEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.MEET_TIME, async ({ response, io, decodedToken }) => {
     logger(`${EVENT_IDENTIFIERS.RESPONSE.MEET_TIME} event was received`);
 
-    const {
-      dataValues: { ownerId, assignedLawyerId },
-    } = response;
-
-    const [userLocationDetails, lawyerLocationDetails] = await Promise.all([
-      LocationServices.find({ where: { id: ownerId } }),
-      LocationServices.find({ where: { id: assignedLawyerId } }),
-    ]);
-
-    const [[, [updatedUserDetails]], [, [updatedLawyerDetails]]] = await Promise.all([
-      LocationServices.update(
-        userLocationDetails.id,
-        {
-          assigningId: null,
-          currentResponseId: null,
-          online: false,
-        },
-        userLocationDetails
-      ),
-      LocationServices.update(
-        lawyerLocationDetails.id,
-        {
-          assigningId: null,
-          currentResponseId: null,
-        },
-        lawyerLocationDetails
-      ),
-    ]);
-
     const userToken = await UserService.findByPk(response.ownerId);
 
     const notificationData = data.MEET_TIME({
@@ -202,6 +173,35 @@ export const responseEvents = (eventEmitter) => {
     EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED,
     async ({ response, decodedToken, io }) => {
       logger(`${EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED} event was received`);
+
+      const {
+        dataValues: { ownerId, assignedLawyerId },
+      } = response;
+
+      const [userLocationDetails, lawyerLocationDetails] = await Promise.all([
+        LocationServices.find({ where: { id: ownerId } }),
+        LocationServices.find({ where: { id: assignedLawyerId } }),
+      ]);
+
+      const [[, [updatedUserDetails]], [, [updatedLawyerDetails]]] = await Promise.all([
+        LocationServices.update(
+          userLocationDetails.id,
+          {
+            assigningId: null,
+            currentResponseId: null,
+            online: false,
+          },
+          userLocationDetails
+        ),
+        LocationServices.update(
+          lawyerLocationDetails.id,
+          {
+            assigningId: null,
+            currentResponseId: null,
+          },
+          lawyerLocationDetails
+        ),
+      ]);
 
       const userToken = await UserService.findByPk(response.ownerId);
 
