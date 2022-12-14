@@ -99,20 +99,22 @@ class ResponsesController {
       params: { id },
     } = req;
     if (oldResponse.bid) {
-      (body.assignedLawyerId = req.decodedToken.id), (body.status = "in-progress");
+      body.assignedLawyerId = req.decodedToken.id;
+      body.status = "in-progress";
     }
-    const [, [updatedResponse]] = await ResponsesService.update(id, body, oldResponse);
+
+    const result = await ResponsesService.update(id, body, oldResponse);
 
     if (body.bid)
       eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, {
-        response: updatedResponse,
+        response: result[1][0],
         decodedToken,
         io,
       });
 
     if (body.meetTime)
       eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.MEET_TIME, {
-        response: updatedResponse,
+        response: oldResponse,
         decodedToken,
         io,
       });
@@ -120,9 +122,9 @@ class ResponsesController {
     return res.status(200).send({
       success: true,
       message: !oldResponse.bid
-        ? "Emergency response successfully updated"
-        : "This emergency response has been assigned to you",
-      response: updatedResponse,
+        ? "response successfully updated"
+        : "You have been assigned this response",
+      response: oldResponse,
     });
   }
 

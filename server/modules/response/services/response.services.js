@@ -143,19 +143,12 @@ class ResponsesService {
   }
 
   async update(id, ResponseDTO, oldResponse, t = undefined) {
-    const { status, meetTime, assignedLawyerId, paid, isNotified } = oldResponse;
+    const { status, assignedLawyerId, paid, isNotified } = oldResponse;
 
-    const handleMeeTime = () => {
-      if (ResponseDTO.meetTime) {
-        return new Date().toISOString();
-      }
-      return meetTime;
-    };
-
+    if (ResponseDTO.meetTime) return this.handleMeeTime(oldResponse);
     return models.Response.update(
       {
         status: ResponseDTO.status || status,
-        meetTime: handleMeeTime(),
         paid: handleFalsy(ResponseDTO.paid, paid),
         isNotified: handleFalsy(ResponseDTO.isNotified, isNotified),
         assignedLawyerId: ResponseDTO.assignedLawyerId || assignedLawyerId,
@@ -181,6 +174,44 @@ class ResponsesService {
     return models.sequelize.query(rawQueries.statistics("Responses"), {
       type: QueryTypes.SELECT,
     });
+  }
+
+  async handleMeeTime(oldResponse) {
+    const {
+      dataValues: { ownerId, assignedLawyerId },
+    } = oldResponse;
+
+    const userLocCoords = await models.LocationDetail.findByPk(ownerId);
+    const lawyerLocCoords = await models.LocationDetail.findByPk(assignedLawyerId);
+    try {
+      return models.sequelize.transaction(async (t) => {
+        await userLocCoords.update(
+          {
+            assigningId: null,
+            currentResponseId: null,
+            online: false,
+          },
+          { transaction: t }
+        );
+
+        await lawyerLocCoords.update(
+          {
+            assigningId: null,
+            currentResponseId: null,
+          },
+          { transaction: t }
+        );
+
+        await oldResponse.update(
+          {
+            meetTime: new Date().toISOString(),
+          },
+          { transaction: t }
+        );
+      });
+    } catch (error) {
+      console.log({ error });
+    }
   }
 }
 
