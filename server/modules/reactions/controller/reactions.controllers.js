@@ -36,7 +36,7 @@ class ReactionsController {
       );
     return res.status(201).send({
       success: true,
-      message: "reaction successfully created",
+      message: "Reaction successfully created",
       reaction,
     });
   }

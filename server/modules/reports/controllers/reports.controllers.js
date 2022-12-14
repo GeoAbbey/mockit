@@ -25,7 +25,7 @@ class ReportsController {
 
     return res.status(201).send({
       success: true,
-      message: "report successfully created",
+      message: "Report successfully created",
       report,
     });
   }

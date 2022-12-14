@@ -25,7 +25,7 @@ class EligibleLawyersController {
 
     return res.status(201).send({
       success: true,
-      message: "eligible lawyer successfully created",
+      message: "Eligible lawyer successfully created",
       eligibleLawyer,
     });
   }
