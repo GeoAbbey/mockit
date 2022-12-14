@@ -102,18 +102,19 @@ class ResponsesController {
       body.assignedLawyerId = req.decodedToken.id;
       body.status = "in-progress";
     }
-    const [, [updatedResponse]] = await ResponsesService.update(id, body, oldResponse);
+
+    const result = await ResponsesService.update(id, body, oldResponse);
 
     if (body.bid)
       eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, {
-        response: updatedResponse,
+        response: result[1][0],
         decodedToken,
         io,
       });
 
     if (body.meetTime)
       eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.MEET_TIME, {
-        response: updatedResponse,
+        response: oldResponse,
         decodedToken,
         io,
       });
@@ -123,7 +124,7 @@ class ResponsesController {
       message: !oldResponse.bid
         ? "response successfully updated"
         : "You have been assigned this response",
-      response: updatedResponse,
+      response: oldResponse,
     });
   }
 

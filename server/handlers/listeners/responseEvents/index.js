@@ -11,6 +11,7 @@ const config = configOptions[env];
 
 import { sendNotificationToEligibleLawyers } from "../helpers";
 const logger = debug("app:handlers:listeners:response-events");
+import models from "../../../models";
 
 import { schedule } from "../../../jobs/scheduler";
 import { data } from "./data";
@@ -25,28 +26,47 @@ export const responseEvents = (eventEmitter) => {
       dataValues: { ownerId, assignedLawyerId, id },
     } = response;
 
-    const [userLocationDetails, lawyerLocationDetails] = await Promise.all([
-      LocationServices.find({ where: { id: ownerId } }),
-      LocationServices.find({ where: { id: assignedLawyerId } }),
-    ]);
+    const userLocationDetails = await LocationServices.find({ where: { id: ownerId } });
+    const lawyerLocationDetails = await LocationServices.find({ where: { id: assignedLawyerId } });
 
-    const [[, updatedUserDetails], [, updatedLawyerDetails]] = await Promise.all([
-      LocationServices.update(
-        userLocationDetails.dataValues.id,
-        {
-          assigningId: assignedLawyerId,
-        },
-        userLocationDetails
-      ),
-      LocationServices.update(
-        lawyerLocationDetails.dataValues.id,
-        {
-          assigningId: ownerId,
-          currentResponseId: id,
-        },
-        lawyerLocationDetails
-      ),
-    ]);
+    try {
+      return models.sequelize.transaction(async (t) => {
+        await userLocationDetails.update(
+          {
+            assigningId: assignedLawyerId,
+          },
+          { transaction: t }
+        );
+
+        await lawyerLocationDetails.update(
+          {
+            assigningId: ownerId,
+            currentResponseId: id,
+          },
+          { transaction: t }
+        );
+      });
+    } catch (error) {
+      console.log({ error });
+    }
+
+    // const [[, updatedUserDetails], [, updatedLawyerDetails]] = await Promise.all([
+    //   LocationServices.update(
+    //     userLocationDetails.dataValues.id,
+    //     {
+    //       assigningId: assignedLawyerId,
+    //     },
+    //     userLocationDetails
+    //   ),
+    //   LocationServices.update(
+    //     lawyerLocationDetails.dataValues.id,
+    //     {
+    //       assigningId: ownerId,
+    //       currentResponseId: id,
+    //     },
+    //     lawyerLocationDetails
+    //   ),
+    // ]);
 
     const userToken = await UserService.findByPk(response.ownerId);
 
@@ -91,7 +111,15 @@ export const responseEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.MEET_TIME, async ({ response, io, decodedToken }) => {
     logger(`${EVENT_IDENTIFIERS.RESPONSE.MEET_TIME} event was received`);
 
+    const {
+      dataValues: { ownerId },
+    } = response;
+
     const userToken = await UserService.findByPk(response.ownerId);
+
+    const [userLocationDetails, lawyerLocationDetails] = await Promise.all([
+      LocationServices.find({ where: { id: ownerId } }),
+    ]);
 
     const notificationData = data.MEET_TIME({
       sender_id: decodedToken.id,
@@ -100,7 +128,7 @@ export const responseEvents = (eventEmitter) => {
       sender_firebase_token: decodedToken.firebaseToken,
     });
 
-    io.to(updatedUserDetails.dataValues.socketId).emit(
+    io.to(userLocationDetails.dataValues.socketId).emit(
       EVENT_IDENTIFIERS.RESPONSE.MEET_TIME,
       notificationData
     );
@@ -173,35 +201,6 @@ export const responseEvents = (eventEmitter) => {
     EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED,
     async ({ response, decodedToken, io }) => {
       logger(`${EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED} event was received`);
-
-      const {
-        dataValues: { ownerId, assignedLawyerId },
-      } = response;
-
-      const [userLocationDetails, lawyerLocationDetails] = await Promise.all([
-        LocationServices.find({ where: { id: ownerId } }),
-        LocationServices.find({ where: { id: assignedLawyerId } }),
-      ]);
-
-      const [[, [updatedUserDetails]], [, [updatedLawyerDetails]]] = await Promise.all([
-        LocationServices.update(
-          userLocationDetails.id,
-          {
-            assigningId: null,
-            currentResponseId: null,
-            online: false,
-          },
-          userLocationDetails
-        ),
-        LocationServices.update(
-          lawyerLocationDetails.id,
-          {
-            assigningId: null,
-            currentResponseId: null,
-          },
-          lawyerLocationDetails
-        ),
-      ]);
 
       const userToken = await UserService.findByPk(response.ownerId);
 
