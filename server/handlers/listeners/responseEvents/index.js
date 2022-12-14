@@ -50,24 +50,6 @@ export const responseEvents = (eventEmitter) => {
       console.log({ error });
     }
 
-    // const [[, updatedUserDetails], [, updatedLawyerDetails]] = await Promise.all([
-    //   LocationServices.update(
-    //     userLocationDetails.dataValues.id,
-    //     {
-    //       assigningId: assignedLawyerId,
-    //     },
-    //     userLocationDetails
-    //   ),
-    //   LocationServices.update(
-    //     lawyerLocationDetails.dataValues.id,
-    //     {
-    //       assigningId: ownerId,
-    //       currentResponseId: id,
-    //     },
-    //     lawyerLocationDetails
-    //   ),
-    // ]);
-
     const userToken = await UserService.findByPk(response.ownerId);
 
     const notificationData = data.ASSIGNED({
