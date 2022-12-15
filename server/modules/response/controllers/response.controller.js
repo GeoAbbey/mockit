@@ -99,22 +99,21 @@ class ResponsesController {
       params: { id },
     } = req;
     if (oldResponse.bid) {
-      body.assignedLawyerId = req.decodedToken.id;
-      body.status = "in-progress";
+      body.assignedLawyerId = decodedToken.id;
     }
 
     const result = await ResponsesService.update(id, body, oldResponse);
 
     if (body.bid)
       eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, {
-        response: result[1][0],
+        response: result,
         decodedToken,
         io,
       });
 
     if (body.meetTime)
       eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.MEET_TIME, {
-        response: oldResponse,
+        response: result,
         decodedToken,
         io,
       });

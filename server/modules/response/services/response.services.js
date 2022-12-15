@@ -146,6 +146,7 @@ class ResponsesService {
     const { status, assignedLawyerId, paid, isNotified } = oldResponse;
 
     if (ResponseDTO.meetTime) return this.handleMeeTime(oldResponse);
+    if (ResponseDTO.bid) return this.handleBid(ResponseDTO, oldResponse);
     return models.Response.update(
       {
         status: ResponseDTO.status || status,
@@ -202,9 +203,47 @@ class ResponsesService {
           { transaction: t }
         );
 
-        await oldResponse.update(
+        return oldResponse.update(
           {
             meetTime: new Date().toISOString(),
+          },
+          { transaction: t }
+        );
+      });
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+
+  async handleBid(ResponseDTO, oldResponse) {
+    const {
+      dataValues: { ownerId, id },
+    } = oldResponse;
+
+    const userLocCoords = await models.LocationDetail.findByPk(ownerId);
+    const lawyerLocCoords = await models.LocationDetail.findByPk(ResponseDTO.assignedLawyerId);
+
+    try {
+      return models.sequelize.transaction(async (t) => {
+        await userLocCoords.update(
+          {
+            assigningId: ResponseDTO.assignedLawyerId,
+          },
+          { transaction: t }
+        );
+
+        await lawyerLocCoords.update(
+          {
+            assigningId: ownerId,
+            currentResponseId: id,
+          },
+          { transaction: t }
+        );
+
+        return oldResponse.update(
+          {
+            assignedLawyerId: ResponseDTO.assignedLawyerId,
+            status: "in-progress",
           },
           { transaction: t }
         );
