@@ -22,34 +22,6 @@ export const responseEvents = (eventEmitter) => {
   eventEmitter.on(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, async ({ response, io, decodedToken }) => {
     logger(`${EVENT_IDENTIFIERS.RESPONSE.ASSIGNED} event was received`);
 
-    const {
-      dataValues: { ownerId, assignedLawyerId, id },
-    } = response;
-
-    const userLocationDetails = await LocationServices.find({ where: { id: ownerId } });
-    const lawyerLocationDetails = await LocationServices.find({ where: { id: assignedLawyerId } });
-
-    try {
-      return models.sequelize.transaction(async (t) => {
-        await userLocationDetails.update(
-          {
-            assigningId: assignedLawyerId,
-          },
-          { transaction: t }
-        );
-
-        await lawyerLocationDetails.update(
-          {
-            assigningId: ownerId,
-            currentResponseId: id,
-          },
-          { transaction: t }
-        );
-      });
-    } catch (error) {
-      console.log({ error });
-    }
-
     const userToken = await UserService.findByPk(response.ownerId);
 
     const notificationData = data.ASSIGNED({
