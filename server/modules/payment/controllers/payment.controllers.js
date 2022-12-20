@@ -145,7 +145,7 @@ class PaymentsController {
     if (!payment.success) return next(createError(400, `${payment.message}`));
     return res.status(201).send({
       success: true,
-      message: payment.message ? payment.message : "Payment successfully. Looking for lawyers now",
+      message: payment.message ? payment.message : "Payment successful. Looking for lawyers now",
       payment: payment.service,
     });
   }
