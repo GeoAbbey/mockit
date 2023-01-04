@@ -40,6 +40,32 @@ class LocationDetailsController {
     return res.status(200).send({ ...result });
   }
 
+  async setLocation(req, res, next) {
+    const {
+      body: { longitude, latitude, socketId },
+      decodedToken: { id },
+    } = req;
+
+    const location = {
+      type: "Point",
+      coordinates: [longitude, latitude],
+    };
+
+    const [, [locationDetail]] = await LocationDetailsService.specificUpdate(
+      id,
+      location,
+      socketId
+    );
+
+    const otherHalfLocation = await LocationDetailsService.findByPk(locationDetail.assigningId);
+
+    return res.status(200).send({
+      success: true,
+      message: "LocationDetail successfully updated",
+      otherHalfLocation,
+    });
+  }
+
   async toggleVisibility(req, res, next) {
     const {
       oldLocationDetail,

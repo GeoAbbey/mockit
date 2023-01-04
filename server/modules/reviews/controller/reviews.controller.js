@@ -33,7 +33,7 @@ class ReviewsController {
     eventEmitter.emit(EVENT_IDENTIFIERS.REVIEW.CREATED, review);
     return res.status(201).send({
       success: true,
-      message: "review successfully created",
+      message: "Review submitted. Thanks",
       review,
     });
   }
@@ -50,26 +50,6 @@ class ReviewsController {
       success: true,
       message: "review successfully deleted",
       review: deletedReview,
-    });
-  }
-
-  async editReview(req, res) {
-    const eventEmitter = req.app.get("eventEmitter");
-
-    const {
-      body,
-      params: { id },
-      oldReview,
-    } = req;
-
-    const [, [updatedReview]] = await ReviewsService.update(id, body, oldReview);
-
-    eventEmitter.emit(EVENT_IDENTIFIERS.REVIEW.EDITED, updatedReview);
-
-    return res.status(200).send({
-      success: true,
-      message: "review successfully updated",
-      review: updatedReview,
     });
   }
 

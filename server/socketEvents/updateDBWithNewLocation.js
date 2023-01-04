@@ -4,7 +4,7 @@ const debugLog = debug("socketEvents:updateDBWithNewLocation");
 
 export const updateDbWithNewLocation = async (payload, io, oldLocationDetails) => {
   const { id, socketId } = payload;
-  debugLog({ id, socketId }, "🐷");
+  // debugLog({ id, socketId }, "🐷");
   const [, [newDetails]] = await LocationService.update(
     id,
     {
@@ -20,5 +20,5 @@ export const updateDbWithNewLocation = async (payload, io, oldLocationDetails) =
 
   io.recipient = newDetails.dataValues;
 
-  debugLog({ realRecipient: io.recipient.assigningId }, "🔥🙏🏻");
+  // debugLog({ realRecipient: io.recipient.assigningId }, "🔥🙏🏻");
 };

@@ -50,34 +50,66 @@ class DashboardsService {
     return { invitations, responses, smallClaims };
   }
 
-  async histogramChat() {
+  async histogramChat(filter) {
     debugLog(`retrieving records for dashboard histogram chat`);
 
-    const invitations = await models.sequelize.query(
-      `SELECT date_trunc('month', "Invitations"."createdAt") AS the_month, count(*) as monthly_total FROM "Invitations" GROUP BY the_month`,
-      {
-        nest: true,
-        type: QueryTypes.SELECT,
-      }
-    );
+    let duration;
 
-    const responses = await models.sequelize.query(
-      `SELECT date_trunc('month', "Responses"."createdAt") AS the_month, count(*) as monthly_total FROM "Responses" GROUP BY the_month`,
-      {
-        nest: true,
-        type: QueryTypes.SELECT,
-      }
-    );
+    if (filter && filter.to && filter.from) {
+      duration = (tableName) =>
+        `SELECT date_trunc('month', "${tableName}"."createdAt") AS the_month, count(*) as monthly_total FROM "${tableName}" WHERE "${tableName}"."createdAt" BETWEEN '${filter.from}' AND '${filter.to}' GROUP BY the_month`;
+    } else {
+      duration = (tableName) =>
+        `SELECT date_trunc('month', "${tableName}"."createdAt") AS the_month, count(*) as monthly_total FROM "${tableName}" GROUP BY the_month`;
+    }
 
-    const smallClaims = await models.sequelize.query(
-      `SELECT date_trunc('month', "SmallClaims"."createdAt") AS the_month, count(*) as monthly_total FROM "SmallClaims" GROUP BY the_month`,
-      {
-        nest: true,
-        type: QueryTypes.SELECT,
-      }
-    );
+    const invitations = await models.sequelize.query(duration("Invitations"), {
+      nest: true,
+      type: QueryTypes.SELECT,
+    });
+
+    const responses = await models.sequelize.query(duration("Responses"), {
+      nest: true,
+      type: QueryTypes.SELECT,
+    });
+
+    const smallClaims = await models.sequelize.query(duration("SmallClaims"), {
+      nest: true,
+      type: QueryTypes.SELECT,
+    });
 
     return { invitations, responses, smallClaims };
+  }
+
+  async totalDebitAndCredit(filter) {
+    debugLog(
+      `retrieving total debit and credit over the following period ${JSON.stringify(filter)}`
+    );
+
+    let duration = (tableName) => "";
+
+    if (filter && filter.to && filter.from) {
+      duration = (tableName) =>
+        `WHERE "${tableName}"."createdAt" BETWEEN '${filter.from}' AND '${filter.to}';`;
+    }
+
+    const payIns = await models.sequelize.query(
+      `SELECT SUM(amount) FROM "PayIns" ${duration("PayIns")}`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    const payOuts = await models.sequelize.query(
+      `SELECT SUM(amount) FROM "Withdrawals" ${duration("Withdrawals")}`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    return { payIns, payOuts };
   }
 }
 

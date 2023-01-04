@@ -34,11 +34,6 @@ export class ReviewsRoutes extends CommonRoutesConfig {
       .delete([
         ReviewsController.checkAccessUser("delete"),
         wrapCatch(ReviewsController.deleteReview),
-      ])
-      .patch([
-        middleware({ schema: updateReviewSchema, property: "body" }),
-        ReviewsController.checkAccessUser("modify"),
-        wrapCatch(ReviewsController.editReview),
       ]);
 
     this.app

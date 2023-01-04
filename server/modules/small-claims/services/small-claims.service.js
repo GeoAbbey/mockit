@@ -46,14 +46,14 @@ class SmallClaimsService {
                 {
                   model: models.PayIn,
                   as: "oneTimePayments",
-                  where: { for: "singleSmallClaim", modelId: id },
+                  where: { type: "singleSmallClaim", modelId: id },
                   attributes: ["amount"],
                   required: false,
                 },
                 {
                   model: models.Transaction,
                   as: "paymentFromWallet",
-                  where: { modelType: "smallClaim", modelId: id },
+                  where: { type: "smallClaim", modelId: id },
                   attributes: ["amount"],
                   required: false,
                 },
@@ -74,39 +74,17 @@ class SmallClaimsService {
               required: false,
             },
             {
+              model: models.InterestedLawyer,
+              as: "myInterest",
+              where: { lawyerId: context },
+              attributes: ["serviceCharge", "lawyerId", "serviceChargeInNaira", "id"],
+              required: false,
+            },
+            {
               model: models.Review,
               as: "reviews",
               where: { modelType: "SmallClaim", modelId: id },
               required: false,
-            },
-            {
-              model: models.InterestedLawyer,
-              as: "interestedLawyers",
-              where: { modelType: "SmallClaim", modelId: id },
-              attributes: [
-                "baseCharge",
-                "serviceCharge",
-                "lawyerId",
-                "baseChargeInNaira",
-                "serviceChargeInNaira",
-              ],
-              required: false,
-              include: [
-                {
-                  model: models.User,
-                  as: "profile",
-                  attributes: [
-                    "firstName",
-                    "lastName",
-                    "email",
-                    "profilePic",
-                    "phone",
-                    "id",
-                    "firebaseToken",
-                    "description",
-                  ],
-                },
-              ],
             },
           ],
         },
@@ -116,33 +94,54 @@ class SmallClaimsService {
     return models.SmallClaim.findByPk(id);
   }
 
-  async findMany(filter, pageDetails) {
-    debugLog(`retrieving small claims with the following filter ${JSON.stringify(filter)}`);
+  async findMany(filter, pageDetails, canApply) {
+    debugLog(`retrieving invitations with the following filter ${JSON.stringify(filter)}`);
 
-    const { limit, offset } = paginate(pageDetails);
-
-    let params = filter ? `WHERE ${filter}` : "";
-
-    const [data] = await models.sequelize.query(
-      `SELECT count("SmallClaims"."id") AS "count" FROM "SmallClaims" AS "SmallClaims" LEFT OUTER JOIN "Users" AS "ownerProfile" ON "SmallClaims"."ownerId" = "ownerProfile"."id" AND ("ownerProfile"."deletedAt" IS NULL) LEFT OUTER JOIN "Users" AS "lawyerProfile" ON "SmallClaims"."assignedLawyerId" = "lawyerProfile"."id" AND ("lawyerProfile"."deletedAt" IS NULL) ${params}`,
+    let temp = [
       {
-        nest: true,
-        type: QueryTypes.SELECT,
-      }
-    );
-
-    const rows = await models.sequelize.query(
-      `SELECT "SmallClaims".claim, "SmallClaims"."createdAt","SmallClaims"."paid","SmallClaims"."ticketId","SmallClaims"."status","SmallClaims"."venue","SmallClaims"."updatedAt", "SmallClaims".amount, "SmallClaims"."assignedLawyerId", "SmallClaims".attachments, "SmallClaims".id, "SmallClaims"."ownerId","ownerProfile"."lastName" AS "ownerProfile.lastName","ownerProfile"."firstName" AS "ownerProfile.firstName", "ownerProfile"."profilePic" AS "ownerProfile.profilePic", "ownerProfile".email AS "ownerProfile.email","ownerProfile".phone AS "ownerProfile.phone", "ownerProfile"."firebaseToken" AS "ownerProfile.firebaseToken","lawyerProfile"."lastName" AS "lawyerProfile.lastName", "lawyerProfile"."firstName" AS "lawyerProfile.firstName", "lawyerProfile"."profilePic" AS "lawyerProfile.profilePic", "lawyerProfile".email AS "lawyerProfile.email","lawyerProfile".phone AS "lawyerProfile.phone", "lawyerProfile"."firebaseToken" AS "lawyerProfile.firebaseToken", (SELECT AVG("Reviews".rating) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.averageRating", (SELECT COUNT(id) FROM "Reviews" WHERE "Reviews"."reviewerId" = "SmallClaims"."assignedLawyerId") AS "lawyerProfile.noOfReviews" FROM "SmallClaims" LEFT OUTER JOIN "Users" AS "lawyerProfile" ON "SmallClaims"."assignedLawyerId" = "lawyerProfile".id LEFT OUTER JOIN "Users" AS "ownerProfile" ON "SmallClaims"."ownerId" = "ownerProfile".id ${params} ORDER BY "SmallClaims"."createdAt" DESC LIMIT ${limit} OFFSET ${offset};`,
+        model: models.User,
+        as: "lawyerProfile",
+        attributes: [
+          "firstName",
+          "lastName",
+          "email",
+          "profilePic",
+          "firebaseToken",
+          "phone",
+          "sumOfReviews",
+          "numOfReviews",
+          "description",
+        ],
+        required: false,
+      },
       {
-        nest: true,
-        type: QueryTypes.SELECT,
-      }
-    );
+        model: models.User,
+        as: "ownerProfile",
+        attributes: [
+          "firstName",
+          "lastName",
+          "email",
+          "profilePic",
+          "firebaseToken",
+          "phone",
+          "sumOfReviews",
+          "numOfReviews",
+          "description",
+        ],
+        required: false,
+      },
+    ];
 
-    return {
-      count: parseInt(data.count),
-      rows,
-    };
+    if (canApply) {
+      temp.push(canApply(models.InterestedLawyer));
+    }
+
+    return models.SmallClaim.findAndCountAll({
+      order: [["createdAt", "DESC"]],
+      where: { ...filter },
+      ...paginate(pageDetails),
+      include: temp,
+    });
   }
 
   async update(id, smallClaimDTO, oldSmallClaim, t = undefined) {
@@ -153,6 +152,7 @@ class SmallClaimsService {
       attachments,
       amount,
       assignedLawyerId,
+      isReassessed,
       paid,
       isNotified,
     } = oldSmallClaim;
@@ -180,6 +180,7 @@ class SmallClaimsService {
         venue: smallClaimDTO.venue && handleAddresses(smallClaimDTO.venue, venue),
         amount: smallClaimDTO.amount || amount,
         isNotified: handleFalsy(smallClaimDTO.isNotified, isNotified),
+        isReassessed: handleFalsy(smallClaimDTO.isReassessed, isReassessed),
         assignedLawyerId: smallClaimDTO.assignedLawyerId || assignedLawyerId,
         attachments: handleAttachments(),
         paid: handleFalsy(smallClaimDTO.paid, paid),

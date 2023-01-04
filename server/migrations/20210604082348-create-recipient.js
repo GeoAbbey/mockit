@@ -5,6 +5,7 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
+        unique: true,
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
@@ -20,10 +21,6 @@ module.exports = {
           as: "id",
         },
       },
-      code: {
-        allowNull: false,
-        type: Sequelize.STRING,
-      },
       details: {
         allowNull: false,
         type: Sequelize.JSONB,
@@ -34,6 +31,9 @@ module.exports = {
       },
       updatedAt: {
         allowNull: false,
+        type: Sequelize.DATE,
+      },
+      deletedAt: {
         type: Sequelize.DATE,
       },
     });

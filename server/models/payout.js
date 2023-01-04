@@ -37,14 +37,14 @@ module.exports = (sequelize, DataTypes) => {
       amountInNaira: {
         type: DataTypes.VIRTUAL,
         get() {
-          return this.amount / 100;
+          return this.amount;
         },
         set(value) {
           throw new Error(`Do not try to set the  pendingAmountInNaira ${value}!`);
         },
       },
       ownerId: { type: DataTypes.UUID, allowNull: false },
-      modelType: { allowNull: false, type: DataTypes.STRING },
+      type: { allowNull: false, type: DataTypes.STRING },
       modelId: { allowNull: false, type: DataTypes.STRING },
     },
     {

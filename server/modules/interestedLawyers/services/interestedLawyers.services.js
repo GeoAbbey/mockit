@@ -1,5 +1,6 @@
 import debug from "debug";
 import models from "../../../models";
+import { paginate } from "../../helpers";
 
 const debugLog = debug("app:interested-lawyers-service");
 
@@ -14,10 +15,10 @@ class InterestedLawyersService {
 
   async create(lawyerDTO) {
     debugLog(`trying to create interest for lawyer with ${JSON.stringify(lawyerDTO)}`);
-    const { modelType, modelId } = lawyerDTO;
-    const verifyRecordExist = await models[modelType].findOne({
+    const { claimId } = lawyerDTO;
+    const verifyRecordExist = await models.SmallClaim.findOne({
       where: {
-        id: modelId,
+        id: claimId,
       },
     });
     if (verifyRecordExist) {
@@ -30,6 +31,31 @@ class InterestedLawyersService {
     return models.InterestedLawyer.findOne({ where: searchContext });
   }
 
+  async findMany(pageDetails, id) {
+    debugLog(`retrieving interested lawyer for the claim with id ${id}`);
+    return models.InterestedLawyer.findAndCountAll({
+      order: [["createdAt", "DESC"]],
+      where: { claimId: id },
+      ...paginate(pageDetails),
+      include: [
+        {
+          model: models.User,
+          as: "profile",
+          attributes: [
+            "firstName",
+            "lastName",
+            "email",
+            "profilePic",
+            "firebaseToken",
+            "phone",
+            "description",
+          ],
+          required: false,
+        },
+      ],
+    });
+  }
+
   async find(id) {
     debugLog(`finding a interest with  the following ${id}`);
     return models.InterestedLawyer.findByPk(id);
@@ -37,12 +63,11 @@ class InterestedLawyersService {
 
   async update(id, interestDTO, oldInterest) {
     debugLog(`updating an interest with the following ${id}`);
-    const { baseCharge, serviceCharge } = oldInterest;
+    const { serviceCharge } = oldInterest;
 
     return models.InterestedLawyer.update(
       {
         serviceCharge: interestDTO.serviceCharge || serviceCharge,
-        baseCharge: interestDTO.baseCharge || baseCharge,
       },
       { where: { id }, returning: true }
     );

@@ -2,16 +2,16 @@ import debug from "debug";
 import createError from "http-errors";
 
 import PayoutsService from "../services/payout.services";
-import SmallClaimsService from "../../small-claims/services/small-claims.service";
 import configOptions from "../../../config/config";
 import { paginate as pagination } from "../../helpers";
 import { Op } from "sequelize";
-import { toKobo } from "../../../utils/toKobo";
+import interestedLawyersServices from "../../interestedLawyers/services/interestedLawyers.services";
+import { pgDateFormate } from "../../../utils/pgFormateDate";
 
 const env = process.env.NODE_ENV || "development";
 const config = configOptions[env];
 
-const log = debug("app:Payouts-controller");
+const log = debug("app:payouts-controller");
 
 class PayoutsController {
   static instance;
@@ -45,22 +45,25 @@ class PayoutsController {
     });
   };
 
-  async getAmount(modelType, modelId) {
-    if (modelType === "invitation") return config.invitationCost * (config.lawyerPercentage / 100);
+  async getAmount(model) {
+    const calAmount = async (model) => {
+      const { claimId, lawyerId, percentage } = model;
+      const { serviceCharge } = await interestedLawyersServices.findOne({
+        claimId,
+        lawyerId,
+      });
 
-    if (modelType === "response")
-      return config.costOfSubscriptionUnit * (config.lawyerPercentage / 100);
+      return serviceCharge * (percentage / 100);
+    };
 
-    if (modelType === "smallClaim") {
-      const oldClaim = await SmallClaimsService.find(modelId, true);
-      const lawyerId = oldClaim.dataValues.assignedLawyerId;
-      const {
-        dataValues: { baseCharge, serviceCharge },
-      } = oldClaim.dataValues.interestedLawyers.find((lawyer) => lawyer.lawyerId === lawyerId);
+    const mapper = {
+      invitation: () => config.invitationCost * (config.lawyerPercentage / 100),
+      response: () => config.costOfSubscriptionUnit * (config.lawyerPercentage / 100),
+      smallClaim: () => config.consultationFee * (config.lawyerConsultationPercentage / 100),
+      mileStone: () => calAmount(model),
+    };
 
-      const totalCost = baseCharge + serviceCharge;
-      return totalCost * (config.lawyerPercentage / 100);
-    }
+    return mapper[model.type]();
   }
 
   async getHistory(req, res, next) {
@@ -125,6 +128,14 @@ class PayoutsController {
 
       if (query.search && query.search.ticketId) {
         filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
+      }
+      if (query.search && query.search.to && query.search.from) {
+        filter = {
+          ...filter,
+          createdAt: {
+            [Op.between]: [pgDateFormate(query.search.from), pgDateFormate(query.search.to)],
+          },
+        };
       }
     };
 

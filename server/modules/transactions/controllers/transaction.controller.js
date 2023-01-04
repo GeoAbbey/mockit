@@ -4,6 +4,7 @@ import { paginate as pagination } from "../../helpers";
 import { Op } from "sequelize";
 
 import TransactionsService from "../services/transaction.services";
+import { pgDateFormate } from "../../../utils/pgFormateDate";
 const log = debug("app:transactions-controller");
 
 class TransactionsController {
@@ -33,7 +34,7 @@ class TransactionsController {
 
     return res.status(201).send({
       success: true,
-      message: "transaction successfully created",
+      message: "Transaction successfully created",
       transaction,
     });
   }
@@ -60,7 +61,7 @@ class TransactionsController {
 
     return res.status(200).send({
       success: true,
-      message: "transaction successfully created",
+      message: "Transaction successfully created",
       transactions: {
         currentPage: offset / limit + 1,
         pageSize: limit,
@@ -75,7 +76,7 @@ class TransactionsController {
     const transaction = await TransactionsService.remove(id);
     return res.status(200).send({
       success: true,
-      message: "transaction successfully created",
+      message: "Transaction successfully created",
       transaction,
     });
   }
@@ -113,6 +114,15 @@ class TransactionsController {
         filter = { ...filter, notes: { [Op.iLike]: `%${query.search.notes}%` } };
       }
 
+      if (query.search && query.search.to && query.search.from) {
+        filter = {
+          ...filter,
+          createdAt: {
+            [Op.between]: [pgDateFormate(query.search.from), pgDateFormate(query.search.to)],
+          },
+        };
+      }
+
       if (query.search && query.search.modelType) {
         filter = { ...filter, modelType: query.search.modelType };
       }
@@ -127,9 +137,9 @@ class TransactionsController {
     }
 
     if (role === "user" || role === "lawyer") {
-      filter = { ...filter, ownerId: id };
-
       commonOptions();
+
+      if (!query.search.code) filter = { ...filter, ownerId: id };
     }
 
     req.filter = filter;

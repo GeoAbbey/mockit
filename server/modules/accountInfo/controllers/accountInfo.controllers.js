@@ -23,7 +23,7 @@ class AccountInfosController {
 
     return res.status(201).send({
       success: true,
-      message: "account info successfully created",
+      message: "Account information successfully created",
       accountInfo,
     });
   }

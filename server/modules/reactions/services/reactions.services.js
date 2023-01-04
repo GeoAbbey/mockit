@@ -16,30 +16,45 @@ class ReactionsService {
     debugLog("creating a reaction");
     const { modelType, modelId, ownerId, reactionType } = ReactionDTO;
     const id = modelId;
-    const modelInstanceExist = await models[modelType].findByPk(id);
-    const isOldReaction = await models.Reaction.findOne({
-      where: {
-        ownerId,
-        reactionType,
-        modelType,
-        modelId,
-      },
-    });
-    if (modelInstanceExist) {
-      if (isOldReaction) return this.update(isOldReaction);
-      return models.Reaction.create(ReactionDTO);
-    }
+    const mapper = {
+      like: "numOfLikes",
+      repost: "numOfRePosts",
+    };
 
-    return null;
+    try {
+      return models.sequelize.transaction(async (t) => {
+        const modelInstanceExist = await models[modelType].findByPk(id);
+        const isOldReaction = await models.Reaction.findOne({
+          where: {
+            ownerId,
+            reactionType,
+            modelType,
+            modelId,
+          },
+        });
+        if (modelInstanceExist) {
+          if (isOldReaction) {
+            isOldReaction.value
+              ? await modelInstanceExist.decrement(mapper[reactionType], { transaction: t })
+              : await modelInstanceExist.increment(mapper[reactionType], { transaction: t });
+            return this.update(isOldReaction, { transaction: t });
+          }
+
+          await modelInstanceExist.increment(mapper[reactionType], { transaction: t });
+          return models.Reaction.create(ReactionDTO, { transaction: t });
+        }
+        return null;
+      });
+    } catch (error) {}
   }
 
-  async update(oldReaction) {
+  async update(oldReaction, t = undefined) {
     const { value, id } = oldReaction;
     const [, [updatedReaction]] = await models.Reaction.update(
       {
         value: !value,
       },
-      { where: { id }, returning: true }
+      { where: { id }, returning: true, ...t }
     );
     return updatedReaction;
   }

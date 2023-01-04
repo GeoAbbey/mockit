@@ -6,7 +6,6 @@ const debugLog = debug("app:withdrawals-service");
 
 import { payStack } from "../../../utils/paymentService";
 import RecipientServices from "../../recipient/services/recipient.services";
-import { toKobo } from "../../../utils/toKobo";
 import AccountInfoServices from "../../accountInfo/services/accountInfo.services";
 import { exceptionHandler } from "../../../utils/exceptionHandler";
 import { paginate } from "../../helpers";
@@ -30,8 +29,8 @@ class WithdrawalsService {
 
   async create(withdrawalDTO) {
     debugLog(`creating a withdrawal for user with id ${withdrawalDTO.id}`);
-    const { id, amount, email, name, accountCode } = withdrawalDTO;
-    const theRecipient = await RecipientServices.findByCode({ lawyerId: id, code: accountCode });
+    const { accountID, amount, email, name, id } = withdrawalDTO;
+    const theRecipient = await RecipientServices.find({ lawyerId: id, id: accountID });
 
     if (!theRecipient)
       return {
@@ -67,7 +66,7 @@ class WithdrawalsService {
           amount,
           status: "INITIATED",
           reference: nanoid(15),
-          accountID: theRecipient.code,
+          accountID,
           data: { email, name },
           ownerId: id,
         });
@@ -90,12 +89,13 @@ class WithdrawalsService {
   }
 
   async update({ id, adminId, oldWithdrawal, monnifyToken, t = undefined }) {
-    const theRecipient = await RecipientServices.findByCode({
-      lawyerId: oldWithdrawal.ownerId,
-      code: oldWithdrawal.accountID,
+    console.log({ oldWithdrawal });
+    const [theRecipient] = await RecipientServices.find({
+      lawyerId: oldWithdrawal.dataValues.ownerId,
+      id: oldWithdrawal.dataValues.accountID,
     });
 
-    console.log({ theRecipient: theRecipient.details }, "⏰");
+    console.log({ theRecipient }, "⏰");
 
     const data = {
       monnifyToken,
@@ -140,6 +140,22 @@ class WithdrawalsService {
       where: { ...filter },
       ...paginate(pageDetails),
       ...paranoid,
+      include: [
+        {
+          model: models.User,
+          as: "lawyerProfile",
+          attributes: [
+            "firstName",
+            "lastName",
+            "email",
+            "profilePic",
+            "firebaseToken",
+            "phone",
+            "description",
+          ],
+          required: false,
+        },
+      ],
     });
   }
 

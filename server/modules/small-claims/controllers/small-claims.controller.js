@@ -4,6 +4,8 @@ import { EVENT_IDENTIFIERS } from "../../../constants";
 
 import SmallClaimsService from "../services/small-claims.service";
 import { paginate as pagination } from "../../helpers";
+import { Op } from "sequelize";
+import milestoneService from "../../mileStone/service/milestone.service";
 const log = debug("app:small-claims-controller");
 
 class SmallClaimsController {
@@ -17,6 +19,7 @@ class SmallClaimsController {
 
   async makeClaim(req, res) {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
 
     const { body, decodedToken, attachments = [] } = req;
     const ownerId = req.decodedToken.id;
@@ -24,18 +27,24 @@ class SmallClaimsController {
     body.venue = JSON.parse(body.venue);
     const smallClaim = await SmallClaimsService.create({ ...body, attachments, ownerId });
 
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, smallClaim, decodedToken);
+    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.CREATED, smallClaim, decodedToken, io);
 
     return res.status(201).send({
       success: true,
-      message: "small claim successfully created",
+      message: "Small Claim successfully created. Looking for lawyers for you now",
       smallClaim,
     });
   }
 
   smallClaimExits(context) {
     return async (req, res, next) => {
-      const { id } = req.params;
+      const {
+        params: { id },
+        decodedToken: { role },
+      } = req;
+
+      if (role === "lawyer") context = req.decodedToken.id;
+
       log(`verifying that the small claim with id ${id} exits`);
       const smallClaim = await SmallClaimsService.find(id, context);
       if (!smallClaim) return next(createError(404, "The small claim can not be found"));
@@ -54,7 +63,7 @@ class SmallClaimsController {
     const [, [updatedSmallClaim]] = await SmallClaimsService.update(id, body, oldSmallClaim);
     return res.status(200).send({
       success: true,
-      message: "small claim successfully updated",
+      message: "Small claim successfully updated",
       smallClaim: updatedSmallClaim,
     });
   }
@@ -66,7 +75,7 @@ class SmallClaimsController {
 
     return res.status(200).send({
       success: true,
-      message: "small claim successfully deleted",
+      message: "Small claim successfully deleted",
       smallClaim: deletedSmallClaim,
     });
   }
@@ -75,7 +84,7 @@ class SmallClaimsController {
     const { oldSmallClaim } = req;
     return res.status(200).send({
       success: true,
-      message: "small claim successfully retrieved",
+      message: "Small claim successfully retrieved",
       smallClaim: oldSmallClaim,
     });
   }
@@ -107,12 +116,24 @@ class SmallClaimsController {
       query: { paginate = {} },
       decodedToken: {
         address: { country, state },
+        id,
       },
     } = req;
 
-    const filter = `("SmallClaims"."assignedLawyerId" IS NULL AND (("SmallClaims"."venue"#>>'{country}') = '${country}' AND ("SmallClaims"."venue"#>>'{state}') = '${state}'))`;
+    const canApply = (model) => ({
+      model,
+      as: "myInterest",
+      required: false,
+      where: { lawyerId: id },
+    });
 
-    const smallClaims = await SmallClaimsService.findMany(filter, paginate);
+    const filter = {
+      status: "initiated",
+      paid: false,
+      venue: { country, state },
+    };
+
+    const smallClaims = await SmallClaimsService.findMany(filter, paginate, canApply);
     const { offset, limit } = pagination(paginate);
 
     return res.status(200).send({
@@ -126,109 +147,28 @@ class SmallClaimsController {
     });
   }
 
-  async marKAsCompleted(req, res, next) {
+  async updateToNewState(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
 
     const {
       params: { id },
+      body: { status },
       decodedToken,
       oldSmallClaim,
     } = req;
 
-    const [, [updatedSmallClaim]] = await SmallClaimsService.update(
-      id,
-      { status: "completed" },
-      oldSmallClaim
-    );
+    const [, [updatedSmallClaim]] = await SmallClaimsService.update(id, { status }, oldSmallClaim);
     eventEmitter.emit(
-      EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_COMPLETED,
+      EVENT_IDENTIFIERS.SMALL_CLAIM[status.toUpperCase()],
       updatedSmallClaim,
-      decodedToken
-    );
-
-    return res.status(200).send({
-      success: true,
-      message: "You have successfully completed this small claim",
-      smallClaim: updatedSmallClaim,
-    });
-  }
-
-  async updateToInProgress(req, res, next) {
-    const eventEmitter = req.app.get("eventEmitter");
-
-    const {
-      params: { id },
       decodedToken,
-      oldSmallClaim,
-    } = req;
-
-    const [, [updatedSmallClaim]] = await SmallClaimsService.update(
-      id,
-      { status: "in-progress" },
-      oldSmallClaim
-    );
-    eventEmitter.emit(
-      EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_AS_IN_PROGRESS,
-      updatedSmallClaim,
-      decodedToken
+      io
     );
 
     return res.status(200).send({
       success: true,
-      message: "You have successfully started this claim",
-      smallClaim: updatedSmallClaim,
-    });
-  }
-
-  async marKInterest(req, res, next) {
-    const eventEmitter = req.app.get("eventEmitter");
-
-    const {
-      params: { id },
-      body: { baseCharge, serviceCharge },
-      oldSmallClaim,
-      decodedToken: { id: lawyerId },
-    } = req;
-
-    const [, [updatedSmallClaim]] = await SmallClaimsService.update(
-      id,
-      { baseCharge, serviceCharge, lawyerId },
-      oldSmallClaim
-    );
-
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.MARK_INTEREST, {
-      data: updatedSmallClaim,
-      decodedToken: req.decodedToken,
-    });
-
-    return res.status(200).send({
-      success: true,
-      message: "You have successfully indicated interest in this small claim",
-      smallClaim: updatedSmallClaim,
-    });
-  }
-
-  async assignALawyer(req, res, next) {
-    const eventEmitter = req.app.get("eventEmitter");
-
-    const {
-      params: { id },
-      body: { assignedLawyerId },
-      decodedToken,
-      oldSmallClaim,
-    } = req;
-
-    const [, [updatedSmallClaim]] = await SmallClaimsService.update(
-      id,
-      { assignedLawyerId },
-      oldSmallClaim
-    );
-
-    eventEmitter.emit(EVENT_IDENTIFIERS.SMALL_CLAIM.ASSIGNED, updatedSmallClaim, decodedToken);
-
-    return res.status(200).send({
-      success: true,
-      message: "You have successfully assigned a lawyer to this small claim kindly make payment",
+      message: `You have successfully ${status || "started"} this claim`,
       smallClaim: updatedSmallClaim,
     });
   }
@@ -249,6 +189,7 @@ class SmallClaimsController {
       const {
         decodedToken: { role, id },
         body: { assignedLawyerId },
+        params: { id: claimId },
         oldSmallClaim: { ownerId, status, interestedLawyers, assignedLawyerId: lawyerId },
       } = req;
 
@@ -262,6 +203,11 @@ class SmallClaimsController {
       }
 
       if ((context === "delete" || context === "modify") && status !== "initiated") {
+        if (
+          req.body.status === "closed" ||
+          (req.body.status === "engagement" && status === "lawyer_consent")
+        )
+          return next();
         return next(
           createError(401, `You can not ${context} a small claim once it has been assigned`)
         );
@@ -305,8 +251,27 @@ class SmallClaimsController {
       if (context === "updateStatus") {
         if (id !== oldSmallClaim.assignedLawyerId)
           return next(createError(401, "You do not have access to perform this operation"));
+
+        if (req.body.status === "cancelled") {
+          const mileStone = await milestoneService.findMany(
+            { claimId: oldSmallClaim.id, status: "in-progress" },
+            { page: 1, pageSize: 10 }
+          );
+
+          if (mileStone.count)
+            return next(
+              createError(401, "Can not cancel claim once a mile stone has been paid for")
+            );
+        }
+
         if (!oldSmallClaim.paid)
-          return next(createError(401, "You can not start a claim that hasn't been paid for"));
+          return next(
+            createError(401, "You can not update the status of a claim that hasn't been paid for")
+          );
+        if (oldSmallClaim.status === req.body.status)
+          return next(
+            createError(401, `status of the claim that has already been ${req.body.status}`)
+          );
       }
       return next();
     };
@@ -329,54 +294,44 @@ class SmallClaimsController {
       query,
     } = req;
 
-    let filter = "";
+    let filter = {};
 
-    if (role === "admin" || role === "super-admin") {
-      if (query.search && query.search.ownerId) {
-        filter = filter
-          ? `${filter} AND "SmallClaims"."ownerId" = '${query.search.ownerId}'`
-          : `"SmallClaims"."ownerId" = '${query.search.ownerId}'`;
-      }
-
+    const commonOptions = () => {
       if (query.search && query.search.ticketId) {
-        filter = filter
-          ? `${filter} AND "SmallClaims"."ticketId" ILIKE '%${query.search.ticketId}%'`
-          : `"SmallClaims"."ticketId" ILIKE '%${query.search.ticketId}%'`;
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
       }
 
       if (query.search && query.search.paid) {
-        filter = filter
-          ? `${filter} AND "SmallClaims"."paid" = ${query.search.paid}`
-          : `"SmallClaims"."paid" = ${query.search.paid}`;
+        filter = { ...filter, paid: query.search.paid };
       }
 
       if (query.search && query.search.status) {
-        filter = filter
-          ? `${filter} AND "SmallClaims"."status" = '${query.search.status}'`
-          : `"SmallClaims"."status" = '${query.search.status}'`;
+        filter = { ...filter, status: query.search.status };
+      }
+    };
+
+    if (role === "admin" || role === "super-admin") {
+      if (query.search && query.search.ownerId) {
+        filter = { ...filter, ownerId: query.search.ownerId };
       }
 
+      commonOptions();
+
       if (query.search && query.search.assignedLawyerId) {
-        filter = filter
-          ? `${filter} AND "SmallClaims"."assignedLawyerId" = '${query.search.assignedLawyerId}'`
-          : `"SmallClaims"."assignedLawyerId" = '${query.search.assignedLawyerId}'`;
+        filter = { ...filter, assignedLawyerId: query.search.assignedLawyerId };
       }
     }
 
     if (role === "lawyer") {
-      filter = `${filter} "SmallClaims"."assignedLawyerId" = '${id}'`;
+      filter = { ...filter, assignedLawyerId: id };
 
-      if (query.search && query.search.ticketId) {
-        filter = `${filter} AND "SmallClaims"."ticketId" ILIKE '%${query.search.ticketId}%'`;
-      }
+      commonOptions();
     }
 
     if (role === "user") {
-      filter = `${filter} "SmallClaims"."ownerId" = '${id}'`;
+      filter = { ...filter, ownerId: id };
 
-      if (query.search && query.search.ticketId) {
-        filter = `${filter} AND "SmallClaims"."ticketId" ILIKE '%${query.search.ticketId}%'`;
-      }
+      commonOptions();
     }
 
     req.filter = filter;

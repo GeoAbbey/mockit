@@ -2,12 +2,12 @@ import Joi from "joi";
 
 export const PaymentWithSubOrWalletSchema = Joi.object().keys({
   modelType: Joi.string()
-    .valid("subscriptionCount", "smallClaim", "invitation", "cooperate")
+    .valid("subscriptionCount", "smallClaim", "invitation", "cooperate", "mileStone")
     .required(),
   modelId: Joi.string()
     .guid({ version: "uuidv4" })
     .when("modelType", {
-      is: ["smallClaim", "invitation"],
+      is: ["smallClaim", "invitation", "mileStone"],
       then: Joi.required(),
     }),
   amount: Joi.number().when("modelType", {
@@ -26,7 +26,14 @@ export const PaymentWithSubOrWalletSchema = Joi.object().keys({
 
 export const PayInSchema = Joi.object().keys({
   type: Joi.string()
-    .valid("singleSmallClaim", "singleInvitation", "wallet", "subscription", "cooperate")
+    .valid(
+      "singleSmallClaim",
+      "singleInvitation",
+      "wallet",
+      "subscription",
+      "cooperate",
+      "mileStone"
+    )
     .required(),
   amount: Joi.number().min(50),
   quantity: Joi.number().min(1),
@@ -55,7 +62,8 @@ export const queryOptions = Joi.object().keys({
       "singleSmallClaim",
       "singleInvitation",
       "wallet",
-      "subscription"
+      "subscription",
+      "mileStone"
     ),
   }),
   paginate: Joi.object().keys({

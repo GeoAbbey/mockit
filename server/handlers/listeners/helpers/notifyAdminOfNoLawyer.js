@@ -1,7 +1,6 @@
 import debug from "debug";
 import { ROLES, TEMPLATE } from "../../../constants";
 import userService from "../../../modules/users/service/user.service";
-import { sendBulkTemplatedEmail } from "../../../utils/MailService";
 
 const logger = debug("app:handlers:listeners:helpers:notifyAdminOfNoLawyer");
 
@@ -14,5 +13,5 @@ export const notifyAdminOfNoLawyer = async (data, modelName) => {
 
   //send Notification to admins that no lawyer was found.
 
-  sendBulkTemplatedEmail(admins, TEMPLATE.NOTIFY_ADMIN, { ticketId: data.ticketId });
+  // sendBulkTemplatedEmail(admins, TEMPLATE.NOTIFY_ADMIN, { ticketId: data.ticketId });
 };

@@ -17,15 +17,25 @@ module.exports = (sequelize, DataTypes) => {
   }
   PayIn.init(
     {
-      for: {
+      type: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          isIn: [["singleSmallClaim", "singleInvitation", "wallet", "subscription", "cooperate"]],
+          isIn: [
+            [
+              "singleSmallClaim",
+              "singleInvitation",
+              "wallet",
+              "subscription",
+              "cooperate",
+              "mileStone",
+            ],
+          ],
         },
       },
       amount: {
-        type: DataTypes.DECIMAL(10, 2),
+        type: DataTypes.FLOAT,
+        allowNull: false,
       },
       ticketId: {
         type: DataTypes.STRING,
@@ -34,6 +44,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: () => nanoid(10),
       },
       reference: { type: DataTypes.STRING, allowNull: false },
+      notes: { type: DataTypes.STRING, allowNull: false },
       subQuantity: {
         type: DataTypes.JSONB,
       },
@@ -48,6 +59,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
+      paranoid: true,
       modelName: "PayIn",
     }
   );

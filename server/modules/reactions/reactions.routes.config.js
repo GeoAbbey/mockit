@@ -16,24 +16,5 @@ export class ReactionRoutes extends CommonRoutesConfig {
         middleware({ schema: allowedReactionSchema, property: "params" }),
       ])
       .post([wrapCatch(ReactionsController.makeReaction)]);
-    // .get([ReactionsController.queryContext, wrapCatch(ReactionsController.getAllReactions)]);
-
-    // this.app
-    //   .route(`${this.path}/reaction/:id`)
-    //   .all([
-    //     Authenticate.verifyToken(),
-    //     middleware({ schema: validateUUID, property: "params" }),
-    //     ReactionsController.reactionExits(),
-    //   ])
-    //   .patch([
-    //     middleware({ schema: createReactionSchema, property: "body" }),
-    //     ReactionsController.checkAccessUser("modify"),
-    //     wrapCatch(ReactionsController.modifyReaction),
-    //   ])
-    //   .delete([
-    //     ReactionsController.checkAccessUser("delete"),
-    //     wrapCatch(ReactionsController.deleteReaction),
-    //   ])
-    //   .get([wrapCatch(ReactionsController.getAReaction)]);
   }
 }

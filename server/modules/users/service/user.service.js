@@ -38,7 +38,14 @@ class UsersService {
 
   async findByPk(id) {
     debugLog(`retrieving a user with id ${id}`);
-    return models.User.findByPk(id);
+    return models.User.findByPk(id, {
+      include: [
+        {
+          model: models.LocationDetail,
+          attributes: ["socketId"],
+        },
+      ],
+    });
   }
 
   async findOne(filter) {
@@ -57,34 +64,71 @@ class UsersService {
   async findMany(filter) {
     debugLog(`retrieving all user on the platform using ${JSON.stringify(filter)}`);
 
-    return models.User.findAll({ where: { ...filter } });
+    return models.User.findAll({
+      where: { ...filter },
+      include: [
+        {
+          model: models.LocationDetail,
+          attributes: ["socketId"],
+        },
+      ],
+    });
   }
 
-  async update(id, UserDTO, oldDetails) {
+  async update(id, UserDTO, oldDetails, t = undefined) {
     debugLog(`updating a user with id ${id} 🍋`);
+    const { address, emergencyContact, lawyer, profilePic, settings } = oldDetails;
 
-    const { address, guarantors, lawyer, profilePic } = oldDetails;
     const handleDocuments = (recent, old) => ({
-      photoIDOrNIN: recent.photoIDOrNIN || old.photoIDOrNIN,
-      LLBCertificate: recent.LLBCertificate || old.LLBCertificate,
-      NBAReceipt: recent.NBAReceipt || old.NBAReceipt,
-      callToBarCertificate: recent.callToBarCertificate || old.callToBarCertificate,
-      others: recent.others || old.others,
+      link: recent.link || old.link,
     });
 
     return models.User.update(
       {
-        notification: handleFalsy(UserDTO.notification, oldDetails.notification),
-        isVerified: handleFalsy(UserDTO.isVerified, oldDetails.isVerified),
-        isAccountSuspended: handleFalsy(UserDTO.isAccountSuspended, oldDetails.isAccountSuspended),
+        settings: {
+          notification: {
+            email:
+              UserDTO.settings && UserDTO.settings.notification
+                ? handleFalsy(UserDTO.settings.notification.email, settings.notification.email)
+                : settings.notification.email,
+            phone:
+              UserDTO.settings && UserDTO.settings.notification
+                ? handleFalsy(UserDTO.settings.notification.phone, settings.notification.phone)
+                : settings.notification.phone,
+            inApp:
+              UserDTO.settings && UserDTO.settings.notification
+                ? handleFalsy(UserDTO.settings.notification.inApp, settings.notification.inApp)
+                : settings.notification.inApp,
+          },
+          isSuspended: UserDTO.settings
+            ? handleFalsy(UserDTO.settings.isSuspended, settings.isSuspended)
+            : settings.isSuspended,
+          isEmailVerified: UserDTO.settings
+            ? handleFalsy(UserDTO.settings.isEmailVerified, settings.isEmailVerified)
+            : settings.isEmailVerified,
+          isPhone: {
+            verified:
+              UserDTO.settings && UserDTO.settings.isPhone
+                ? handleFalsy(UserDTO.settings.isPhone.verified, settings.isPhone.verified)
+                : settings.isPhone.verified,
+            pinId:
+              (UserDTO.settings && UserDTO.settings.isPhone && UserDTO.settings.isPhone.pinId) ||
+              settings.isPhone.pinId,
+          },
+          hasAgreedToTerms: UserDTO.settings
+            ? handleFalsy(UserDTO.settings.hasAgreedToTerms, settings.hasAgreedToTerms)
+            : settings.hasAgreedToTerms,
+        },
         firstName: UserDTO.firstName || oldDetails.firstName,
         lastName: UserDTO.lastName || oldDetails.lastName,
         email: UserDTO.email || oldDetails.email,
+        phone: UserDTO.phone || oldDetails.phone,
+        dob: UserDTO.dob || oldDetails.dob,
         password: UserDTO.password || oldDetails.password,
         description: UserDTO.description || oldDetails.description,
         role: UserDTO.role || oldDetails.role,
+        profilePic: UserDTO.profilePic || profilePic,
         gender: UserDTO.gender || oldDetails.gender,
-        isSubscribed: handleFalsy(UserDTO.isSubscribed, oldDetails.isSubscribed),
         firebaseToken: UserDTO.firebaseToken || oldDetails.firebaseToken,
         otp: {
           value: (UserDTO.otp && UserDTO.otp.value) || oldDetails.otp.value,
@@ -102,119 +146,36 @@ class UsersService {
               address.residence.home,
           },
         },
-        phone: UserDTO.phone || oldDetails.phone,
-        dob: UserDTO.dob || oldDetails.dob,
-        guarantors: {
-          nextOfKin: {
-            firstName:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.nextOfKin &&
-                UserDTO.guarantors.nextOfKin.firstName) ||
-              (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.firstName) ||
-              null,
-            lastName:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.nextOfKin &&
-                UserDTO.guarantors.nextOfKin.lastName) ||
-              (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.lastName) ||
-              null,
-            email:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.nextOfKin &&
-                UserDTO.guarantors.nextOfKin.email) ||
-              (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.email) ||
-              null,
-            phone:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.nextOfKin &&
-                UserDTO.guarantors.nextOfKin.phone) ||
-              (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.phone) ||
-              null,
-            dob:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.nextOfKin &&
-                UserDTO.guarantors.nextOfKin.dob) ||
-              (guarantors && guarantors.dob && guarantors.nextOfKin.dob) ||
-              null,
-            address:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.nextOfKin &&
-                UserDTO.guarantors.nextOfKin.address) ||
-              (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.address) ||
-              null,
-            profilePic:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.nextOfKin &&
-                UserDTO.guarantors.nextOfKin.profilePic) ||
-              (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.profilePic) ||
-              null,
-            gender:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.nextOfKin &&
-                UserDTO.guarantors.nextOfKin.gender) ||
-              (guarantors && guarantors.nextOfKin && guarantors.nextOfKin.gender) ||
-              null,
-          },
-          surety: {
-            firstName:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.surety &&
-                UserDTO.guarantors.surety.firstName) ||
-              (guarantors && guarantors.surety && guarantors.surety.firstName) ||
-              null,
-            lastName:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.surety &&
-                UserDTO.guarantors.surety.lastName) ||
-              (guarantors && guarantors.surety && guarantors.surety.lastName) ||
-              null,
-            email:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.surety &&
-                UserDTO.guarantors.surety.email) ||
-              (guarantors && guarantors.surety && guarantors.surety.email) ||
-              null,
-            phone:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.surety &&
-                UserDTO.guarantors.surety.phone) ||
-              (guarantors && guarantors.surety && guarantors.surety.phone) ||
-              null,
-            dob:
-              (UserDTO.guarantors && UserDTO.guarantors.surety && UserDTO.guarantors.surety.dob) ||
-              (guarantors && guarantors.dob && guarantors.surety.dob) ||
-              null,
-            address:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.surety &&
-                UserDTO.guarantors.surety.address) ||
-              (guarantors && guarantors.surety && guarantors.surety.address) ||
-              null,
-            profilePic:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.surety &&
-                UserDTO.guarantors.surety.profilePic) ||
-              (guarantors && guarantors.surety && guarantors.surety.profilePic) ||
-              null,
-            gender:
-              (UserDTO.guarantors &&
-                UserDTO.guarantors.surety &&
-                UserDTO.guarantors.surety.gender) ||
-              (guarantors && guarantors.surety && guarantors.surety.gender) ||
-              null,
-          },
+        emergencyContact: {
+          firstName:
+            (UserDTO.emergencyContact && UserDTO.emergencyContact.firstName) ||
+            emergencyContact.firstName,
+          lastName:
+            (UserDTO.emergencyContact && UserDTO.emergencyContact.lastName) ||
+            emergencyContact.lastName,
+          email:
+            (UserDTO.emergencyContact && UserDTO.emergencyContact.email) || emergencyContact.email,
+          phone:
+            (UserDTO.emergencyContact && UserDTO.emergencyContact.phone) || emergencyContact.phone,
         },
-        profilePic: UserDTO.profilePic || profilePic,
         lawyer: {
-          isVerified: UserDTO.lawyer && handleFalsy(UserDTO.lawyer.isVerified, lawyer.isVerified),
+          isVerified: UserDTO.lawyer
+            ? handleFalsy(UserDTO.lawyer.isVerified, lawyer.isVerified)
+            : lawyer.isVerified,
+          supremeCourtNumber:
+            (UserDTO.lawyer && UserDTO.lawyer.supremeCourtNumber) || lawyer.supremeCourtNumber,
+          typeOfDocument:
+            (UserDTO.lawyer && UserDTO.lawyer.typeOfDocument) || lawyer.typeOfDocument,
+          oneTimeSubscription: UserDTO.lawyer
+            ? handleFalsy(UserDTO.lawyer.oneTimeSubscription, lawyer.oneTimeSubscription)
+            : lawyer.oneTimeSubscription,
           documents:
             UserDTO.lawyer && UserDTO.lawyer.documents
               ? handleDocuments(UserDTO.lawyer.documents, lawyer.documents)
               : lawyer.documents,
         },
-        hasAgreedToTerms: handleFalsy(UserDTO.hasAgreedToTerms, oldDetails.hasAgreedToTerms),
       },
-      { where: { id }, returning: true }
+      { where: { id }, returning: true, ...t }
     );
   }
 }

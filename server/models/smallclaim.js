@@ -24,7 +24,8 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       });
       this.hasMany(models.Review, { as: "reviews", foreignKey: "modelId" });
-      this.hasMany(models.InterestedLawyer, { as: "interestedLawyers", foreignKey: "modelId" });
+      this.hasMany(models.InterestedLawyer, { as: "myInterest", foreignKey: "claimId" });
+      this.hasMany(models.MileStone, { foreignKey: "claimId" });
     }
   }
   SmallClaim.init(
@@ -32,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
       claim: { type: DataTypes.TEXT, allowNull: false },
       amount: { type: DataTypes.INTEGER, allowNull: false },
       attachments: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
-      venue: { type: DataTypes.JSONB, allowNull: false, defaultValue: someDefaults() },
+      venue: { type: DataTypes.JSONB, allowNull: false },
       ownerId: { type: DataTypes.UUID, allowNull: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       assignedLawyerId: { type: DataTypes.UUID },
@@ -42,18 +43,24 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
         defaultValue: () => nanoid(10),
       },
-      paid: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: () => false,
-      },
-      isNotified: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: () => false,
-      },
+      isReassessed: { type: DataTypes.BOOLEAN, defaultValue: () => false },
+      paid: { type: DataTypes.BOOLEAN, defaultValue: () => false },
+      isNotified: { type: DataTypes.BOOLEAN, defaultValue: () => false },
       status: {
         type: DataTypes.STRING,
         validate: {
-          isIn: [["initiated", "in-progress", "completed"]],
+          isIn: [
+            [
+              "initiated",
+              "consultation_in_progress",
+              "consultation_completed",
+              "completed",
+              "cancelled",
+              "lawyer_consent",
+              "closed",
+              "engagement",
+            ],
+          ],
         },
         defaultValue: "initiated",
       },

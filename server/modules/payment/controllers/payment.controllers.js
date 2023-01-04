@@ -4,7 +4,13 @@ import axios from "axios";
 import { payStack } from "../../../utils/paymentService";
 
 import PaymentsService from "../services/payment.services";
-import { walletPay, subscriptionPay, singleInvitationPay, singleSmallClaimPay } from "./helpers";
+import {
+  walletPay,
+  subscriptionPay,
+  singleInvitationPay,
+  singleSmallClaimPay,
+  mileStonePay,
+} from "./helpers";
 import { paginate as pagination } from "../../helpers";
 import { Op } from "sequelize";
 
@@ -33,6 +39,26 @@ class PaymentsController {
       success: true,
       message: "all prices successfully returned",
       prices,
+    });
+  }
+
+  async activityHistory(req, res, next) {
+    const {
+      decodedToken: { id },
+      query: { paginate = {} },
+    } = req;
+
+    const { offset, limit } = pagination(paginate);
+    const activities = await PaymentsService.activity({ id, offset, limit });
+
+    return res.status(200).send({
+      success: true,
+      message: "all prices successfully returned",
+      activities: {
+        currentPage: offset / limit + 1,
+        pageSize: limit,
+        activities,
+      },
     });
   }
 
@@ -93,6 +119,7 @@ class PaymentsController {
 
   async walletOrSubPayment(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
 
     const {
       body: { modelId, modelType, lawyerId = undefined, amount = undefined, quantity = undefined },
@@ -109,6 +136,7 @@ class PaymentsController {
         amount,
         modelType,
         code,
+        io,
       },
       eventEmitter,
       decodedToken
@@ -117,13 +145,14 @@ class PaymentsController {
     if (!payment.success) return next(createError(400, `${payment.message}`));
     return res.status(201).send({
       success: true,
-      message: payment.message ? payment.message : "payment successfully created",
+      message: payment.message ? payment.message : "Payment successful. Looking for lawyers now",
       payment: payment.service,
     });
   }
 
   processPayment = async (req, res, next) => {
     const eventEmitter = req.app.get("eventEmitter");
+    const io = req.app.get("io");
 
     const {
       params: { ref },
@@ -131,21 +160,21 @@ class PaymentsController {
       monnifyToken,
     } = req;
 
+    console.log("I was here");
     const result = await payment.verifyPayment(ref, { monnifyToken });
+
     const {
-      success,
       response: { responseBody: data },
     } = result;
 
-    console.log({ result: data });
-
-    if (!success)
+    if (data && data.paymentStatus !== "PAID")
       return next(createError(400, "There was an error processing your payment kindly try again"));
 
     const paymentResult = await PaymentsService.processPayIn({
       data,
       eventEmitter,
       decodedToken,
+      io,
     });
 
     return res.status(200).send(paymentResult);
@@ -222,6 +251,17 @@ class PaymentsController {
           amount,
           type,
         }),
+      mileStone: () =>
+        this.handleMileStoneCardPayIn({
+          monnifyToken,
+          email,
+          firstName,
+          lastName,
+          id,
+          authCode,
+          type,
+          modelId,
+        }),
     };
 
     const result = await mapper[type]();
@@ -232,6 +272,14 @@ class PaymentsController {
 
   async handleWalletOrCooperateCardPayIn(args) {
     let data = walletPay(args);
+
+    if (data.success === false) return data;
+    data = { ...data, cardToken: args.authCode };
+    return payment.chargeCard(data);
+  }
+
+  async handleMileStoneCardPayIn(args) {
+    let data = await mileStonePay(args);
 
     if (data.success === false) return data;
     data = { ...data, cardToken: args.authCode };
@@ -280,6 +328,17 @@ class PaymentsController {
       subscription: () =>
         this.handleSubscriptionPayIn({
           quantity,
+          email,
+          id,
+          firstName,
+          lastName,
+          type,
+          callback_url,
+          monnifyToken,
+        }),
+      mileStone: () =>
+        this.handleMileStonePayIn({
+          modelId,
           email,
           id,
           firstName,
@@ -343,6 +402,13 @@ class PaymentsController {
 
   async handleSubscriptionPayIn(args) {
     const data = subscriptionPay(args);
+
+    if (data.success === false) return data;
+    return payment.initializePayment(data);
+  }
+
+  async handleMileStonePayIn(args) {
+    const data = await mileStonePay(args);
 
     if (data.success === false) return data;
     return payment.initializePayment(data);

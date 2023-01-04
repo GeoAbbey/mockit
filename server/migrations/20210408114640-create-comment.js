@@ -32,6 +32,12 @@ module.exports = {
           as: "commenterId",
         },
       },
+      numOfRePosts: {
+        type: Sequelize.INTEGER,
+      },
+      numOfLikes: {
+        type: Sequelize.INTEGER,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

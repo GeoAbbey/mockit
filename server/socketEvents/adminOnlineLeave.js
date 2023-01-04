@@ -5,7 +5,7 @@ const logger = debug("app:socket-events:admin-online-leave");
 
 const hoistedAdminOnlineLeave = (io, socket) => {
   return async function adminOnlineLeave(payload) {
-    logger(`admin:online:leave I have received this payload ${payload} 🐒🍑`);
+    // logger(`admin:online:leave I have received this payload ${payload} 🐒🍑`);
 
     const {
       response: { ownerId, id, assignedLawyerId },

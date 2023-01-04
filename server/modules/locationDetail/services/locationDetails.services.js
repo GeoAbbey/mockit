@@ -32,6 +32,14 @@ class LocationsService {
     return models.LocationDetail.findOrCreate(LocationDTO);
   }
 
+  async specificUpdate(id, data, socketId) {
+    debugLog("updating specific properties");
+    return models.LocationDetail.update(
+      { location: data, socketId },
+      { where: { id }, returning: true }
+    );
+  }
+
   async update(id, LocationDTO, oldLocation) {
     const { location, online, assigningId, socketId, currentResponseId, room } = oldLocation;
 
@@ -66,7 +74,7 @@ class LocationsService {
     if (env === "production") {
       debugLog("using code for production ie set SRID");
       return models.sequelize.query(
-        `SELECT "Users"."id", "Users"."firebaseToken", "Users"."firstName", "Users"."email", "LocationDetails"."location" FROM "LocationDetails" INNER JOIN "Users" ON "LocationDetails"."id" = "Users".id WHERE ST_DWithin((location)::geography, ST_SetSRID(ST_MakePoint(:longitude,:latitude)::geography, 4326),:radius) AND "LocationDetails"."assigningId" IS NULL AND "LocationDetails"."online" = true AND "Users"."role" = 'lawyer' LIMIT 10`,
+        `SELECT "Users"."id", "Users"."firebaseToken", "Users"."firstName", "Users"."email", "LocationDetails"."socketId", ,"LocationDetails"."location" FROM "LocationDetails" INNER JOIN "Users" ON "LocationDetails"."id" = "Users".id WHERE ST_DWithin((location)::geography, ST_SetSRID(ST_MakePoint(:longitude,:latitude)::geography, 4326),:radius) AND "LocationDetails"."assigningId" IS NULL AND "LocationDetails"."online" = true AND "Users"."role" = 'lawyer' LIMIT 10`,
         {
           type: QueryTypes.SELECT,
           replacements: { longitude, latitude, radius },
@@ -75,7 +83,7 @@ class LocationsService {
     } else {
       debugLog("using code for development ie doesn`t set SRID");
       return models.sequelize.query(
-        `SELECT "Users"."id", "Users"."firebaseToken", "Users"."firstName", "Users"."email", "LocationDetails"."location" FROM "LocationDetails" INNER JOIN "Users" ON "LocationDetails"."id" = "Users".id WHERE ST_DWithin((location)::geography,ST_MakePoint(:longitude,:latitude)::geography,:radius) AND "LocationDetails"."assigningId" IS NULL AND "LocationDetails"."online" = true AND "Users"."role" = 'lawyer' LIMIT 10`,
+        `SELECT "Users"."id", "Users"."firebaseToken", "Users"."firstName", "Users"."email", "LocationDetails"."socketId", "LocationDetails"."location" FROM "LocationDetails" INNER JOIN "Users" ON "LocationDetails"."id" = "Users".id WHERE ST_DWithin((location)::geography,ST_MakePoint(:longitude,:latitude)::geography,:radius) AND "LocationDetails"."assigningId" IS NULL AND "LocationDetails"."online" = true AND "Users"."role" = 'lawyer' LIMIT 10`,
         {
           type: QueryTypes.SELECT,
           replacements: { longitude, latitude, radius },

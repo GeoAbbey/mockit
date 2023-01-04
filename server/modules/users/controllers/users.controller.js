@@ -1,11 +1,11 @@
 import debug from "debug";
 import createError from "http-errors";
+import axios from "axios";
 import { compareAsc } from "date-fns";
 
 import UsersService from "../service/user.service";
 import Authenticate from "../../../utils/handleJwt";
 import { HandlePassword, otp } from "../../../utils";
-import { parseISO } from "date-fns/esm";
 import { EVENT_IDENTIFIERS } from "../../../constants";
 
 const envs = process.env.NODE_ENV || "development";
@@ -14,10 +14,12 @@ import configOptions from "../../../config/config";
 const config = configOptions[envs];
 
 import { Op } from "sequelize";
-import { process as convert } from "../../../utils/processInput";
 import { paginate as pagination } from "../../helpers";
+import { smsService } from "../../../utils/smsServices";
+import { applicationMappers, messageTemplateMappers } from "../../../utils/smsServices/mappers";
 
 const log = debug("app:users-controller");
+const SMSService = smsService(axios);
 
 class UsersController {
   static instance;
@@ -38,8 +40,6 @@ class UsersController {
     req.body.email = req.body.email.trim();
     req.body.firstName = req.body.firstName.trim();
     req.body.lastName = req.body.lastName.trim();
-    req.body.gender = convert(req.body.gender);
-    req.body.phone = convert(req.body.phone);
 
     const user = await UsersService.create(req.body);
     delete user.dataValues.password;
@@ -49,7 +49,7 @@ class UsersController {
 
     return res.status(201).send({
       success: true,
-      message: "user successfully created",
+      message: `${req.body.role} successfully created`,
       token,
     });
   };
@@ -128,12 +128,7 @@ class UsersController {
 
   handleUploads(req) {
     const { body } = req;
-
     const newBody = {
-      guarantors: {
-        nextOfKin: {},
-        surety: {},
-      },
       lawyer: {
         documents: {},
       },
@@ -142,16 +137,7 @@ class UsersController {
 
     if (req.files) {
       var {
-        files: {
-          profilePic,
-          nextOfKinProfilePic,
-          suretyProfilePic,
-          photoIDOrNIN,
-          NBAReceipt,
-          callToBarCertificate,
-          LLBCertificate,
-          others,
-        },
+        files: { profilePic, link },
       } = req;
     }
 
@@ -159,52 +145,9 @@ class UsersController {
       newBody.profilePic = profilePic[0].location;
     }
 
-    if (nextOfKinProfilePic && nextOfKinProfilePic[0]) {
-      newBody.guarantors.nextOfKin.profilePic = nextOfKinProfilePic[0].location;
-    }
-
-    if (others && others[0]) {
-      newBody.lawyer.documents.others = {
-        url: others[0].location,
-        name: others[0].originalname,
-        type: others[0].mimetype,
-      };
-    }
-
-    if (NBAReceipt && NBAReceipt[0]) {
-      newBody.lawyer.documents.NBAReceipt = {
-        url: NBAReceipt[0].location,
-        name: NBAReceipt[0].originalname,
-        type: NBAReceipt[0].mimetype,
-      };
-    }
-
-    if (LLBCertificate && LLBCertificate[0]) {
-      newBody.lawyer.documents.LLBCertificate = {
-        url: LLBCertificate[0].location,
-        name: LLBCertificate[0].originalname,
-        type: LLBCertificate[0].mimetype,
-      };
-    }
-
-    if (callToBarCertificate && callToBarCertificate[0]) {
-      newBody.lawyer.documents.callToBarCertificate = {
-        url: callToBarCertificate[0].location,
-        name: callToBarCertificate[0].originalname,
-        type: callToBarCertificate[0].mimetype,
-      };
-    }
-
-    if (photoIDOrNIN && photoIDOrNIN[0]) {
-      newBody.lawyer.documents.photoIDOrNIN = {
-        url: photoIDOrNIN[0].location,
-        name: photoIDOrNIN[0].originalname,
-        type: photoIDOrNIN[0].mimetype,
-      };
-    }
-
-    if (suretyProfilePic && suretyProfilePic[0]) {
-      newBody.guarantors.surety.profilePic = suretyProfilePic[0].location;
+    if (link && link[0]) {
+      newBody.lawyer.documents.link = link[0].location;
+      newBody.lawyer.isVerified = "in-progress";
     }
 
     return newBody;
@@ -235,13 +178,48 @@ class UsersController {
     } = req;
     log(`verifying otp details of user with id ${id}`);
 
-    body.isVerified = true;
-    const [, [User]] = await UsersService.update(id, body, user);
+    let data = {
+      settings: {
+        isEmailVerified: true,
+      },
+    };
+    const [, [User]] = await UsersService.update(id, data, user);
     delete User.dataValues.password;
     const token = await Authenticate.signToken(User.dataValues);
     return res.status(200).send({
       success: true,
       message: "email successfully verified",
+      token,
+    });
+  }
+
+  async verifyPhoneNumber(req, res, next) {
+    const {
+      body: { pin },
+      user: {
+        id,
+        settings: {
+          isPhone: { pinId },
+        },
+      },
+    } = req;
+    log(`verifying pin details of user with id ${id}`);
+
+    const { response } = await SMSService.verifyPhone({ pin }, pinId);
+
+    if (!response.verified) return next(createError(response.status, response.statusText));
+
+    const [, [User]] = await UsersService.update(
+      id,
+      { settings: { isEmailVerified: true, isPhone: { verified: response.verified } } },
+      req.user
+    );
+
+    delete User.dataValues.password;
+    const token = await Authenticate.signToken(User.dataValues);
+    return res.status(200).send({
+      success: true,
+      message: "phone successfully verified",
       token,
     });
   }
@@ -262,9 +240,34 @@ class UsersController {
     });
   }
 
+  async generateNewPin(req, res, next) {
+    const {
+      user: { phone, id },
+    } = req;
+    log(`Generating new pin for user with phone ${phone}`);
+
+    const response = await SMSService.send2FAPin({
+      to: phone,
+      applicationId: applicationMappers.verifyPhoneId,
+      messageId: messageTemplateMappers.verifyPhoneMessageId,
+    });
+
+    if (!response.success) return next(createError(500, "Something went wrong. Try again later"));
+    const {
+      response: { pinId },
+    } = response;
+
+    await UsersService.update(id, { settings: { isPhone: { pinId } } }, req.user);
+
+    res.status(200).send({
+      ...response,
+      message: "new PIN successfully generated",
+    });
+  }
+
   async resetPassword(req, res, next) {
     const { user, body } = req;
-    log(`changing password for user with email ${body.email}`);
+    log(`changing password for user with email ${body.phone}`);
 
     body.password = await HandlePassword.getHash(body.newPassword);
     const [, [User]] = await UsersService.update(user.id, body, user);
@@ -279,13 +282,17 @@ class UsersController {
 
   async validateOTP(req, res, next) {
     log("validating OTP supplied");
-    const { body } = req;
-    if (body.otp != req.user.otp.value) {
-      return next(createError(403, "Invalid OTP supplied"));
-    }
-    if (compareAsc(new Date(), parseISO(req.user.otp.expiresIn)) !== -1) {
-      return next(createError(403, "supplied OTP has expired"));
-    }
+    const {
+      body: { otp },
+      user: {
+        settings: {
+          isPhone: { pinId },
+        },
+      },
+    } = req;
+    const { response } = await SMSService.verifyPhone({ pin: otp }, pinId);
+
+    if (!response.verified) return next(createError(400, response.pinError));
     return next();
   }
 
@@ -304,13 +311,15 @@ class UsersController {
       const identifier =
         (req.params && req.params.id) ||
         (req.decodedToken && req.decodedToken.id) ||
-        (req.body && req.body.email);
+        (req.body && req.body.email && { email: req.body.email }) ||
+        (req.body && req.body.phone && { phone: req.body.phone });
 
       if (!identifier) return next(createError(403, "means of identification must be supplied"));
       log(`validating that user with identifier ${identifier} exists`);
-      const user = req.body.email
-        ? await UsersService.findOne({ email: identifier })
-        : await UsersService.findByPk(identifier);
+      const user =
+        req.body.email || req.body.phone
+          ? await UsersService.findOne({ ...identifier })
+          : await UsersService.findByPk(identifier);
 
       if (user && context === "signup")
         return next(createError(409, "user with the given email already exits"));

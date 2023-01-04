@@ -14,8 +14,8 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       this.belongsTo(models.User, { as: "ownerProfile", foreignKey: "reporterId" });
       this.hasMany(models.Comment, { as: "comments", foreignKey: "reportId" });
-      this.hasMany(models.Reaction, { as: "likes", foreignKey: "modelId" });
-      this.hasMany(models.Reaction, { as: "reposts", foreignKey: "modelId" });
+      this.hasMany(models.Reaction, { as: "hasLiked", foreignKey: "modelId" });
+      this.hasMany(models.Reaction, { as: "hasRePosted", foreignKey: "modelId" });
     }
   }
   Report.init(
@@ -24,6 +24,9 @@ module.exports = (sequelize, DataTypes) => {
       reporterId: { type: DataTypes.UUID, allowNull: false },
       meta: { type: DataTypes.JSONB, defaultValue: {} },
       location: { type: DataTypes.STRING },
+      numOfRePosts: { type: DataTypes.INTEGER, defaultValue: 0 },
+      numOfLikes: { type: DataTypes.INTEGER, defaultValue: 0 },
+      numOfComments: { type: DataTypes.INTEGER, defaultValue: 0 },
       ticketId: {
         type: DataTypes.STRING,
         allowNull: false,

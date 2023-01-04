@@ -57,6 +57,7 @@ class ResponsesController {
       startingLocation,
       speed: config.averageSpeed,
     });
+
     return res.status(201).send({
       success: true,
       message: "1 subscription has been successfully used in creating this response",
@@ -98,19 +99,21 @@ class ResponsesController {
       params: { id },
     } = req;
     if (oldResponse.bid) {
-      (body.assignedLawyerId = req.decodedToken.id), (body.status = "in-progress");
+      body.assignedLawyerId = decodedToken.id;
     }
-    const [, [updatedResponse]] = await ResponsesService.update(id, body, oldResponse);
+
+    const result = await ResponsesService.update(id, body, oldResponse);
 
     if (body.bid)
       eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.ASSIGNED, {
-        response: updatedResponse,
+        response: result,
         decodedToken,
+        io,
       });
 
     if (body.meetTime)
       eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.MEET_TIME, {
-        response: updatedResponse,
+        response: result,
         decodedToken,
         io,
       });
@@ -120,7 +123,7 @@ class ResponsesController {
       message: !oldResponse.bid
         ? "response successfully updated"
         : "You have been assigned this response",
-      response: updatedResponse,
+      response: oldResponse,
     });
   }
 
@@ -165,13 +168,23 @@ class ResponsesController {
   async getUnassignedResponses(req, res, next) {
     log("getting all unassigned responses");
     const {
+      decodedToken: { id },
       query: { paginate = {} },
     } = req;
+
+    const canApply = (model) => ({
+      model,
+      as: "eligibleLawyers",
+      required: true,
+      where: {
+        lawyerId: id,
+      },
+    });
 
     const data = { assignedLawyerId: null };
     const { offset, limit } = pagination(paginate);
 
-    const responses = await ResponsesService.findMany(data, paginate);
+    const responses = await ResponsesService.findMany(data, paginate, canApply);
     return res.status(200).send({
       success: true,
       message: "responses successfully retrieved",
@@ -217,7 +230,7 @@ class ResponsesController {
 
   async marKAsCompleted(req, res, next) {
     const eventEmitter = req.app.get("eventEmitter");
-
+    const io = req.app.get("io");
     const {
       params: { id },
       decodedToken,
@@ -233,6 +246,7 @@ class ResponsesController {
     eventEmitter.emit(EVENT_IDENTIFIERS.RESPONSE.MARK_AS_COMPLETED, {
       response: updatedResponse,
       decodedToken,
+      io,
     });
 
     return res.status(200).send({

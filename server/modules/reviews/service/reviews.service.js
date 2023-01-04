@@ -1,7 +1,9 @@
 import debug from "debug";
 import { Op, QueryTypes } from "sequelize";
 import models from "../../../models";
+import { exceptionHandler } from "../../../utils/exceptionHandler";
 import { paginate } from "../../helpers";
+import userService from "../../users/service/user.service";
 
 const debugLog = debug("app:reviews-service");
 
@@ -20,7 +22,9 @@ class ReviewsService {
     const validModelIdWithOwnerOrLawyer = await models[modelType].findOne({
       where: {
         id: modelId,
-        status: "completed",
+        status: {
+          [Op.or]: ["completed", "consultation_completed"],
+        },
         [Op.or]: [
           {
             ownerId: reviewerId,
@@ -35,7 +39,27 @@ class ReviewsService {
           ? validModelIdWithOwnerOrLawyer.assignedLawyerId
           : validModelIdWithOwnerOrLawyer.ownerId;
 
-      return models.Review.create({ ...ReviewDTO, forId });
+      try {
+        return models.sequelize.transaction(async (t) => {
+          const reviewerModel = await userService.findByPk(forId);
+          await reviewerModel.increment(
+            {
+              sumOfReviews: ReviewDTO.rating,
+              numOfReviews: 1,
+            },
+            { transaction: t }
+          );
+
+          return models.Review.create({ ...ReviewDTO, forId }, { transaction: t });
+        });
+      } catch (error) {
+        console.log(error);
+        throw new exceptionHandler({
+          message: "something went wrong",
+          status: 500,
+          name: "reviewExceptionHandler",
+        });
+      }
     } else return null;
   }
 
@@ -96,16 +120,6 @@ class ReviewsService {
     });
   }
 
-  async update(id, ReviewDTO, oldReview) {
-    const { rating, feedback } = oldReview;
-    return models.Review.update(
-      {
-        rating: ReviewDTO.rating || rating,
-        feedback: ReviewDTO.feedback || feedback,
-      },
-      { where: { id }, returning: true }
-    );
-  }
   async getStats(id) {
     debugLog(`retrieving statistics for a lawyer with ${id}`);
     return models.sequelize.query(

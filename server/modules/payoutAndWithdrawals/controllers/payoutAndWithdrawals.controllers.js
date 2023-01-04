@@ -3,7 +3,10 @@ import createError from "http-errors";
 
 import PayoutsService from "../../payout/services/payout.services";
 import { paginate as pagination } from "../../helpers";
+import { Op } from "sequelize";
 import WithdrawalService from "../../withdrawals/services/withdrawals.services";
+import { pgDateFormate } from "../../../utils/pgFormateDate";
+import paymentServices from "../../payment/services/payment.services";
 
 const log = debug("app:payout-withdrawal-controller");
 
@@ -19,19 +22,12 @@ class PayoutAndWithdrawalController {
   async getHistory(req, res, next) {
     log("getting combined transaction history of both payout and withdrawals");
     const {
+      decodedToken: { id },
       query: { paginate = {} },
     } = req;
 
-    const payoutHistory = await PayoutsService.getHistory({}, paginate);
-    const withdrawalHistory = await WithdrawalService.findMany({}, paginate, false);
-
-    console.log({ payoutHistory, withdrawalHistory });
-
-    const history = [...payoutHistory.rows, ...withdrawalHistory.rows];
-
-    history.sort((firstItem, secondItem) => secondItem.createdAt - firstItem.createdAt);
-
     const { offset, limit } = pagination(paginate);
+    const history = await paymentServices.payOuts({ id, offset, limit });
 
     return res.status(201).send({
       success: true,
@@ -57,6 +53,48 @@ class PayoutAndWithdrawalController {
 
       return next();
     };
+  }
+
+  queryContext(req, res, next) {
+    const {
+      decodedToken: { role, id },
+      query,
+    } = req;
+
+    let filter = {};
+
+    const commonOptions = () => {
+      if (query.search && query.search.modelType) {
+        filter = { ...filter, modelType: query.search.modelType };
+      }
+
+      if (query.search && query.search.ticketId) {
+        filter = { ...filter, ticketId: { [Op.iLike]: `%${query.search.ticketId}%` } };
+      }
+      if (query.search && query.search.to && query.search.from) {
+        filter = {
+          ...filter,
+          createdAt: {
+            [Op.between]: [pgDateFormate(query.search.from), pgDateFormate(query.search.to)],
+          },
+        };
+      }
+    };
+
+    if (role === "admin" || role === "super-admin") {
+      if (query.search && query.search.ownerId) {
+        filter = { ...filter, ownerId: query.search.ownerId };
+      }
+      commonOptions();
+    }
+
+    if (role === "lawyer") {
+      filter = { ...filter, ownerId: id };
+      commonOptions();
+    }
+
+    req.filter = filter;
+    return next();
   }
 }
 

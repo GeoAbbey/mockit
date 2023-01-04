@@ -37,6 +37,9 @@ module.exports = {
       paid: {
         type: Sequelize.BOOLEAN,
       },
+      isReassessed: {
+        type: Sequelize.BOOLEAN,
+      },
       ownerId: {
         type: Sequelize.UUID,
         onDelete: "CASCADE",

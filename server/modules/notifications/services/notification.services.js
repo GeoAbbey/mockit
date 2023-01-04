@@ -21,6 +21,7 @@ class NotificationsService {
   async findMany(filter, pageDetails) {
     debugLog(`retrieving notifications with the following filter ${JSON.stringify(filter)}`);
     return models.Notification.findAndCountAll({
+      order: [["createdAt", "DESC"]],
       where: { ...filter },
       ...paginate(pageDetails),
       include: [

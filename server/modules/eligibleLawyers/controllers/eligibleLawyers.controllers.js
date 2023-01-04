@@ -25,7 +25,7 @@ class EligibleLawyersController {
 
     return res.status(201).send({
       success: true,
-      message: "eligible lawyer successfully created",
+      message: "Eligible lawyer successfully created",
       eligibleLawyer,
     });
   }
@@ -42,9 +42,12 @@ class EligibleLawyersController {
   }
 
   async deleteEligibleLawyer(req, res, next) {
-    const { id } = req.params;
-    log(`deleting an eligible lawyer with id ${id}`);
-    const deletedEligibleLawyer = await EligibleLawyersService.remove(id);
+    const {
+      params: { id },
+      filter = {},
+    } = req;
+    log(`deleting an eligible lawyer  entry for responseId ${id}`);
+    const deletedEligibleLawyer = await EligibleLawyersService.remove(id, filter);
     return res.status(200).send({
       success: true,
       message: "eligible lawyer successfully deleted",
@@ -66,10 +69,13 @@ class EligibleLawyersController {
   checkAccessAdmin(context) {
     return async (req, res, next) => {
       const {
-        decodedToken: { role },
+        decodedToken: { role, id },
       } = req;
       if (role === "admin" || role === "super-admin") return next();
-      else return next(createError(400, "You don not have permission to access this route"));
+      else if (role === "lawyer") {
+        req.filter = { lawyerId: id };
+        return next();
+      } else return next(createError(400, "You don not have permission to access this route"));
     };
   }
 

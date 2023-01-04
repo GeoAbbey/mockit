@@ -8,9 +8,6 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
-      baseCharge: {
-        type: Sequelize.INTEGER,
-      },
       serviceCharge: {
         type: Sequelize.INTEGER,
       },
@@ -25,17 +22,14 @@ module.exports = {
       meta: {
         type: Sequelize.JSONB,
       },
-      modelId: {
+      claimId: {
         type: Sequelize.UUID,
         onDelete: "CASCADE",
         references: {
           model: "SmallClaims",
           key: "id",
-          as: "modelId",
+          as: "claimId",
         },
-      },
-      modelType: {
-        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,

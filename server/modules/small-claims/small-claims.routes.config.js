@@ -3,10 +3,10 @@ import SmallClaimsController from "./controllers/small-claims.controller";
 import {
   createSmallClaimSchema,
   updateSmallClaimSchema,
+  lawyerUpdateClaimSchema,
   queryOptions,
 } from "./schema/small-claim.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID, uploadMiddleware } from "../../utils";
-import { queryContextParams } from "../../utils/allPurpose.schema";
 
 export class SmallClaimRoutes extends CommonRoutesConfig {
   constructor({ app, path }) {
@@ -58,22 +58,19 @@ export class SmallClaimRoutes extends CommonRoutesConfig {
         middleware({ schema: updateSmallClaimSchema, property: "body" }),
         SmallClaimsController.checkAccessUser("modify"),
         wrapCatch(SmallClaimsController.modifyClaim),
-      ])
-      .post([
-        SmallClaimsController.checkAccessLawyer("markAsComplete"),
-        wrapCatch(SmallClaimsController.marKAsCompleted),
       ]);
 
     this.app
-      .route(`${this.path}/small-claims/start/:id`)
+      .route(`${this.path}/small-claims/modify/:id`)
       .all([
         Authenticate.verifyToken(),
         middleware({ schema: validateUUID("id"), property: "params" }),
         SmallClaimsController.smallClaimExits(),
       ])
       .put([
+        middleware({ schema: lawyerUpdateClaimSchema, property: "body" }),
         SmallClaimsController.checkAccessLawyer("updateStatus"),
-        wrapCatch(SmallClaimsController.updateToInProgress),
+        wrapCatch(SmallClaimsController.updateToNewState),
       ]);
 
     this.app

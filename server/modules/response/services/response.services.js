@@ -66,7 +66,7 @@ class ResponsesService {
                 {
                   model: models.Transaction,
                   as: "paymentFromWallet",
-                  where: { modelType: "response", modelId: id },
+                  where: { type: "response", modelId: id },
                   attributes: ["amount"],
                   required: false,
                 },
@@ -94,60 +94,62 @@ class ResponsesService {
     return models.Response.findByPk(id, t);
   }
 
-  async findMany(filter, pageDetails) {
-    debugLog(`retrieving responses with the following filter ${JSON.stringify(filter)}`);
+  async findMany(filter, pageDetails, canApply = undefined) {
+    debugLog(
+      `retrieving responses with the following filter ${JSON.stringify(filter)} and ${canApply}`
+    );
+
+    const defaultSearch = [
+      {
+        model: models.User,
+        as: "ownerProfile",
+        attributes: [
+          "firstName",
+          "lastName",
+          "email",
+          "profilePic",
+          "firebaseToken",
+          "phone",
+          "description",
+        ],
+        required: false,
+      },
+      {
+        model: models.User,
+        as: "lawyerProfile",
+        attributes: [
+          "firstName",
+          "lastName",
+          "email",
+          "profilePic",
+          "firebaseToken",
+          "phone",
+          "description",
+        ],
+        required: false,
+      },
+    ];
+
+    if (canApply) {
+      defaultSearch.push(canApply(models.EligibleLawyer));
+    }
 
     return models.Response.findAndCountAll({
       order: [["createdAt", "DESC"]],
       where: { ...filter },
       ...paginate(pageDetails),
-      include: [
-        {
-          model: models.User,
-          as: "ownerProfile",
-          attributes: [
-            "firstName",
-            "lastName",
-            "email",
-            "profilePic",
-            "firebaseToken",
-            "phone",
-            "description",
-          ],
-          required: false,
-        },
-        {
-          model: models.User,
-          as: "lawyerProfile",
-          attributes: [
-            "firstName",
-            "lastName",
-            "email",
-            "profilePic",
-            "firebaseToken",
-            "phone",
-            "description",
-          ],
-          required: false,
-        },
-      ],
+      include: defaultSearch,
     });
   }
 
   async update(id, ResponseDTO, oldResponse, t = undefined) {
-    const { status, meetTime, assignedLawyerId, paid, isNotified } = oldResponse;
+    const { status, assignedLawyerId, paid, isNotified } = oldResponse;
 
-    const handleMeeTime = () => {
-      if (ResponseDTO.meetTime) {
-        return new Date().toISOString();
-      }
-      return meetTime;
-    };
-
+    if (ResponseDTO.meetTime) return this.handleMeeTime(oldResponse);
+    if (ResponseDTO.bid) return this.handleBid(ResponseDTO, oldResponse);
     return models.Response.update(
       {
         status: ResponseDTO.status || status,
-        meetTime: handleMeeTime(),
         paid: handleFalsy(ResponseDTO.paid, paid),
         isNotified: handleFalsy(ResponseDTO.isNotified, isNotified),
         assignedLawyerId: ResponseDTO.assignedLawyerId || assignedLawyerId,
@@ -173,6 +175,82 @@ class ResponsesService {
     return models.sequelize.query(rawQueries.statistics("Responses"), {
       type: QueryTypes.SELECT,
     });
+  }
+
+  async handleMeeTime(oldResponse) {
+    const {
+      dataValues: { ownerId, assignedLawyerId },
+    } = oldResponse;
+
+    const userLocCoords = await models.LocationDetail.findByPk(ownerId);
+    const lawyerLocCoords = await models.LocationDetail.findByPk(assignedLawyerId);
+    try {
+      return models.sequelize.transaction(async (t) => {
+        await userLocCoords.update(
+          {
+            assigningId: null,
+            currentResponseId: null,
+            online: false,
+          },
+          { transaction: t }
+        );
+
+        await lawyerLocCoords.update(
+          {
+            assigningId: null,
+            currentResponseId: null,
+          },
+          { transaction: t }
+        );
+
+        return oldResponse.update(
+          {
+            meetTime: new Date().toISOString(),
+          },
+          { transaction: t }
+        );
+      });
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+
+  async handleBid(ResponseDTO, oldResponse) {
+    const {
+      dataValues: { ownerId, id },
+    } = oldResponse;
+
+    const userLocCoords = await models.LocationDetail.findByPk(ownerId);
+    const lawyerLocCoords = await models.LocationDetail.findByPk(ResponseDTO.assignedLawyerId);
+
+    try {
+      return models.sequelize.transaction(async (t) => {
+        await userLocCoords.update(
+          {
+            assigningId: ResponseDTO.assignedLawyerId,
+          },
+          { transaction: t }
+        );
+
+        await lawyerLocCoords.update(
+          {
+            assigningId: ownerId,
+            currentResponseId: id,
+          },
+          { transaction: t }
+        );
+
+        return oldResponse.update(
+          {
+            assignedLawyerId: ResponseDTO.assignedLawyerId,
+            status: "in-progress",
+          },
+          { transaction: t }
+        );
+      });
+    } catch (error) {
+      console.log({ error });
+    }
   }
 }
 

@@ -4,10 +4,6 @@ export const createWithdrawalSchema = Joi.object().keys({
   amount: Joi.number().min(1000).required(),
 });
 
-export const accountWithdrawalSchema = Joi.object().keys({
-  accountCode: Joi.string().required(),
-});
-
 export const finalizeOTP = Joi.object().keys({
   otp: Joi.string().required(),
   reference: Joi.string().required(),

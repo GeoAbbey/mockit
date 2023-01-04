@@ -6,18 +6,20 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "debug:dev": "export DEBUG=*,-engine:* &&  nodemon ./bin/www",
-    "start": "export NODE_ENV=production && export DEBUG=* && node ./bin/www",
+    "start-devDeployment": "npm run up:dev-dev && export NODE_ENV=devDeployment && export DEBUG=*,-engine:* && node ./bin/www",
+    "start-staging": "npm run up:dev-deploy && export NODE_ENV=staging && node ./bin/www",
     "stop": "pm2 stop 'all'",
     "start:dev": "export DEBUG=* && nodemon ./bin/www",
     "db:migrate": "./node_modules/.bin/sequelize db:migrate",
-    "db:migrate:undo": "./node_modules/.bin/sequelize db:migrate:undo",
-    "db:migrate:undo:all": "./node_modules/.bin/sequelize db:migrate:undo:all",
-    "down:up:prod": "export NODE_ENV=production && npm run db:migrate:undo:all && npm run db:migrate && npm run seed:up",
-    "down:up": "npm run db:migrate:undo:all && npm run db:migrate && npm run seed:up",
+    "up:dev-deploy": "export NODE_ENV=staging && npm run db:migrate",
+    "up:dev-dev": "export NODE_ENV=devDeployment && npm run db:migrate",
+    "up": "npm run db:migrate",
+    "down": "./node_modules/.bin/sequelize db:migrate:undo",
     "seed:up": "npx sequelize-cli db:seed:all",
-    "seed:down:prod": "export NODE_ENV=production && npx sequelize-cli db:seed:undo:all",
+    "seed:down:prod": "export NODE_ENV=devDeployment && npx sequelize-cli db:seed:undo:all",
     "seed:down": "npx sequelize-cli db:seed:undo:all",
-    "create:template": "node /Users/gbolahanolagunju/Documents/zapplawyer/server/utils/emailTemplates.js"
+    "make:app": "node server/utils/smsServices/applications.js",
+    "make:message": "node server/utils/smsServices/messages.js"
   },
   "repository": {
     "type": "git",
@@ -42,6 +44,7 @@
   },
   "homepage": "https://github.com/Deveote/Zapplawyer-BE#readme",
   "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
     "accesscontrol": "^2.2.1",
     "agenda": "^4.1.0",
     "agendash": "^2.0.0",

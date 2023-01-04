@@ -4,7 +4,6 @@ import {
   createWithdrawalSchema,
   queryOptions,
   finalizeOTP,
-  accountWithdrawalSchema,
   referenceSchema,
 } from "./schema/withdrawals.schema";
 import { wrapCatch, middleware, Authenticate, validateUUID } from "../../utils";
@@ -17,9 +16,9 @@ export class WithdrawalRoutes extends CommonRoutesConfig {
 
   configureRoutes() {
     this.app
-      .route(`${this.path}/withdrawals/:accountCode`)
+      .route(`${this.path}/withdrawals/:accountID`)
       .all([
-        middleware({ schema: accountWithdrawalSchema, property: "params" }),
+        middleware({ schema: validateUUID("accountID"), property: "params" }),
         Authenticate.verifyToken(),
       ])
       .post([

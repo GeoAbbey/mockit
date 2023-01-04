@@ -2,12 +2,12 @@ import Joi from "joi";
 
 export const createUserSchema = Joi.object().keys({
   firstName: Joi.string().trim().required(),
+  phone: Joi.string().required(),
   lastName: Joi.string().trim().required(),
   email: Joi.string().trim().email({ minDomainSegments: 2 }).required(),
   password: Joi.string().min(6).max(30).required(),
-  phone: Joi.string(),
+  gender: Joi.string().valid("male", "female"),
   role: Joi.string().valid("user", "lawyer"),
-  gender: Joi.string().valid("male", "female").required(),
 });
 
 export const createAnAdminSchema = createUserSchema.append({
@@ -15,74 +15,66 @@ export const createAnAdminSchema = createUserSchema.append({
   password: Joi.string().min(6).max(30),
 });
 
+export const adminUpdateUser = Joi.object().keys({
+  role: Joi.string().valid("user", "lawyer", "admin"),
+  lawyer: Joi.object().keys({
+    isVerified: Joi.string().valid("initiated", "in-progress", "completed", "declined"),
+  }),
+  settings: Joi.object().keys({
+    isSuspended: Joi.boolean(),
+  }),
+});
+
 export const updateUserSchema = Joi.object().keys({
   firstName: Joi.string(),
   lastName: Joi.string(),
-  notification: Joi.boolean(),
-  isAccountSuspended: Joi.boolean(),
-  isSubscribed: Joi.boolean(),
+  settings: Joi.object().keys({
+    hasAgreedToTerms: Joi.boolean(),
+    notification: Joi.object().keys({
+      email: Joi.boolean(),
+      inApp: Joi.boolean(),
+      phone: Joi.boolean(),
+    }),
+  }),
+  gender: Joi.string().valid("male", "female"),
   firebaseToken: Joi.string(),
   description: Joi.string(),
   address: {
-    residential: Joi.object().keys({
-      country: Joi.string(),
-      state: Joi.string(),
-      street: Joi.string(),
-    }),
-    work: Joi.object().keys({
-      country: Joi.string(),
-      state: Joi.string(),
-      street: Joi.string(),
-    }),
-    preferredLocation: Joi.object().keys({
-      country: Joi.string(),
-      state: Joi.string(),
-      street: Joi.string(),
+    state: Joi.string(),
+    country: Joi.string(),
+    residence: Joi.object().keys({
+      home: Joi.string(),
+      work: Joi.string(),
     }),
   },
-  phone: Joi.string(),
   dob: Joi.date(),
-  guarantors: Joi.object().keys({
-    nextOfKin: Joi.object().keys({
-      firstName: Joi.string(),
-      lastName: Joi.string(),
-      email: Joi.string().email({ minDomainSegments: 2 }),
-      phone: Joi.string(),
-      dob: Joi.date(),
-      address: Joi.string(),
-      gender: Joi.string().valid("male", "female").required(),
-      profilePic: Joi.string(),
-    }),
-    surety: Joi.object().keys({
-      firstName: Joi.string(),
-      lastName: Joi.string(),
-      email: Joi.string().email({ minDomainSegments: 2 }),
-      phone: Joi.string(),
-      dob: Joi.date(),
-      address: Joi.string(),
-      gender: Joi.string().valid("male", "female").required(),
-      profilePic: Joi.string(),
-    }),
+  emergencyContact: Joi.object().keys({
+    firstName: Joi.string(),
+    lastName: Joi.string(),
+    email: Joi.string().email({ minDomainSegments: 2 }),
+    phone: Joi.string(),
   }),
   profilePic: Joi.string(),
-  creditCard: Joi.string().creditCard(),
   lawyer: Joi.object().keys({
-    isVerified: Joi.boolean(),
+    isVerified: Joi.string().valid("initiated", "in-progress", "completed", "declined"),
     documents: Joi.object(),
+    typeOfDocument: Joi.string(),
+    supremeCourtNumber: Joi.string(),
   }),
-
-  hasAgreedToTerms: Joi.boolean(),
-  role: Joi.string().valid("user", "lawyer", "admin"),
 });
 
 export const validOTP = Joi.object().keys({
   otp: Joi.string().required(),
 });
 
+export const validPIN = Joi.object().keys({
+  pin: Joi.string().required(),
+});
+
 export const validOtpAndPassword = Joi.object().keys({
   otp: Joi.number().required(),
   newPassword: Joi.string().required(),
-  email: Joi.string().email({ minDomainSegments: 2 }).required(),
+  phone: Joi.string().required(),
 });
 
 export const loginUserSchema = Joi.object().keys({

@@ -22,7 +22,6 @@ module.exports = {
       },
       approvedBy: {
         type: Sequelize.UUID,
-        onDelete: "CASCADE",
         references: {
           model: "Users",
           key: "id",
@@ -35,7 +34,14 @@ module.exports = {
       reference: {
         type: Sequelize.STRING,
       },
-      accountID: { type: Sequelize.STRING },
+      accountID: {
+        type: Sequelize.UUID,
+        references: {
+          model: "Recipients",
+          key: "id",
+          as: "accountID",
+        },
+      },
       ticketId: {
         type: Sequelize.STRING,
         unique: true,
