@@ -14,4 +14,5 @@ COPY . $HOME
 
 RUN npm install
 ENTRYPOINT npm run start-${NODE_ENV}
+# ENTRYPOINT npm run start-production
 

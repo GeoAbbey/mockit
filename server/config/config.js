@@ -87,4 +87,28 @@ module.exports = {
       },
     },
   },
+
+  production: {
+    username: process.env.PROD_DB_USERNAME,
+    password: process.env.PROD_DB_PASSWORD,
+    port: process.env.PROD_DB_PORT,
+    database: process.env.PROD_DB_NAME,
+    host: process.env.PROD_DB_HOSTNAME,
+    mongoConnect: process.env.PROD_MONGO_DB_CONNECTION,
+    payoutInterval: process.env.PAYOUT_INTERVAL,
+    runEmailNotificationService: true,
+    runNotificationService: true,
+    payment_base_url: process.env.MONNIFY_PROD_BASE_URL,
+    payment_contract_code: process.env.MONNIFY_PROD_CONTRACT_CODE,
+    payment_secret_key: process.env.MONNIFY_PROD_SECRET_KEY,
+    payment_api_key: process.env.MONNIFY_PROD_API_KEY,
+    payment_source_account_number: process.env.MONNIFY_PROD_WALLET_ACCOUNT_NUMBER,
+    ...common,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false, // <<<<<<< YOU NEED THIS
+      },
+    },
+  },
 };
