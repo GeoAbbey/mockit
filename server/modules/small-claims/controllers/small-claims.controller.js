@@ -44,6 +44,7 @@ class SmallClaimsController {
       } = req;
 
       if (role === "lawyer") context = req.decodedToken.id;
+      else context = null;
 
       log(`verifying that the small claim with id ${id} exits`);
       const smallClaim = await SmallClaimsService.find(id, context);
