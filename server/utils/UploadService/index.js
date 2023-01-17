@@ -12,7 +12,7 @@ const logger = debug("app:utils:upload-service");
 
 const uploadS3 = multer({
   storage: multerS3({
-    bucket: "zapplawyer",
+    bucket: process.env.S3_BUCKET_NAME,
     acl: "public-read",
     s3: AWS_S3,
     key: (req, file, callBack) => {

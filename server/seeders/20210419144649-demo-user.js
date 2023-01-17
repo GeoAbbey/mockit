@@ -14,7 +14,7 @@ module.exports = {
       [
         {
           profilePic: "https://zapplawyer.s3.us-west-2.amazonaws.com/attachments/user.png",
-          password: await bcrypt.hash("Password", 10),
+          password: await bcrypt.hash("wCDIMk8ZzEwVFuP6CYf$", 10),
           lawyer: JSON.stringify({
             documents: {
               link: "",
@@ -42,11 +42,11 @@ module.exports = {
             },
           }),
           id: "a2e2c494-0be4-4b7f-92bb-aeaa3d6a431b",
-          firstName: "Benjamin",
-          lastName: "Alamu",
-          email: "oluwaseunalamu@gmail.com",
+          firstName: "aptResponse",
+          lastName: "Admin",
+          email: "responseapt@gmail.com",
           gender: "male",
-          phone: "08162561265",
+          phone: "08098506313",
           role: "super-admin",
           createdAt: new Date(),
           updatedAt: new Date(),
