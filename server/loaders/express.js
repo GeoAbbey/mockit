@@ -32,12 +32,16 @@ export default async ({ app }) => {
 
   logger({ messaging });
 
-  app.use(
-    expressWinston.errorLogger({
-      transports: [new winston.transports.Console()],
-      format: winston.format.combine(winston.format.colorize(), winston.format.json()),
-    })
-  );
+  console.log("env 🥶", process.env.NODE_ENV);
+
+  if (process.env.NODE_ENV !== "production") {
+    app.use(
+      expressWinston.errorLogger({
+        transports: [new winston.transports.Console({ level: "error" })],
+        format: winston.format.combine(winston.format.colorize(), winston.format.json()),
+      })
+    );
+  }
 
   app.get("/api/v1/callback", (req, res) => res.status(200).send(""));
 
