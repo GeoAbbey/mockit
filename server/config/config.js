@@ -1,7 +1,21 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
-const common = {
+const env = {
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  clientUri: process.env.CLIENT_URI,
+  database: process.env.DB_NAME,
+  host: process.env.DB_HOSTNAME,
+  mongoConnect: process.env.MONGO_DB_CONNECTION,
+  payoutInterval: process.env.PAYOUT_INTERVAL,
+  runEmailNotificationService: true,
+  runNotificationService: true,
+  payment_base_url: process.env.MONNIFY_BASE_URL,
+  payment_contract_code: process.env.MONNIFY_CONTRACT_CODE,
+  payment_secret_key: process.env.MONNIFY_SECRET_KEY,
+  payment_api_key: process.env.MONNIFY_API_KEY,
+  payment_source_account_number: process.env.MONNIFY_WALLET_ACCOUNT_NUMBER,
   googleApplicationCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS,
   dialect: process.env.DIALECT,
   radius: process.env.RADIUS,
@@ -18,97 +32,16 @@ const common = {
   smsBaseUrl: process.env.SMS_BASE_URL,
   sendGridApiKey: process.env.SENDGRID_API_KEY,
   closeStaleResponseInterval: process.env.CLOSE_STALE_RESPONSE,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
 };
 
 module.exports = {
-  development: {
-    username: process.env.USERNAME,
-    clientUri: "http://localhost:3000",
-    password: process.env.PASSWORD,
-    database: process.env.LOCAL_DATABASE,
-    host: process.env.HOST,
-    mongoConnect: process.env.LOCAL_MONGO_DB_CONNECTION,
-    runNotificationService: true,
-    runEmailNotificationService: true,
-    payoutInterval: process.env.PAYOUT_INTERVAL,
-    payment_base_url: process.env.MONNIFY_BASE_URL,
-    payment_contract_code: process.env.MONNIFY_CONTRACT_CODE,
-    payment_secret_key: process.env.MONNIFY_SECRET_KEY,
-    payment_api_key: process.env.MONNIFY_API_KEY,
-    payment_source_account_number: process.env.MONNIFY_WALLET_ACCOUNT_NUMBER,
-    ...common,
-  },
-
-  devDeployment: {
-    username: process.env.DEV_DB_USERNAME,
-    password: process.env.DEV_DB_PASSWORD,
-    clientUri: process.env.CLIENT_URI,
-    database: process.env.DEV_DB_NAME,
-    host: process.env.DEV_DB_HOSTNAME,
-    mongoConnect: process.env.DEV_MONGO_DB_CONNECTION,
-    payoutInterval: process.env.PAYOUT_INTERVAL,
-    runEmailNotificationService: true,
-    runNotificationService: true,
-    payment_base_url: process.env.MONNIFY_PROD_BASE_URL,
-    payment_contract_code: process.env.MONNIFY_PROD_CONTRACT_CODE,
-    payment_secret_key: process.env.MONNIFY_PROD_SECRET_KEY,
-    payment_api_key: process.env.MONNIFY_PROD_API_KEY,
-    payment_source_account_number: process.env.MONNIFY_PROD_WALLET_ACCOUNT_NUMBER,
-    ...common,
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false, // <<<<<<< YOU NEED THIS
-      },
-    },
-  },
-
-  staging: {
-    username: process.env.STAGE_DB_USERNAME,
-    password: process.env.STAGE_DB_PASSWORD,
-    port: process.env.STAGE_DB_PORT,
-    clientUri: process.env.CLIENT_URI,
-    database: process.env.STAGE_DB_NAME,
-    host: process.env.STAGE_DB_HOSTNAME,
-    mongoConnect: process.env.STAGE_MONGO_DB_CONNECTION,
-    payoutInterval: process.env.PAYOUT_INTERVAL,
-    runEmailNotificationService: true,
-    runNotificationService: true,
-    payment_base_url: process.env.MONNIFY_PROD_BASE_URL,
-    payment_contract_code: process.env.MONNIFY_PROD_CONTRACT_CODE,
-    payment_secret_key: process.env.MONNIFY_PROD_SECRET_KEY,
-    payment_api_key: process.env.MONNIFY_PROD_API_KEY,
-    payment_source_account_number: process.env.MONNIFY_PROD_WALLET_ACCOUNT_NUMBER,
-    ...common,
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false, // <<<<<<< YOU NEED THIS
-      },
-    },
-  },
-
-  production: {
-    username: process.env.PROD_DB_USERNAME,
-    password: process.env.PROD_DB_PASSWORD,
-    port: process.env.PROD_DB_PORT,
-    database: process.env.PROD_DB_NAME,
-    host: process.env.PROD_DB_HOSTNAME,
-    mongoConnect: process.env.PROD_MONGO_DB_CONNECTION,
-    payoutInterval: process.env.PAYOUT_INTERVAL,
-    runEmailNotificationService: true,
-    runNotificationService: true,
-    payment_base_url: process.env.MONNIFY_PROD_BASE_URL,
-    payment_contract_code: process.env.MONNIFY_PROD_CONTRACT_CODE,
-    payment_secret_key: process.env.MONNIFY_PROD_SECRET_KEY,
-    payment_api_key: process.env.MONNIFY_PROD_API_KEY,
-    payment_source_account_number: process.env.MONNIFY_PROD_WALLET_ACCOUNT_NUMBER,
-    ...common,
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false, // <<<<<<< YOU NEED THIS
-      },
-    },
-  },
+  development: { ...env },
+  staging: { ...env },
+  production: { ...env },
 };

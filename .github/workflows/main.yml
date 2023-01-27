@@ -1,23 +1,61 @@
-name: docker-build
+name: CI/CD of Mockit
 
 on:
   push:
-    branches: [release, develop]
+    branches:
+      - develop
+      - release
+      - main
 
 jobs:
-  docker-build:
-    runs-on: self-hosted
-
+  set_env:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.setEnvironment.outputs.ENVIRONMENT }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Build development container
-        run: docker build . -t deveote/zapplayer-be:develop --build-arg=NODE_ENV=devDeployment
-        if: contains('refs/heads/develop',github.ref)
-      - name: Build staging container
-        run: docker build . -t deveote/zapplayer-be:release --build-arg=NODE_ENV=staging
+      - name: Set development environment
+        if: endsWith(github.ref, 'develop')
+        run: echo "ENVIRONMENT=development" >> $GITHUB_ENV
+      - name: Set staging environment
+        if: endsWith(github.ref, 'release')
+        run: echo "ENVIRONMENT=staging" >> $GITHUB_ENV
+      - name: Set production environment
+        if: endsWith(github.ref, 'main')
+        run: echo "ENVIRONMENT=production" >> $GITHUB_ENV
+      - id: setEnvironment
+        run: echo "ENVIRONMENT=${{ env.ENVIRONMENT }}" >> $GITHUB_OUTPUT
 
-        if: contains('refs/heads/release',github.ref)
-      - name: Reload containers
-        run: docker-compose -f /docker/compose/docker-compose.yml up -d
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    needs: set_env
+    environment: ${{needs.set_env.outputs.environment}}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
+      - name: Build Docker image
+        run: |
+          docker build -t mockit:${{needs.set_env.outputs.environment}} --build-arg=NODE_ENV=${{needs.set_env.outputs.environment}} .
 
+      - id: repo
+        uses: ASzc/change-string-case-action@v5
+        with:
+          string: ghcr.io/${{ github.repository }}
+
+      - name: Push to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GIT_DOCKER_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          export REPOSITORY=${{ steps.repo.outputs.lowercase }}
+          docker tag mockit:${{needs.set_env.outputs.environment}} ${REPOSITORY}:${{needs.set_env.outputs.environment}}
+          docker push ${REPOSITORY}:${{needs.set_env.outputs.environment}}
+
+      - name: Login to AWS
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Refresh ECS service
+        run: |
+          aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER }} --service ${{ secrets.ECS_SERVICE }} --force-new-deployment --region ${{ secrets.AWS_REGION }}

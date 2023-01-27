@@ -1,4 +1,4 @@
-## This is the Back End application for the App-Rescue Project
+## This is the Back End application for the Mockit Project
 
 ### To run this project.
 
